@@ -91,7 +91,12 @@ export function DraftPanel(props: {
             <p key={ability.id}>
               {ability.name}
               <span className="badge">{ability.slot}</span>
-              <span className="badge">{ability.implementation}</span>
+              <span className="badge">
+                {ability.implementation}
+                {ability.notModeled && ability.notModeled.length > 0
+                  ? ` · not modeled: ${ability.notModeled.join(", ")}`
+                  : ""}
+              </span>
               <span className="badge">{ability.figures.kind}</span>
             </p>
           ))}

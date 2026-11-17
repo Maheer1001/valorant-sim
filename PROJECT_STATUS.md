@@ -1,8 +1,8 @@
 # Project status
 
-Updated: 17 November 2026. Milestone 2 (interactive turn window) is implemented. Milestone 1 remains in place.
+Updated: 17 November 2026. Milestone 2 remains in place. **Stage 1 part 1** is implemented: shared plumbing plus all four Breach abilities executable in the Drill Hall interactive round (turn layer, deterministic). Brimstone kit completion and cast UI are not in this part.
 
-Agent records for patch 13.10 are in `agent-reference.json`. Each ability stores the sheet's duration, effect, damage, team damage, windup, and remaining stats. That file is a reference, not the sim catalog.
+Agent records for patch 13.10 are in `agent-reference.json`. Each ability stores the sheet's duration, effect, damage, team damage, windup, and remaining stats. That file is a reference, not the sim catalog. Breach catalog numbers are guarded against drift by `tests/sim/breach.test.ts`.
 
 ## Stack
 
@@ -38,10 +38,16 @@ src/
     agents/state.ts
     agents/cast.ts
     agents/abilities/sky-smoke.ts
+    agents/abilities/breach.ts
+    agents/abilities/breach-resolve.ts
+    effects/status.ts
+    effects/geometry-aoe.ts
     composition/team.ts
     composition/profile.ts
     composition/coverage.ts
     combat/assumed-rifle.ts
+    combat/ult-points.ts
+    economy/buy.ts
     scenario/types.ts
     scenario/default-drill.ts
   tactics/decision.ts
@@ -81,6 +87,12 @@ Standard ruleset id: `standard-competitive`.
 | Planning window 3000 ms | `windowMs` | assumed. Lab turn length for simultaneous plans. Not a Valorant timer. |
 | Walk speed 3500 mm/s | `walkSpeedMmPerSec` | assumed. Matches the milestone-1 drill script. Not a measured Valorant walk speed. |
 | Auto-fire interval 1000 ms | `autoFireIntervalMs` | assumed. Agents without a shoot order auto-engage the nearest visible enemy with Rifle A on this interval. Not a Valorant fire rate. |
+| Starting credits 800 | `startingCredits` | assumed. Drill buyCharge stub only. Not a live buy phase. |
+| Concuss walk multiplier 7000 bp | `concussWalkSpeedMultiplierBp` | assumed. Lab stand-in for concuss slow. |
+| Concuss hit penalty 2000 bp | `concussHitChancePenaltyBp` | assumed. Subtracted from Rifle A hit chance while concussed. |
+| Flash look half-angle 90° | `flashLookHalfAngleDeg` | assumed / design. Looking-at flash until a measured cone exists. |
+| Flashpoint flight 400 ms | `flashpointFlightMs` | assumed. `travelSpeed` 2400 has no unit in the reference and is not converted. |
+| Rolling Thunder knockback 1500 mm | `rollingThunderKnockbackMm` | assumed horizontal displacement per blast. Vertical knockup estimate withheld. |
 
 The same agent may be drafted on both teams. A second copy on one team is rejected. A sixth member is rejected.
 
@@ -95,6 +107,7 @@ Unimplemented ability stats are omitted rather than copied in as if they were ac
 | Agent | Role tag | Live ability | Other abilities |
 | --- | --- | --- | --- |
 | Brimstone | Controller, secondary, wiki page | Sky Smoke, signature, complete | Stim Beacon, Incendiary, Orbital Strike are placeholders |
+| Breach | Initiator, secondary, wiki page | Aftershock, Flashpoint, Fault Line, Rolling Thunder — all complete (verified 13.10 numbers) | Rolling Thunder marks `notModeled: verticalKnockup (estimate withheld, flat map)` |
 | KAY/O | Initiator, secondary, wiki page | none | FLASH/DRIVE is a basic flash placeholder. ZERO/point is the signature placeholder. FRAG/ment and NULL/cmd are placeholders |
 | Jett | Duelist, secondary | none | Cloudburst is a basic smoke placeholder and does not grant smoke coverage. Tailwind is the signature entry placeholder. Updraft is not treated as entry. Blade Storm is a placeholder |
 | Cypher | Sentinel, secondary | none | Trapwire is a basic flank-watch placeholder. Spycam is the signature placeholder. Cyber Cage and Neural Theft are placeholders |
@@ -209,16 +222,36 @@ Still secondary, and not copied into the catalog:
 
 A live smoke or cage blocks the look a flash needs, and that block ends when the volume ends. Patch 13.05 fixed Brimstone smokes and Cyber Cages that kept blocking line-of-sight abilities after they should have stopped. Suppress stops casts. Concuss, nearsight, slow, hinder, decay, vulnerable, and detain stay separate. Two vision blockers can share a coverage kind only with their own duration, radius, charges, and deploy delay attached.
 
+## Stage 1 part 1 result (Breach + plumbing)
+
+Executable in the Drill Hall round: Sky Smoke (unchanged) plus Breach Aftershock, Flashpoint, Fault Line, and Rolling Thunder.
+
+Shared plumbing: agent `facingDeg`, `statuses`, `ultimatePoints`, `cooldownReadyAtMs`, per-ability charges, `credits`; concuss and blind statuses; ult ledger (+1 killer / +1 victim on kill; assists give nothing; orbs/plant/defuse TODO only); Fault Line 50 s signature cooldown; `buyCharge` without shop UI; cast orders with `aimYawDeg`, `chargeValue`, optional `mapTarget`.
+
+Aftershock geometry (design): cylinder along yaw, verified length 10 m and radius 3 m, through walls, damages allies. Flashpoint: 2 charges, windup 0.5 s, assumed flight 400 ms, blind 2.25 s if looking ±90° and not smoke-blocked; through-walls corridor uses design half-width 4 m. Fault Line: free signature, charge length 8–56 m, width 8 m, starts 8 m ahead, concuss 2.5 s. Rolling Thunder: 8 ult points, channel 0.6 s, 8 blasts every 0.255 s over 32×18 m starting 8 m ahead, concuss 4 s, horizontal knockback only; vertical knockup not modeled.
+
+### Checks (Stage 1 part 1)
+
+| Command | Result |
+| --- | --- |
+| `npm test` | Pass. Vitest 5.0.5, 14 files, 55 tests, 17 November 2026. |
+| `npm run lint` | Pass. ESLint completed with no findings. |
+| `npm run typecheck` | Pass. `tsc --noEmit` completed with no errors. |
+| `npm run build` | Pass. Vite 8.3.4 produced `dist/` in 265 ms. |
+
 ## Known limitations
 
-- One original map and four agents. Only Sky Smoke executes.
-- No flash, dash, trip, spike, economy, buy phase, or ultimate effect.
+- One original map. Five catalog agents. Executable: Sky Smoke + full Breach kit. Brimstone Stim / Incendiary / Orbital remain placeholders.
+- No cast aim UI yet; Breach casts need `aimYawDeg` / `chargeValue` on window orders (tests / API).
+- Flashpoint `travelSpeed` 2400 unit unknown — flight timing is an assumed stub, not a conversion.
+- Rolling Thunder vertical knockup (estimate 7 m) is not modeled on the flat map.
+- Minimal `buyCharge` only — no shop UI, no full economy.
+- Ult orbs, plant, and defuse points are out of scope (TODO on the ledger).
 - Defense is a hold stub. No opponent choice, tendency update, or difficulty preset.
 - No IndexedDB. Persistence is versioned JSON text.
-- Jett's Tailwind page and Cypher's Trapwire and Cyber Cage pages were opened for the revised sheet. Their roles were not re-fetched as separate pages.
 - Uniqueness and team size are secondary, not client-verified.
 - Drill Hall is 20 m wide, so the secondary 4.15 m smoke covers a large part of the doorway. That is the recorded radius on this small schematic.
-- Planning window length, walk speed, and auto-fire interval are assumed lab values.
+- Planning window length, walk speed, auto-fire interval, and the stage-1 assumed table above are lab values.
 - No armor. Auto-engage and player shoot orders use Rifle A only.
 - Mid-window moves that finish after the window end are advanced by integer lerp and carried in the pending queue.
 
@@ -226,7 +259,7 @@ A live smoke or cage blocks the look a flash needs, and that block ends when the
 
 1. **Done.** Drill, catalog, live smoke, both-team draft, coverage, JSON scenario.
 2. **Done.** Interactive planning windows, fog-of-war view, defense hold stub, auto-engage, hp/death.
-3. **Next.** Shared effect primitives — see [`docs/effect-primitives.md`](docs/effect-primitives.md) and checkable data in `data/ability-primitives.json` / `data/primitive-stages.json`. First implementation milestone: Breach + Brimstone per [`docs/stage-1-plan.md`](docs/stage-1-plan.md).
+3. **In progress.** Stage 1 per [`docs/stage-1-plan.md`](docs/stage-1-plan.md): part 1 Breach + plumbing done; part 2 Brimstone remaining. Primitives docs: [`docs/effect-primitives.md`](docs/effect-primitives.md), `data/ability-primitives.json` / `data/primitive-stages.json`.
 4. Richer draft report: map fit, synergies, counter-composition, and which plans a composition can support. Suitability stays separate from any win claim.
 5. More complete kits and Sova recon. Each new ability flips its own status.
 6. Versioned weapons and armor. Replace Rifle A only where a primary source exists.
@@ -241,4 +274,4 @@ A live smoke or cage blocks the look a flash needs, and that block ends when the
 
 ## Next task
 
-Implement stage 1 from `docs/stage-1-plan.md`: Breach and Brimstone fully executable in the Drill Hall round (primitives, orders, charges/ult/buy stub, tests). Keep every new number tagged from `agent-reference.json`; do not invent missing ally-damage fractions or Flashpoint speed units.
+Stage 1 part 2: make the remaining Brimstone abilities fully executable (Stim Beacon, Incendiary, Orbital Strike) using the same plumbing. Do not invent ally-damage fractions. Aim / map-target UI can follow.

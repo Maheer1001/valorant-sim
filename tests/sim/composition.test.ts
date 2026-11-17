@@ -180,11 +180,17 @@ describe("team composition", () => {
     expect(same).toEqual(report);
   });
 
-  it("ships one executable ability", () => {
+  it("ships Sky Smoke and the Breach kit as executable", () => {
     const complete = SHIPPED_CATALOG.agents.flatMap((agent) =>
       agent.abilities.filter((ability) => ability.implementation === "complete").map((ability) => ability.id),
     );
-    expect(complete).toEqual(["sky-smoke"]);
+    expect(complete).toEqual([
+      "sky-smoke",
+      "aftershock",
+      "flashpoint",
+      "fault-line",
+      "rolling-thunder",
+    ]);
     const flash = SHIPPED_CATALOG.agents
       .find((agent) => agent.id === "kayo")
       ?.abilities.find((ability) => ability.id === "flash-drive");

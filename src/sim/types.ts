@@ -51,10 +51,15 @@ export type RejectionCode =
   | "target-not-enemy"
   | "target-not-visible"
   | "missing-plan"
-  | "plan-already-submitted";
+  | "plan-already-submitted"
+  | "signature-on-cooldown"
+  | "insufficient-ult-points"
+  | "insufficient-credits"
+  | "charges-full";
 
 export type StatusEffect = {
   id: string;
+  sourceAbilityId: string;
   untilMs: number;
 };
 

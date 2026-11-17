@@ -1,4 +1,5 @@
 import type { Provenance } from "../../rules/provenance.ts";
+import { STANDARD_RULESET } from "../../rules/ruleset.ts";
 import type { Side, StatusEffect, TacticalAssignment } from "../types.ts";
 import type { AgentDefinition } from "./definition.ts";
 
@@ -24,6 +25,8 @@ export type AgentInstance = {
   xMm: number;
   yMm: number;
   hp: number;
+  facingDeg: number;
+  credits: number;
   charges: Record<string, number>;
   cooldownReadyAtMs: Record<string, number>;
   ultimatePoints: number;
@@ -36,6 +39,7 @@ export function createInstance(
   point: { xMm: number; yMm: number },
   instanceId: string,
   assignment: TacticalAssignment | null,
+  options?: { facingDeg?: number; credits?: number; ultimatePoints?: number },
 ): AgentInstance {
   const charges: Record<string, number> = {};
   for (const ability of definition.abilities) {
@@ -51,9 +55,11 @@ export function createInstance(
     xMm: point.xMm,
     yMm: point.yMm,
     hp: ASSUMED_STARTING_HP,
+    facingDeg: options?.facingDeg ?? 0,
+    credits: options?.credits ?? STANDARD_RULESET.startingCredits,
     charges,
     cooldownReadyAtMs: {},
-    ultimatePoints: 0,
+    ultimatePoints: options?.ultimatePoints ?? 0,
     statuses: [],
   };
 }

@@ -18,6 +18,24 @@ export type Ruleset = {
   /** Auto-engage shot interval for agents without a shoot order. */
   autoFireIntervalMs: number;
   autoFireIntervalProvenance: Provenance;
+  /** Starting credits for buyCharge tests / drills. */
+  startingCredits: number;
+  startingCreditsProvenance: Provenance;
+  /** Concuss walk-speed multiplier while status is active. */
+  concussWalkSpeedMultiplierBp: number;
+  concussWalkSpeedMultiplierProvenance: Provenance;
+  /** Concuss hit-chance penalty in basis points (subtracted from rifle chance). */
+  concussHitChancePenaltyBp: number;
+  concussHitChancePenaltyProvenance: Provenance;
+  /** Flash looking-at half-angle in degrees. */
+  flashLookHalfAngleDeg: number;
+  flashLookHalfAngleProvenance: Provenance;
+  /** Assumed Flashpoint flight duration after windup (travelSpeed unit unknown). */
+  flashpointFlightMs: number;
+  flashpointFlightMsProvenance: Provenance;
+  /** Assumed horizontal knockback for Rolling Thunder blasts (vertical knockup withheld). */
+  rollingThunderKnockbackMm: number;
+  rollingThunderKnockbackProvenance: Provenance;
 };
 
 const WIKI_GAMEPLAY = "https://wiki.playvalorant.com/en-us/VALORANT";
@@ -38,6 +56,42 @@ export const AUTO_FIRE_INTERVAL_PROVENANCE: Provenance = {
   kind: "assumed",
   source: "milestone-2",
   note: "Agents without a shoot order auto-engage the nearest visible enemy every 1000 ms with Rifle A. The interval is a lab assumption, not a Valorant fire rate.",
+};
+
+export const STARTING_CREDITS_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "stage-1",
+  note: "Drill agents start with 800 credits for buyCharge stubs. Not a live buy phase.",
+};
+
+export const CONCUSS_WALK_SPEED_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "stage-1",
+  note: "Concuss multiplies walk speed by 7000/10000 while active. Not a measured Valorant concuss slow.",
+};
+
+export const CONCUSS_HIT_CHANCE_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "stage-1",
+  note: "Concuss subtracts 2000 basis points from Rifle A hit chance. Lab stand-in for accuracy loss.",
+};
+
+export const FLASH_LOOK_HALF_ANGLE_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "stage-1 design decision",
+  note: "Looking-at flash uses ±90 degrees until a client-measured cone exists.",
+};
+
+export const FLASHPOINT_FLIGHT_MS_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "stage-1",
+  note: "Flashpoint travelSpeed 2400 has no unit in the reference. Flight after windup is an assumed 400 ms stub; 2400 is not converted.",
+};
+
+export const ROLLING_THUNDER_KNOCKBACK_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "stage-1",
+  note: "Horizontal displacement of 1500 mm per Rolling Thunder blast on the flat map. The 7 m vertical knockup is estimate-withheld and not modeled.",
 };
 
 /**
@@ -69,6 +123,18 @@ export const STANDARD_RULESET: Ruleset = {
   walkSpeedProvenance: WALK_SPEED_PROVENANCE,
   autoFireIntervalMs: 1000,
   autoFireIntervalProvenance: AUTO_FIRE_INTERVAL_PROVENANCE,
+  startingCredits: 800,
+  startingCreditsProvenance: STARTING_CREDITS_PROVENANCE,
+  concussWalkSpeedMultiplierBp: 7000,
+  concussWalkSpeedMultiplierProvenance: CONCUSS_WALK_SPEED_PROVENANCE,
+  concussHitChancePenaltyBp: 2000,
+  concussHitChancePenaltyProvenance: CONCUSS_HIT_CHANCE_PROVENANCE,
+  flashLookHalfAngleDeg: 90,
+  flashLookHalfAngleProvenance: FLASH_LOOK_HALF_ANGLE_PROVENANCE,
+  flashpointFlightMs: 400,
+  flashpointFlightMsProvenance: FLASHPOINT_FLIGHT_MS_PROVENANCE,
+  rollingThunderKnockbackMm: 1500,
+  rollingThunderKnockbackProvenance: ROLLING_THUNDER_KNOCKBACK_PROVENANCE,
 };
 
 export function rulesetWithUniqueness(

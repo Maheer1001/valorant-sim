@@ -16,6 +16,14 @@ export type AbilityDefinition = {
   radiusMm: number | null;
   maxRangeMm: number | null;
   figures: Provenance;
+  /** Ult point cost when kind is ultimate; null otherwise. */
+  ultPointCost?: number | null;
+  /** Signature cooldown in ms when applicable. */
+  signatureCooldownMs?: number | null;
+  /** Effects intentionally not modeled. */
+  notModeled?: readonly string[];
+  /** Numeric fields mirrored from agent-reference.json for drift tests. */
+  referenceStats?: Record<string, number | boolean | null>;
 };
 
 export type AgentDefinition = {

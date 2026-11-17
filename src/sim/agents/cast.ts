@@ -31,7 +31,8 @@ export function evaluateCast(
     return { ok: false, code: "ability-not-executable" };
   }
   const charges = instance.charges[ability.id] ?? 0;
-  if (ability.maxCharges !== null && charges <= 0) {
+  // Signature charge pools restore when cooldownReadyAtMs elapses; resolve enforces the gate.
+  if (ability.maxCharges !== null && charges <= 0 && ability.signatureCooldownMs == null) {
     return { ok: false, code: "insufficient-charges" };
   }
   if (ability.maxRangeMm !== null && distanceMm(origin, target) > ability.maxRangeMm) {

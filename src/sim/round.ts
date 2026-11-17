@@ -3,6 +3,7 @@ import { getAgent, SHIPPED_CATALOG, type Catalog } from "./agents/catalog.ts";
 import { RIFLE_A } from "./combat/assumed-rifle.ts";
 import { compareQueueKeys, EventQueue, type QueueItem } from "./clock.ts";
 import { compositionViolation } from "./composition/team.ts";
+import { hasStatus, STATUS_BLIND } from "./effects/status.ts";
 import { getMap } from "./map/drill-hall.ts";
 import { hasLineOfSight } from "./map/line-of-sight.ts";
 import { forkSeed, resumeStream } from "./rng.ts";
@@ -23,7 +24,15 @@ import {
 export type WindowOrder =
   | { kind: "hold"; instanceId: string }
   | { kind: "move"; instanceId: string; to: Point }
-  | { kind: "cast"; instanceId: string; abilityId: string; target: Point }
+  | {
+      kind: "cast";
+      instanceId: string;
+      abilityId: string;
+      target: Point;
+      aimYawDeg?: number;
+      chargeValue?: number;
+      mapTarget?: Point;
+    }
   | { kind: "shoot"; instanceId: string; targetInstanceId: string };
 
 /** Truth snapshot for an interactive round. */
@@ -109,7 +118,7 @@ export function openRound(
     return { ok: false, code: violation, message: "Team composition violates the ruleset." };
   }
 
-  const world = createWorld(scenario);
+  const world = createWorld(scenario, ruleset);
   return {
     state: {
       seed: scenario.seed,
@@ -222,6 +231,9 @@ export function resolveWindow(round: Round): ResolveResult {
           instanceId: order.instanceId,
           abilityId: order.abilityId,
           target: order.target,
+          aimYawDeg: order.aimYawDeg,
+          chargeValue: order.chargeValue,
+          mapTarget: order.mapTarget,
         },
       });
       continue;
@@ -283,7 +295,16 @@ export function resolveWindow(round: Round): ResolveResult {
     if (!next || next.timeMs > windowEnd) break;
     const item = queue.pop();
     if (!item) break;
-    const applied = applyJob(item.payload, item.timeMs, item.sequence, world, round.catalog, map.walls, combat);
+    const applied = applyJob(
+      item.payload,
+      item.timeMs,
+      item.sequence,
+      world,
+      round.catalog,
+      map.walls,
+      combat,
+      round.ruleset,
+    );
     world.timeMs = item.timeMs;
     events.push(applied.event);
     frames.push(structuredClone(world));
@@ -340,18 +361,17 @@ export function viewWorld(mapId: string, world: World, side: Side): World {
   const own = world.agents.filter((agent) => agent.side === side);
   const enemies = world.agents.filter((agent) => agent.side !== side);
   const visibleEnemies = enemies.filter((enemy) =>
-    own.some(
-      (ally) =>
-        ally.alive &&
-        enemy.alive &&
-        hasLineOfSight(
-          { xMm: ally.xMm, yMm: ally.yMm },
-          { xMm: enemy.xMm, yMm: enemy.yMm },
-          walls,
-          world.smokes,
-          world.timeMs,
-        ),
-    ),
+    own.some((ally) => {
+      if (!ally.alive || !enemy.alive) return false;
+      if (hasStatus(ally, STATUS_BLIND, world.timeMs)) return false;
+      return hasLineOfSight(
+        { xMm: ally.xMm, yMm: ally.yMm },
+        { xMm: enemy.xMm, yMm: enemy.yMm },
+        walls,
+        world.smokes,
+        world.timeMs,
+      );
+    }),
   );
   return {
     timeMs: world.timeMs,
@@ -413,6 +433,19 @@ function validateOrder(
     return { ok: true };
   }
   if (order.kind === "cast") {
+    if (order.aimYawDeg != null) {
+      if (!Number.isInteger(order.aimYawDeg) || order.aimYawDeg < 0 || order.aimYawDeg > 359) {
+        return { ok: false, code: "invalid-order", message: "aimYawDeg must be an integer in 0..359." };
+      }
+    }
+    if (order.chargeValue != null && !Number.isInteger(order.chargeValue)) {
+      return { ok: false, code: "invalid-order", message: "chargeValue must be an integer." };
+    }
+    if (order.mapTarget != null) {
+      if (!Number.isInteger(order.mapTarget.xMm) || !Number.isInteger(order.mapTarget.yMm)) {
+        return { ok: false, code: "invalid-order", message: "mapTarget must be integer millimeters." };
+      }
+    }
     const definition = getAgent(round.catalog, agent.definitionId);
     const origin = { xMm: agent.xMm, yMm: agent.yMm };
     const verdict = evaluateCast(definition, toInstance(agent), order.abilityId, origin, order.target);
@@ -430,6 +463,9 @@ function validateOrder(
   }
   if (!target.alive) {
     return { ok: false, code: "agent-down", message: `Target ${order.targetInstanceId} is down.` };
+  }
+  if (hasStatus(agent, STATUS_BLIND, world.timeMs)) {
+    return { ok: false, code: "target-not-visible", message: "Shooter is blinded." };
   }
   const map = getMap(round.state.mapId);
   if (!map) {
@@ -493,6 +529,9 @@ function cloneOrder(order: WindowOrder): WindowOrder {
       instanceId: order.instanceId,
       abilityId: order.abilityId,
       target: { ...order.target },
+      aimYawDeg: order.aimYawDeg,
+      chargeValue: order.chargeValue,
+      mapTarget: order.mapTarget ? { ...order.mapTarget } : undefined,
     };
   }
   if (order.kind === "shoot") {
@@ -514,9 +553,11 @@ function toInstance(agent: AgentBody) {
     xMm: agent.xMm,
     yMm: agent.yMm,
     hp: agent.hp,
+    facingDeg: agent.facingDeg,
+    credits: agent.credits,
     charges: agent.charges,
-    cooldownReadyAtMs: {},
-    ultimatePoints: 0,
-    statuses: [],
+    cooldownReadyAtMs: { ...agent.cooldownReadyAtMs },
+    ultimatePoints: agent.ultimatePoints,
+    statuses: structuredClone(agent.statuses),
   };
 }

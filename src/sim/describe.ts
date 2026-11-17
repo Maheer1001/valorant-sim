@@ -10,7 +10,7 @@ export function describeEvent(event: SimEvent): string {
     case "move-blocked":
       return `${prefix} · Movement stopped by a wall at ${event.at.xMm}, ${event.at.yMm}`;
     case "cast-accepted":
-      return `${prefix} · Sky Smoke accepted, ${event.chargesRemaining} charges left`;
+      return `${prefix} · ${event.abilityId} accepted, ${event.chargesRemaining} charges left`;
     case "cast-rejected":
       return `${prefix} · Cast rejected (${event.code})`;
     case "order-rejected":
@@ -23,6 +23,14 @@ export function describeEvent(event: SimEvent): string {
       return `${prefix} · Shot withheld (${event.reason})`;
     case "shot":
       return `${prefix} · Shot hit chance ${event.hitProbabilityBp}/10000, draw ${event.draw}, ${event.hit ? "hit" : "miss"}`;
+    case "ability-damage":
+      return `${prefix} · ${event.abilityId} burst ${event.burstIndex} hit ${event.hits.length}`;
+    case "flash-resolved":
+      return `${prefix} · ${event.abilityId} blinded ${event.blindedInstanceIds.length}, blocked ${event.blockedInstanceIds.length}`;
+    case "status-wave":
+      return `${prefix} · ${event.abilityId} applied ${event.statusId} to ${event.affectedInstanceIds.length}`;
+    case "status-expired":
+      return `${prefix} · ${event.statusId} expired (${event.sourceAbilityId})`;
     default: {
       const unreachable: never = event;
       return unreachable;

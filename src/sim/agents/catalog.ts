@@ -4,8 +4,9 @@ import type { AbilityDefinition, AbilitySlot, AgentDefinition, Catalog } from ".
 export type { AgentDefinition, Catalog };
 import type { CapabilityKind } from "../types.ts";
 import { SKY_SMOKE_ABILITY } from "./abilities/sky-smoke.ts";
+import { BREACH_ABILITIES } from "./abilities/breach.ts";
 
-export const CATALOG_VERSION = "m1-2026-10-21";
+export const CATALOG_VERSION = "m2-stage1-breach-2026-11-17";
 
 const ABILITY_TABLE = "https://wiki.playvalorant.com/en-us/Abilities";
 
@@ -31,6 +32,12 @@ const CYPHER_ROLE: Provenance = {
   kind: "secondary",
   source: "https://wiki.playvalorant.com/en-us/Cypher",
   note: "Public roster lists Cypher as a Sentinel. Coverage does not grant capabilities from this label.",
+};
+
+const BREACH_ROLE: Provenance = {
+  kind: "secondary",
+  source: "https://wiki.playvalorant.com/en-us/Breach",
+  note: "Public roster lists Breach as an Initiator. Coverage does not grant capabilities from this label.",
 };
 
 function listed(input: {
@@ -202,9 +209,17 @@ const CYPHER: AgentDefinition = {
   ],
 };
 
+const BREACH: AgentDefinition = {
+  id: "breach",
+  name: "Breach",
+  role: "initiator",
+  roleProvenance: BREACH_ROLE,
+  abilities: [...BREACH_ABILITIES],
+};
+
 export const SHIPPED_CATALOG: Catalog = {
   version: CATALOG_VERSION,
-  agents: [BRIMSTONE, KAYO, JETT, CYPHER],
+  agents: [BRIMSTONE, KAYO, JETT, CYPHER, BREACH],
 };
 
 export function getAgent(catalog: Catalog, definitionId: string): AgentDefinition | null {

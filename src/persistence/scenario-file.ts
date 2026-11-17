@@ -63,6 +63,17 @@ function assertTeam(value: unknown, side: "attack" | "defense"): void {
     if (!Number.isInteger(member.xMm) || !Number.isInteger(member.yMm) || !Number.isInteger(member.hp)) {
       throw new ScenarioFileError("invalid-shape", "Agent position or health is invalid.");
     }
+    if (
+      typeof member.facingDeg !== "number" ||
+      !Number.isInteger(member.facingDeg) ||
+      member.facingDeg < 0 ||
+      member.facingDeg > 359
+    ) {
+      throw new ScenarioFileError("invalid-shape", "Agent facing is invalid.");
+    }
+    if (typeof member.credits !== "number" || !Number.isInteger(member.credits)) {
+      throw new ScenarioFileError("invalid-shape", "Agent credits are invalid.");
+    }
     if (!isNumberRecord(member.charges) || !isNumberRecord(member.cooldownReadyAtMs)) {
       throw new ScenarioFileError("invalid-shape", "Agent resources are invalid.");
     }
