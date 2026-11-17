@@ -180,12 +180,15 @@ describe("team composition", () => {
     expect(same).toEqual(report);
   });
 
-  it("ships Sky Smoke and the Breach kit as executable", () => {
+  it("ships full Brimstone and Breach kits as executable", () => {
     const complete = SHIPPED_CATALOG.agents.flatMap((agent) =>
       agent.abilities.filter((ability) => ability.implementation === "complete").map((ability) => ability.id),
     );
     expect(complete).toEqual([
+      "stim-beacon",
+      "incendiary",
       "sky-smoke",
+      "orbital-strike",
       "aftershock",
       "flashpoint",
       "fault-line",

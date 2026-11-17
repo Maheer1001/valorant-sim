@@ -3,10 +3,10 @@ import type { AbilityDefinition, AbilitySlot, AgentDefinition, Catalog } from ".
 
 export type { AgentDefinition, Catalog };
 import type { CapabilityKind } from "../types.ts";
-import { SKY_SMOKE_ABILITY } from "./abilities/sky-smoke.ts";
 import { BREACH_ABILITIES } from "./abilities/breach.ts";
+import { BRIMSTONE_ABILITIES } from "./abilities/brimstone.ts";
 
-export const CATALOG_VERSION = "m2-stage1-breach-2026-11-17";
+export const CATALOG_VERSION = "m2-stage1-brimstone-2026-11-17";
 
 const ABILITY_TABLE = "https://wiki.playvalorant.com/en-us/Abilities";
 
@@ -72,30 +72,7 @@ const BRIMSTONE: AgentDefinition = {
   name: "Brimstone",
   role: "controller",
   roleProvenance: BRIMSTONE_ROLE,
-  abilities: [
-    listed({
-      id: "stim-beacon",
-      name: "Stim Beacon",
-      slot: "basic",
-      capability: null,
-      note: "Name and basic slot only. Not castable. No charges or duration are stored.",
-    }),
-    listed({
-      id: "incendiary",
-      name: "Incendiary",
-      slot: "basic",
-      capability: null,
-      note: "Name and basic slot only. Not classified as area denial until the ability is implemented.",
-    }),
-    SKY_SMOKE_ABILITY,
-    listed({
-      id: "orbital-strike",
-      name: "Orbital Strike",
-      slot: "ultimate",
-      capability: null,
-      note: "Ultimate name only. Point cost and effect are not stored. Not castable.",
-    }),
-  ],
+  abilities: [...BRIMSTONE_ABILITIES],
 };
 
 const KAYO: AgentDefinition = {

@@ -16,7 +16,8 @@ describe("draft panel", () => {
 
     const kit = screen.getByRole("region", { name: "Agent kit" });
     expect(within(kit).getByText("Sky Smoke")).toBeInTheDocument();
-    expect(within(kit).getByText("complete")).toBeInTheDocument();
+    expect(within(kit).getByText("Stim Beacon")).toBeInTheDocument();
+    expect(within(kit).getAllByText(/complete/).length).toBeGreaterThanOrEqual(4);
 
     await user.click(screen.getByRole("button", { name: "KAY/O, Initiator" }));
     expect(within(screen.getByRole("region", { name: "Agent kit" })).getByText("FLASH/DRIVE")).toBeInTheDocument();

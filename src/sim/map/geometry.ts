@@ -86,6 +86,37 @@ export function clipSegment(from: Point, to: Point, walls: readonly Segment[]): 
   };
 }
 
+/**
+ * Total wall span along a ray: distance between the first and last wall
+ * intersection. A single infinitely thin wall contributes 0 mm. Parallel walls
+ * that form a thick barrier contribute the gap between first and last hit.
+ */
+export function wallDepthMmAlongRay(from: Point, to: Point, walls: readonly Segment[]): number {
+  const dx = to.xMm - from.xMm;
+  const dy = to.yMm - from.yMm;
+  const length = Math.hypot(dx, dy);
+  if (length === 0) return 0;
+  const hits: number[] = [];
+  for (const wall of walls) {
+    const sx = wall.b.xMm - wall.a.xMm;
+    const sy = wall.b.yMm - wall.a.yMm;
+    const denom = dx * sy - dy * sx;
+    if (denom === 0) continue;
+    const qpx = wall.a.xMm - from.xMm;
+    const qpy = wall.a.yMm - from.yMm;
+    const t = (qpx * sy - qpy * sx) / denom;
+    const u = (qpx * dy - qpy * dx) / denom;
+    if (t > 0 && t <= 1 && u >= 0 && u <= 1) {
+      hits.push(t);
+    }
+  }
+  if (hits.length < 2) return 0;
+  hits.sort((a, b) => a - b);
+  const first = hits[0]!;
+  const last = hits[hits.length - 1]!;
+  return Math.round((last - first) * length);
+}
+
 export function pointSegmentDistanceSq(point: Point, a: Point, b: Point): number {
   const dx = b.xMm - a.xMm;
   const dy = b.yMm - a.yMm;

@@ -431,6 +431,74 @@ describe("Breach stage-1 kit", () => {
     }
   });
 
+  it("lets Flashpoint through a thin wall and blocks when wall span exceeds 10 m", async () => {
+    const { applyFlashpointImpact } = await import("../../src/sim/agents/abilities/breach-resolve.ts");
+    const { wallDepthMmAlongRay } = await import("../../src/sim/map/geometry.ts");
+    const { createWorld } = await import("../../src/sim/run.ts");
+
+    let round = mustOpen(
+      breachScenario(30, {
+        breachAt: { xMm: 6000, yMm: 2000 },
+        enemyAt: { xMm: 9500, yMm: 2000 },
+        enemyFacingDeg: 0,
+      }),
+    );
+    round = mustSubmit(round, "attack", [
+      {
+        kind: "cast",
+        instanceId: "breach-attack",
+        abilityId: FLASHPOINT_ID,
+        target: { xMm: 7000, yMm: 2000 },
+        aimYawDeg: 0,
+      },
+    ]);
+    round = mustSubmit(round, "defense", holdDefense(round));
+    const thinFlash = resolveWindow(round);
+    expect(thinFlash.ok).toBe(true);
+    if (!thinFlash.ok) return;
+    const thinEvent = thinFlash.events.find((event) => event.type === "flash-resolved");
+    expect(thinEvent?.type).toBe("flash-resolved");
+    if (thinEvent?.type === "flash-resolved") {
+      expect(thinEvent.blindedInstanceIds).toEqual(["jett-defense"]);
+    }
+    expect(wallDepthMmAlongRay({ xMm: 6000, yMm: 2000 }, { xMm: 9500, yMm: 2000 }, DRILL_HALL.walls)).toBe(0);
+
+    // Parallel walls 12 m apart → span > verified wallDepth 10 m (corridor uses range 35 m).
+    const thickWalls = [
+      { a: { xMm: 7000, yMm: 0 }, b: { xMm: 7000, yMm: 12000 } },
+      { a: { xMm: 19000, yMm: 0 }, b: { xMm: 19000, yMm: 12000 } },
+    ];
+    expect(
+      wallDepthMmAlongRay({ xMm: 6000, yMm: 6000 }, { xMm: 19500, yMm: 6000 }, thickWalls),
+    ).toBeGreaterThan(10000);
+
+    const world = createWorld(
+      breachScenario(31, {
+        breachAt: { xMm: 6000, yMm: 6000 },
+        enemyAt: { xMm: 19500, yMm: 6000 },
+        enemyFacingDeg: 0,
+      }),
+    );
+    const impact = applyFlashpointImpact(
+      {
+        type: "flashpoint-impact",
+        instanceId: "breach-attack",
+        impact: { xMm: 16000, yMm: 6000 },
+        yawDeg: 0,
+      },
+      900,
+      1,
+      world,
+      thickWalls,
+      STANDARD_RULESET,
+    );
+    expect(impact.event.type).toBe("flash-resolved");
+    if (impact.event.type === "flash-resolved") {
+      expect(impact.event.blindedInstanceIds).toEqual([]);
+      expect(impact.event.blockedInstanceIds).toContain("jett-defense");
+    }
+  });
+
   it("blinds only enemies looking toward the flash and lets smoke block Flashpoint", () => {
     let looking = mustOpen(
       breachScenario(12, {

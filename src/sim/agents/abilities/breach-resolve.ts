@@ -2,7 +2,7 @@ import type { Catalog } from "../catalog.ts";
 import { getAgent } from "../catalog.ts";
 import type { ApplyResult, Job, World } from "../../run.ts";
 import { findAgent } from "../../run.ts";
-import { clipSegment } from "../../map/geometry.ts";
+import { clipSegment, wallDepthMmAlongRay } from "../../map/geometry.ts";
 import { hasLineOfSight } from "../../map/line-of-sight.ts";
 import type { Point, RejectionCode, Segment } from "../../types.ts";
 import type { Ruleset } from "../../../rules/ruleset.ts";
@@ -18,6 +18,8 @@ import { grantKillUltPoints, spendUltPoints } from "../../combat/ult-points.ts";
 
 /** Design: Flashpoint look corridor half-width. Not a measured Valorant cone width. */
 const FLASHPOINT_CORRIDOR_HALF_WIDTH_MM = 4000;
+/** Verified Flashpoint wallDepthM 10 — max solid wall span the flash may cross. */
+const FLASHPOINT_WALL_DEPTH_MM = 10000;
 
 export type CastExtras = {
   aimYawDeg?: number;
@@ -121,7 +123,7 @@ export function tryResolveBreachCast(
   if (ability.id === FLASHPOINT_ID) {
     const windup = 500;
     const impactAt = timeMs + windup + ruleset.flashpointFlightMs;
-    const impact = pointFromYaw({ xMm: agent.xMm, yMm: agent.yMm }, agent.facingDeg, 10000);
+    const impact = pointFromYaw({ xMm: agent.xMm, yMm: agent.yMm }, agent.facingDeg, 10000); // impact at wallDepth for look test
     return {
       world,
       event: accepted,
@@ -264,20 +266,21 @@ export function applyFlashpointImpact(
   const origin = { xMm: caster.xMm, yMm: caster.yMm };
   for (const other of world.agents) {
     if (!other.alive || other.side === caster.side) continue;
-    // Design: flash corridor = wallDepth 10 m ahead, half-width FLASHPOINT_CORRIDOR_HALF_WIDTH_MM.
-    const inCorridor = pointInOrientedRect(origin, job.yawDeg, 0, 10000, FLASHPOINT_CORRIDOR_HALF_WIDTH_MM, {
-      xMm: other.xMm,
-      yMm: other.yMm,
-    });
+    // Design corridor: verified range 35 m ahead, half-width FLASHPOINT_CORRIDOR_HALF_WIDTH_MM.
+    // Verified wallDepthM 10 caps how much wall span the flash may cross (separate from range).
+    const to = { xMm: other.xMm, yMm: other.yMm };
+    const inCorridor = pointInOrientedRect(origin, job.yawDeg, 0, 35000, FLASHPOINT_CORRIDOR_HALF_WIDTH_MM, to);
     if (!inCorridor) continue;
-    // Through-walls: ignore solid walls; active smoke still blocks the flash look.
-    if (!hasLineOfSight(origin, { xMm: other.xMm, yMm: other.yMm }, [], world.smokes, timeMs)) {
+    if (wallDepthMmAlongRay(origin, to, walls) > FLASHPOINT_WALL_DEPTH_MM) {
       blocked.push(other.instanceId);
       continue;
     }
-    if (
-      !lookingAt(other.facingDeg, { xMm: other.xMm, yMm: other.yMm }, job.impact, ruleset.flashLookHalfAngleDeg)
-    ) {
+    // Through thin walls: ignore solid LOS walls; active smoke still blocks the flash look.
+    if (!hasLineOfSight(origin, to, [], world.smokes, timeMs)) {
+      blocked.push(other.instanceId);
+      continue;
+    }
+    if (!lookingAt(other.facingDeg, to, job.impact, ruleset.flashLookHalfAngleDeg)) {
       continue;
     }
     applyStatus(other, {

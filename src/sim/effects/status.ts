@@ -3,6 +3,14 @@ import type { StatusEffect } from "../types.ts";
 
 export const STATUS_CONCUSS = "concuss";
 export const STATUS_BLIND = "blind";
+export const STATUS_HASTE = "haste";
+export const STATUS_COMBAT_STIM = "combat-stim";
+
+export function statusModifier(agent: AgentBody, statusId: string, key: string, timeMs: number): number | null {
+  const status = activeStatuses(agent, timeMs).find((item) => item.id === statusId);
+  if (!status?.modifiers || !(key in status.modifiers)) return null;
+  return status.modifiers[key] ?? null;
+}
 
 export function activeStatuses(agent: AgentBody, timeMs: number): StatusEffect[] {
   return agent.statuses.filter((status) => timeMs < status.untilMs);

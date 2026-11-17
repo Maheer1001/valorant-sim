@@ -36,6 +36,19 @@ export type Ruleset = {
   /** Assumed horizontal knockback for Rolling Thunder blasts (vertical knockup withheld). */
   rollingThunderKnockbackMm: number;
   rollingThunderKnockbackProvenance: Provenance;
+  /** Assumed spacing between Incendiary floor contacts on the flat map. */
+  incendiaryFloorSpacingMm: number;
+  incendiaryFloorSpacingProvenance: Provenance;
+  /**
+   * Design: Incendiary damage batching — 6 hp every 100 ms (= 60 DPS from 1×60 ticks/s).
+   * Not a published batch size; keeps integer ms without inventing a different DPS.
+   */
+  incendiaryTickDamage: number;
+  incendiaryTickIntervalMs: number;
+  incendiaryTickProvenance: Provenance;
+  /** Assumed Stim Beacon pulse interval for applying/refreshing buffs. */
+  stimBeaconPulseMs: number;
+  stimBeaconPulseProvenance: Provenance;
 };
 
 const WIKI_GAMEPLAY = "https://wiki.playvalorant.com/en-us/VALORANT";
@@ -94,6 +107,24 @@ export const ROLLING_THUNDER_KNOCKBACK_PROVENANCE: Provenance = {
   note: "Horizontal displacement of 1500 mm per Rolling Thunder blast on the flat map. The 7 m vertical knockup is estimate-withheld and not modeled.",
 };
 
+export const INCENDIARY_FLOOR_SPACING_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "stage-1 part 2",
+  note: "Flat-map stand-in: floor contacts every 4000 mm along the throw until two bounces then detonate. Not a measured bounce arc.",
+};
+
+export const INCENDIARY_TICK_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "stage-1 part 2 design",
+  note: "Reference is 1 damage × 60 ticks/s. Engine batches to 6 damage every 100 ms (same 60 DPS) for integer milliseconds.",
+};
+
+export const STIM_BEACON_PULSE_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "stage-1 part 2",
+  note: "Stim Beacon refreshes ally buffs on a 500 ms pulse while active. Lab cadence, not a client tick.",
+};
+
 /**
  * Standard match shape used by the lab.
  * Team size and uniqueness are secondary: the Valorant wiki gameplay summary
@@ -135,6 +166,13 @@ export const STANDARD_RULESET: Ruleset = {
   flashpointFlightMsProvenance: FLASHPOINT_FLIGHT_MS_PROVENANCE,
   rollingThunderKnockbackMm: 1500,
   rollingThunderKnockbackProvenance: ROLLING_THUNDER_KNOCKBACK_PROVENANCE,
+  incendiaryFloorSpacingMm: 4000,
+  incendiaryFloorSpacingProvenance: INCENDIARY_FLOOR_SPACING_PROVENANCE,
+  incendiaryTickDamage: 6,
+  incendiaryTickIntervalMs: 100,
+  incendiaryTickProvenance: INCENDIARY_TICK_PROVENANCE,
+  stimBeaconPulseMs: 500,
+  stimBeaconPulseProvenance: STIM_BEACON_PULSE_PROVENANCE,
 };
 
 export function rulesetWithUniqueness(

@@ -53,4 +53,13 @@ export const SKY_SMOKE_ABILITY: AbilityDefinition = {
   radiusMm: SKY_SMOKE_RADIUS_MM,
   maxRangeMm: SKY_SMOKE_RANGE_MM,
   figures: SKY_SMOKE_FIGURES,
+  referenceStats: {
+    equipSec: 0.8,
+    rangeM: 55,
+    deploySec: 1,
+    radiusM: 4.15,
+    durationSec: 19.25,
+    warningAtSec: 17.75,
+    blocksVisionWhileActive: true,
+  },
 };

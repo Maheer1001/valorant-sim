@@ -12,6 +12,7 @@ import type { Point, RejectionCode, Side } from "./types.ts";
 import { STANDARD_RULESET, type Ruleset } from "../rules/ruleset.ts";
 import {
   applyJob,
+  autoFireIntervalFor,
   createWorld,
   findAgent,
   lerpPoint,
@@ -42,6 +43,8 @@ export type RoundState = {
   timeMs: number;
   agents: AgentBody[];
   smokes: World["smokes"];
+  devices: World["devices"];
+  zones: World["zones"];
   mapId: string;
   rulesetId: string;
   catalogVersion: string;
@@ -126,6 +129,8 @@ export function openRound(
       timeMs: world.timeMs,
       agents: structuredClone(world.agents),
       smokes: structuredClone(world.smokes),
+      devices: structuredClone(world.devices),
+      zones: structuredClone(world.zones),
       mapId: scenario.mapId,
       rulesetId: ruleset.id,
       catalogVersion: catalog.version,
@@ -253,7 +258,7 @@ export function resolveWindow(round: Round): ResolveResult {
 
   for (const agent of world.agents) {
     if (!agent.alive || shooters.has(agent.instanceId)) continue;
-    const interval = round.ruleset.autoFireIntervalMs;
+    const interval = autoFireIntervalFor(agent, windowStart, round.ruleset);
     for (let at = windowStart; at < windowEnd; at += interval) {
       enqueueJobs.push({
         timeMs: at,
@@ -330,6 +335,8 @@ export function resolveWindow(round: Round): ResolveResult {
       timeMs: world.timeMs,
       agents: structuredClone(world.agents),
       smokes: structuredClone(world.smokes),
+      devices: structuredClone(world.devices),
+      zones: structuredClone(world.zones),
       mapId: round.state.mapId,
       rulesetId: round.state.rulesetId,
       catalogVersion: round.state.catalogVersion,
@@ -373,10 +380,17 @@ export function viewWorld(mapId: string, world: World, side: Side): World {
       );
     }),
   );
+  const devices = world.devices.filter((device) => {
+    if (device.side === side) return true;
+    // enemiesSeeRadius false → hide enemy Stim Beacon radius from this side's fog view.
+    return device.enemiesSeeRadius;
+  });
   return {
     timeMs: world.timeMs,
     agents: [...own, ...visibleEnemies],
     smokes: structuredClone(world.smokes),
+    devices: structuredClone(devices),
+    zones: structuredClone(world.zones.filter((zone) => zone.side === side || zone.blocksVision)),
   };
 }
 
@@ -385,6 +399,8 @@ export function truthWorld(state: RoundState): World {
     timeMs: state.timeMs,
     agents: structuredClone(state.agents),
     smokes: structuredClone(state.smokes),
+    devices: structuredClone(state.devices),
+    zones: structuredClone(state.zones),
   };
 }
 
@@ -448,7 +464,8 @@ function validateOrder(
     }
     const definition = getAgent(round.catalog, agent.definitionId);
     const origin = { xMm: agent.xMm, yMm: agent.yMm };
-    const verdict = evaluateCast(definition, toInstance(agent), order.abilityId, origin, order.target);
+    const place = order.mapTarget ?? order.target;
+    const verdict = evaluateCast(definition, toInstance(agent), order.abilityId, origin, place);
     if (!verdict.ok) {
       return { ok: false, code: verdict.code, message: `Cast rejected: ${verdict.code}.` };
     }

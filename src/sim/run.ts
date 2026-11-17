@@ -8,17 +8,43 @@ import {
   applyStatusExpire,
   tryResolveBreachCast,
 } from "./agents/abilities/breach-resolve.ts";
+import {
+  applyDeviceExpire,
+  applyIncendiaryDetonate,
+  applyOrbitalActivate,
+  applyOrbitalShrink,
+  applyStimBeaconPulse,
+  applyZoneExpire,
+  applyZoneTick,
+  tryResolveBrimstoneCast,
+} from "./agents/abilities/brimstone-resolve.ts";
 import { getWeapon, hitProbabilityBp } from "./combat/assumed-rifle.ts";
 import { grantKillUltPoints } from "./combat/ult-points.ts";
 import { EventQueue } from "./clock.ts";
 import { compositionViolation } from "./composition/team.ts";
-import { hasStatus, STATUS_BLIND, STATUS_CONCUSS, yawToward } from "./effects/status.ts";
+import {
+  hasStatus,
+  STATUS_BLIND,
+  STATUS_COMBAT_STIM,
+  STATUS_CONCUSS,
+  STATUS_HASTE,
+  statusModifier,
+  yawToward,
+} from "./effects/status.ts";
 import { clipSegment, distanceMm } from "./map/geometry.ts";
 import { getMap } from "./map/drill-hall.ts";
 import { hasLineOfSight } from "./map/line-of-sight.ts";
 import { createStream, type Rng } from "./rng.ts";
 import type { Order, Scenario } from "./scenario/types.ts";
-import type { Point, RejectionCode, Segment, SmokeVolume, StatusEffect } from "./types.ts";
+import type {
+  DamageZone,
+  Device,
+  Point,
+  RejectionCode,
+  Segment,
+  SmokeVolume,
+  StatusEffect,
+} from "./types.ts";
 import { STANDARD_RULESET, type Ruleset } from "../rules/ruleset.ts";
 
 export type AgentBody = {
@@ -41,6 +67,8 @@ export type World = {
   timeMs: number;
   agents: AgentBody[];
   smokes: SmokeVolume[];
+  devices: Device[];
+  zones: DamageZone[];
 };
 
 export type SimEvent = {
@@ -97,6 +125,19 @@ export type SimEvent = {
       sourceAbilityId: string;
       removed: boolean;
     }
+  | { type: "stim-pulse"; deviceId: string; affectedInstanceIds: string[] }
+  | { type: "device-expired"; deviceId: string }
+  | { type: "incendiary-detonated"; at: Point; bounces: number; zoneId: string }
+  | { type: "orbital-activated"; zoneId: string; at: Point }
+  | { type: "orbital-shrink"; zoneId: string; radiusMm: number }
+  | {
+      type: "zone-damage";
+      abilityId: string;
+      zoneId: string;
+      radiusMm: number;
+      hits: { targetInstanceId: string; damage: number; targetHpAfter: number }[];
+    }
+  | { type: "zone-expired"; zoneId: string }
 );
 
 export type RunSuccess = {
@@ -147,7 +188,14 @@ export type Job =
       instanceId: string;
       statusId: string;
       sourceAbilityId: string;
-    };
+    }
+  | { type: "stim-beacon-pulse"; deviceId: string }
+  | { type: "device-expire"; deviceId: string }
+  | { type: "incendiary-detonate"; instanceId: string; at: Point; bounces: number }
+  | { type: "orbital-activate"; instanceId: string; at: Point }
+  | { type: "orbital-shrink"; zoneId: string; smokeId: string; radiusMm: number }
+  | { type: "zone-tick"; zoneId: string }
+  | { type: "zone-expire"; zoneId: string };
 
 export type ApplyResult = {
   world: World;
@@ -298,9 +346,14 @@ export function applyJob(
     const from = { xMm: agent.xMm, yMm: agent.yMm };
     agent.facingDeg = yawToward(from, job.to);
     const clip = clipSegment(from, job.to, walls);
-    const speed = hasStatus(agent, STATUS_CONCUSS, timeMs)
-      ? Math.round((job.speedMmPerSec * ruleset.concussWalkSpeedMultiplierBp) / 10000)
-      : job.speedMmPerSec;
+    let speed = job.speedMmPerSec;
+    const haste = statusModifier(agent, STATUS_HASTE, "movementSpeed", timeMs);
+    if (haste != null) {
+      speed = Math.round(speed * haste);
+    }
+    if (hasStatus(agent, STATUS_CONCUSS, timeMs)) {
+      speed = Math.round((speed * ruleset.concussWalkSpeedMultiplierBp) / 10000);
+    }
     const safeSpeed = Math.max(1, speed);
     const travelMs = Math.round((distanceMm(from, clip.point) * 1000) / safeSpeed);
     return {
@@ -354,73 +407,25 @@ export function applyJob(
   if (job.type === "cast") {
     const breach = tryResolveBreachCast(job, timeMs, sequence, next, catalog, walls, ruleset);
     if (breach) return breach;
+    const brimstone = tryResolveBrimstoneCast(job, timeMs, sequence, next, catalog, walls, ruleset);
+    if (brimstone) return brimstone;
 
     const agent = findAgent(next, job.instanceId);
     const definition = agent ? getAgent(catalog, agent.definitionId) : null;
+    const place = job.mapTarget ?? job.target;
     const origin = agent ? { xMm: agent.xMm, yMm: agent.yMm } : { xMm: 0, yMm: 0 };
-    const verdict = evaluateCast(definition, agent ? toInstance(agent) : null, job.abilityId, origin, job.target);
-    if (!verdict.ok || !agent) {
-      return {
-        world: next,
-        followups: [],
-        event: {
-          type: "cast-rejected",
-          timeMs,
-          sequence,
-          agentId: job.instanceId,
-          abilityId: job.abilityId,
-          code: verdict.ok ? "unknown-agent" : verdict.code,
-        },
-      };
-    }
-    if (verdict.ability.id !== "sky-smoke" || verdict.ability.durationMs === null || verdict.ability.radiusMm === null) {
-      return {
-        world: next,
-        followups: [],
-        event: {
-          type: "cast-rejected",
-          timeMs,
-          sequence,
-          agentId: agent.instanceId,
-          abilityId: job.abilityId,
-          code: "ability-not-executable",
-        },
-      };
-    }
-    if (job.aimYawDeg != null) {
-      agent.facingDeg = ((Math.round(job.aimYawDeg) % 360) + 360) % 360;
-    } else {
-      agent.facingDeg = yawToward(origin, job.target);
-    }
-    const remaining = (agent.charges[verdict.ability.id] ?? 0) - 1;
-    agent.charges[verdict.ability.id] = remaining;
-    const deploy = verdict.ability.deployDelayMs ?? 0;
-    const smoke: SmokeVolume = {
-      id: `smoke-${sequence}`,
-      ownerInstanceId: agent.instanceId,
-      abilityId: verdict.ability.id,
-      xMm: job.target.xMm,
-      yMm: job.target.yMm,
-      radiusMm: verdict.ability.radiusMm,
-      activeFromMs: timeMs + deploy,
-      expiresAtMs: timeMs + deploy + verdict.ability.durationMs,
-    };
-    next.smokes.push(smoke);
+    const verdict = evaluateCast(definition, agent ? toInstance(agent) : null, job.abilityId, origin, place);
     return {
       world: next,
+      followups: [],
       event: {
-        type: "cast-accepted",
+        type: "cast-rejected",
         timeMs,
         sequence,
-        agentId: agent.instanceId,
-        abilityId: verdict.ability.id,
-        target: job.target,
-        chargesRemaining: remaining,
+        agentId: job.instanceId,
+        abilityId: job.abilityId,
+        code: !agent ? "unknown-agent" : verdict.ok ? "ability-not-executable" : verdict.code,
       },
-      followups: [
-        { atMs: smoke.activeFromMs, agentId: agent.instanceId, job: { type: "smoke-active", smokeId: smoke.id } },
-        { atMs: smoke.expiresAtMs, agentId: agent.instanceId, job: { type: "smoke-expire", smokeId: smoke.id } },
-      ],
     };
   }
 
@@ -438,6 +443,27 @@ export function applyJob(
   }
   if (job.type === "status-expire") {
     return applyStatusExpire(job, timeMs, sequence, next);
+  }
+  if (job.type === "stim-beacon-pulse") {
+    return applyStimBeaconPulse(job, timeMs, sequence, next);
+  }
+  if (job.type === "device-expire") {
+    return applyDeviceExpire(job, timeMs, sequence, next);
+  }
+  if (job.type === "incendiary-detonate") {
+    return applyIncendiaryDetonate(job, timeMs, sequence, next, ruleset);
+  }
+  if (job.type === "orbital-activate") {
+    return applyOrbitalActivate(job, timeMs, sequence, next);
+  }
+  if (job.type === "orbital-shrink") {
+    return applyOrbitalShrink(job, timeMs, sequence, next);
+  }
+  if (job.type === "zone-tick") {
+    return applyZoneTick(job, timeMs, sequence, next);
+  }
+  if (job.type === "zone-expire") {
+    return applyZoneExpire(job, timeMs, sequence, next);
   }
 
   if (job.type === "smoke-active" || job.type === "smoke-expire") {
@@ -681,7 +707,14 @@ export function createWorld(scenario: Scenario, ruleset: Ruleset = STANDARD_RULE
     ultimatePoints: member.ultimatePoints ?? 0,
     statuses: structuredClone(member.statuses ?? []),
   }));
-  return { timeMs: 0, agents, smokes: [] };
+  return { timeMs: 0, agents, smokes: [], devices: [], zones: [] };
+}
+
+/** Auto-fire interval, shortened by Combat Stim fireRate when present. */
+export function autoFireIntervalFor(agent: AgentBody, timeMs: number, ruleset: Ruleset): number {
+  const rate = statusModifier(agent, STATUS_COMBAT_STIM, "fireRate", timeMs);
+  if (rate == null || rate <= 0) return ruleset.autoFireIntervalMs;
+  return Math.max(1, Math.round(ruleset.autoFireIntervalMs / rate));
 }
 
 /** Linear interpolate integer mm positions. */
