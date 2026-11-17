@@ -130,6 +130,26 @@ describe("agent-reference.json patch 13.10", () => {
     expect(destroyed("Vyse", "Arc Rose")).toBe(45);
   });
 
+  it("keeps Spycam and Arc Rose ability sources as sheet with verified cooldown stats", () => {
+    const spycam = reference.agents
+      .find((agent) => agent.name === "Cypher")
+      ?.abilities.find((ability) => ability.name === "Spycam") as Ability & {
+      statSources?: Record<string, string>;
+    };
+    const arc = reference.agents
+      .find((agent) => agent.name === "Vyse")
+      ?.abilities.find((ability) => ability.name === "Arc Rose") as Ability & {
+      statSources?: Record<string, string>;
+    };
+    expect(spycam?.source).toBe("sheet");
+    expect(spycam?.statSources).toEqual({
+      destroyedCooldownSec: "verified",
+      recallCooldownSec: "verified",
+    });
+    expect(arc?.source).toBe("sheet");
+    expect(arc?.statSources).toEqual({ destroyedCooldownSec: "verified" });
+  });
+
   it("keeps Hush aggregator raw values unconverted", () => {
     const hush = reference.agents.find((agent) => agent.name === "Hush");
     expect(hush?.live).toBe(true);
@@ -141,12 +161,14 @@ describe("agent-reference.json patch 13.10", () => {
     expect(rawValue(flow.baseSpeed)).toBe(2250);
     expect(rawValue(flow.traceLength)).toBe(1500);
     expect(rawValue(flow.forceDuration)).toBe(0.4);
+    expect((flow.forceDuration as { unit?: string }).unit).toBe("seconds");
     expect(rawValue(flow.fallGraceDistance)).toBe(1000);
     expect(rawValue(flow.maxUpwardsSpeed)).toBe(500);
     expect(flow.levitateDurationSec).toBeNull();
 
     const flash = byName.Flashbulb?.stats ?? {};
     expect(rawValue(flash.flashDuration)).toBe(0.4);
+    expect((flash.flashDuration as { unit?: string }).unit).toBe("unlabeled (probably seconds)");
     expect(rawValue(flash.maxTargetingDistance)).toBe(6500);
     expect(rawValue(flash.minTargetingDistance)).toBe(3250);
     expect(flash.equipDelaySec).toBe(0.8);

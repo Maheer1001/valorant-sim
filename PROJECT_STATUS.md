@@ -226,7 +226,7 @@ A live smoke or cage blocks the look a flash needs, and that block ends when the
 
 1. **Done.** Drill, catalog, live smoke, both-team draft, coverage, JSON scenario.
 2. **Done.** Interactive planning windows, fog-of-war view, defense hold stub, auto-engage, hp/death.
-3. **Next.** KAY/O FLASH/DRIVE, Jett Tailwind, and Cypher Trapwire. Ownership, charges, timing, and geometry. Keep every new number secondary or verified. Definitions already exist as placeholders.
+3. **Next.** Shared effect primitives before more abilities — see [`docs/effect-primitives.md`](docs/effect-primitives.md); then implement along that build order (FLASH/DRIVE, Tailwind, and Trapwire remain early consumers). Keep every new number secondary or verified. Definitions already exist as placeholders.
 4. Richer draft report: map fit, synergies, counter-composition, and which plans a composition can support. Suitability stays separate from any win claim.
 5. More complete kits and Sova recon. Each new ability flips its own status.
 6. Versioned weapons and armor. Replace Rifle A only where a primary source exists.

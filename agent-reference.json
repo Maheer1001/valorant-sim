@@ -3781,7 +3781,11 @@
             "recallCooldownSec": 20,
             "patch1310Note": "Destroyed cooldown 60s to 45s; reclaim cooldown 15s to 20s."
           },
-          "source": "verified"
+          "source": "sheet",
+          "statSources": {
+            "destroyedCooldownSec": "verified",
+            "recallCooldownSec": "verified"
+          }
         },
         {
           "slot": "X",
@@ -4516,7 +4520,10 @@
             "requiresSeen": true,
             "patch1310Note": "Destroyed cooldown 60s to 45s; recalled cooldown 20s unchanged."
           },
-          "source": "verified"
+          "source": "sheet",
+          "statSources": {
+            "destroyedCooldownSec": "verified"
+          }
         },
         {
           "slot": "X",
@@ -4629,7 +4636,7 @@
             },
             "forceDuration": {
               "value": 0.4,
-              "unit": "unlabeled game units"
+              "unit": "seconds"
             },
             "fallGraceDistance": {
               "value": 1000,
@@ -4661,7 +4668,7 @@
             "windupSec": 0.5,
             "flashDuration": {
               "value": 0.4,
-              "unit": "unlabeled game units"
+              "unit": "unlabeled (probably seconds)"
             },
             "maxTargetingDistance": {
               "value": 6500,
