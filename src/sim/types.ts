@@ -45,7 +45,13 @@ export type RejectionCode =
   | "unknown-map"
   | "ruleset-mismatch"
   | "catalog-mismatch"
-  | "invalid-order";
+  | "invalid-order"
+  | "wrong-side"
+  | "agent-down"
+  | "target-not-enemy"
+  | "target-not-visible"
+  | "missing-plan"
+  | "plan-already-submitted";
 
 export type StatusEffect = {
   id: string;

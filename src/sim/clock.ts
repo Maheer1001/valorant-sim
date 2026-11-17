@@ -25,6 +25,10 @@ export class EventQueue<T> {
     this.items.sort(compareQueueKeys);
   }
 
+  peek(): QueueItem<T> | undefined {
+    return this.items[0];
+  }
+
   pop(): QueueItem<T> | undefined {
     return this.items.shift();
   }

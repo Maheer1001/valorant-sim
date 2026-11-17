@@ -74,15 +74,23 @@ export type RunFailure = {
 
 export type RunResult = RunSuccess | RunFailure;
 
-type Job =
+export type Job =
   | { type: "move"; instanceId: string; to: Point; speedMmPerSec: number }
   | { type: "cast"; instanceId: string; abilityId: string; target: Point }
   | { type: "engage"; instanceId: string; targetInstanceId: string; weaponId: string }
-  | { type: "move-resolve"; instanceId: string; at: Point; blocked: boolean }
+  | { type: "auto-engage"; instanceId: string; weaponId: string }
+  | {
+      type: "move-resolve";
+      instanceId: string;
+      from: Point;
+      at: Point;
+      startMs: number;
+      blocked: boolean;
+    }
   | { type: "smoke-active"; smokeId: string }
   | { type: "smoke-expire"; smokeId: string };
 
-type ApplyResult = {
+export type ApplyResult = {
   world: World;
   event: SimEvent;
   followups: { atMs: number; agentId: string; job: Job }[];
@@ -185,7 +193,7 @@ function orderToJob(order: Order): Job {
   };
 }
 
-function applyJob(
+export function applyJob(
   job: Job,
   timeMs: number,
   sequence: number,
@@ -237,7 +245,14 @@ function applyJob(
         {
           atMs: timeMs + travelMs,
           agentId: agent.instanceId,
-          job: { type: "move-resolve", instanceId: agent.instanceId, at: clip.point, blocked: clip.blocked },
+          job: {
+            type: "move-resolve",
+            instanceId: agent.instanceId,
+            from,
+            at: clip.point,
+            startMs: timeMs,
+            blocked: clip.blocked,
+          },
         },
       ],
     };
@@ -380,6 +395,45 @@ function applyJob(
     };
   }
 
+  if (job.type === "auto-engage") {
+    const shooter = findAgent(next, job.instanceId);
+    if (!shooter) {
+      return {
+        world: next,
+        followups: [],
+        event: {
+          type: "order-rejected",
+          timeMs,
+          sequence,
+          agentId: job.instanceId,
+          orderType: "auto-engage",
+          code: "unknown-agent",
+        },
+      };
+    }
+    if (!shooter.alive) {
+      return withheld(next, timeMs, sequence, shooter.instanceId, shooter.instanceId, "shooter-down");
+    }
+    const target = nearestVisibleEnemy(next, walls, shooter, timeMs);
+    if (!target) {
+      return withheld(next, timeMs, sequence, shooter.instanceId, shooter.instanceId, "no-line-of-sight");
+    }
+    return applyJob(
+      {
+        type: "engage",
+        instanceId: shooter.instanceId,
+        targetInstanceId: target.instanceId,
+        weaponId: job.weaponId,
+      },
+      timeMs,
+      sequence,
+      next,
+      catalog,
+      walls,
+      combat,
+    );
+  }
+
   const shooter = findAgent(next, job.instanceId);
   const target = findAgent(next, job.targetInstanceId);
   if (!shooter || !target) {
@@ -447,6 +501,28 @@ function applyJob(
   };
 }
 
+function nearestVisibleEnemy(
+  world: World,
+  walls: readonly Segment[],
+  shooter: AgentBody,
+  timeMs: number,
+): AgentBody | null {
+  let best: AgentBody | null = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  const from = { xMm: shooter.xMm, yMm: shooter.yMm };
+  for (const other of world.agents) {
+    if (!other.alive || other.side === shooter.side) continue;
+    const to = { xMm: other.xMm, yMm: other.yMm };
+    if (!hasLineOfSight(from, to, walls, world.smokes, timeMs)) continue;
+    const distance = distanceMm(from, to);
+    if (distance < bestDistance) {
+      best = other;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
 function withheld(
   world: World,
   timeMs: number,
@@ -462,7 +538,7 @@ function withheld(
   };
 }
 
-function findAgent(world: World, instanceId: string): AgentBody | null {
+export function findAgent(world: World, instanceId: string): AgentBody | null {
   return world.agents.find((agent) => agent.instanceId === instanceId) ?? null;
 }
 
@@ -482,7 +558,7 @@ function toInstance(agent: AgentBody) {
   };
 }
 
-function createWorld(scenario: Scenario): World {
+export function createWorld(scenario: Scenario): World {
   const agents = [...scenario.attack.members, ...scenario.defense.members].map((member) => ({
     instanceId: member.instanceId,
     definitionId: member.definitionId,
@@ -494,4 +570,12 @@ function createWorld(scenario: Scenario): World {
     charges: { ...member.charges },
   }));
   return { timeMs: 0, agents, smokes: [] };
+}
+
+/** Linear interpolate integer mm positions. */
+export function lerpPoint(from: Point, to: Point, t: number): Point {
+  return {
+    xMm: Math.round(from.xMm + (to.xMm - from.xMm) * t),
+    yMm: Math.round(from.yMm + (to.yMm - from.yMm) * t),
+  };
 }

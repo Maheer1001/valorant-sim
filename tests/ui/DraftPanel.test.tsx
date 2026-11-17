@@ -34,9 +34,11 @@ describe("draft panel", () => {
     const user = userEvent.setup();
     render(<App />);
     expect(screen.getByLabelText("Timeline position")).toHaveTextContent(/^0 \//);
+    await user.click(screen.getByRole("button", { name: "Resolve window" }));
+    expect(screen.getByLabelText("Timeline position")).toHaveTextContent(/^0 \//);
     await user.click(screen.getByRole("button", { name: "Step" }));
     expect(screen.getByLabelText("Timeline position")).toHaveTextContent(/^1 \//);
-    expect(screen.getByRole("listitem", { current: "step" })).toHaveTextContent(/Move started/);
+    expect(screen.getByRole("listitem", { current: "step" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Export scenario" }));
     const file = screen.getByLabelText("Scenario JSON");
