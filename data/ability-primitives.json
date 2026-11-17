@@ -1,0 +1,2191 @@
+{
+  "version": 1,
+  "patch": "13.10",
+  "core": [
+    "resource.charges",
+    "resource.signatureRecharge",
+    "resource.ultPoints"
+  ],
+  "coreNote": "Charge pools, signature recharge rules, and ult points are engine-wide state, not per-ability primitives. They still appear in RoundState for every agent.",
+  "primitives": {
+    "status.concuss": "stun/accuracy debuff for a duration",
+    "status.nearsight": "vision radius clamp",
+    "status.deafen": "audio muffling",
+    "status.slow": "move-speed reduction / forced crouch",
+    "status.hinder": "unpublished multiplier family (Waylay)",
+    "status.vulnerable": "Fragile/Vulnerable damage amp",
+    "status.suppress": "blocks casts",
+    "status.decay": "temporary HP drain then restore",
+    "status.detain": "root/disable in place",
+    "status.levitate": "suspend in air",
+    "status.haste": "movement-speed buff",
+    "status.combatStim": "fire-rate / equip / reload / recovery buff",
+    "status.snapshot": "still-image silhouette reveal",
+    "status.overheal": "temporary HP above max",
+    "status.intangible": "untargetable / phase",
+    "status.tether": "trail/tether attach",
+    "vision.smoke": "LOS disk/volume with deploy + expiry",
+    "vision.wallOrVolume": "walls, cages, pits, audio walls, bullet-block volumes",
+    "damage.zoneOrHit": "instant hits and timed damage fields",
+    "projectile.generic": "thrown/fired payload with travel time",
+    "projectile.bouncing": "wall/floor bounces",
+    "projectile.steerable": "crosshair redirect after cast",
+    "projectile.homing": "seeks agents / trails",
+    "projectile.flash": "facing-dependent blind; blocked by smokes",
+    "movement.dash": "short burst translation",
+    "movement.teleport": "instant relocate / beacon return",
+    "movement.glide": "fall control / air hold",
+    "movement.pull": "attract toward a point",
+    "movement.knockback": "push / launch / knockup",
+    "device.summonOrPlaceable": "HP, arm, recall, destroy cooldown",
+    "trigger.zone": "arm + detect + trigger",
+    "support.heal": "ally/self heal over time",
+    "support.revive": "return from death / checkpoint",
+    "support.shield": "temporary absorb HP",
+    "placement.mapTargeted": "tactical-map / astral / global placement",
+    "info.reveal": "live or pulsed enemy reveal",
+    "info.audioOrMinimap": "sound cues / minimap obscure",
+    "interact.pickup": "pick up weapons/Spike and use switches from range",
+    "resource.passiveMeter": "fuel / battery / soul-orb / star economy (non-charge)"
+  },
+  "abilities": [
+    {
+      "key": "1:passive",
+      "agentId": 1,
+      "agent": "Astra",
+      "role": "controller",
+      "slot": "passive",
+      "ability": "Astral Form / Stars",
+      "kind": "passive",
+      "source": "sheet",
+      "primitives": [
+        "placement.mapTargeted",
+        "resource.passiveMeter"
+      ],
+      "extra": "",
+      "override": true
+    },
+    {
+      "key": "1:C",
+      "agentId": 1,
+      "agent": "Astra",
+      "role": "controller",
+      "slot": "C",
+      "ability": "Gravity Well",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "movement.pull",
+        "projectile.generic",
+        "status.vulnerable"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "1:Q",
+      "agentId": 1,
+      "agent": "Astra",
+      "role": "controller",
+      "slot": "Q",
+      "ability": "Nova Pulse",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "projectile.generic",
+        "status.concuss"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "1:E",
+      "agentId": 1,
+      "agent": "Astra",
+      "role": "controller",
+      "slot": "E",
+      "ability": "Nebula / Dissipate",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "placement.mapTargeted",
+        "resource.passiveMeter",
+        "vision.smoke"
+      ],
+      "extra": "",
+      "override": true
+    },
+    {
+      "key": "1:X",
+      "agentId": 1,
+      "agent": "Astra",
+      "role": "controller",
+      "slot": "X",
+      "ability": "Cosmic Divide",
+      "kind": "ultimate",
+      "source": "verified",
+      "primitives": [
+        "info.audioOrMinimap",
+        "placement.mapTargeted",
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "2:C",
+      "agentId": 2,
+      "agent": "Brimstone",
+      "role": "controller",
+      "slot": "C",
+      "ability": "Stim Beacon",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "status.combatStim",
+        "status.haste"
+      ],
+      "extra": "Haste + Combat Stim; indestructible beacon",
+      "override": true
+    },
+    {
+      "key": "2:Q",
+      "agentId": 2,
+      "agent": "Brimstone",
+      "role": "controller",
+      "slot": "Q",
+      "ability": "Incendiary",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.bouncing",
+        "projectile.generic"
+      ],
+      "extra": "thrown mollie; ally damage fraction unpublished",
+      "override": true
+    },
+    {
+      "key": "2:E",
+      "agentId": 2,
+      "agent": "Brimstone",
+      "role": "controller",
+      "slot": "E",
+      "ability": "Sky Smoke",
+      "kind": "signature",
+      "source": "secondary",
+      "primitives": [
+        "placement.mapTargeted",
+        "vision.smoke"
+      ],
+      "extra": "already executable in sim; cast via tactical map",
+      "override": true
+    },
+    {
+      "key": "2:X",
+      "agentId": 2,
+      "agent": "Brimstone",
+      "role": "controller",
+      "slot": "X",
+      "ability": "Orbital Strike",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "placement.mapTargeted",
+        "vision.wallOrVolume"
+      ],
+      "extra": "map-targeted strike; not a projectile; ally damage fraction unpublished",
+      "override": true
+    },
+    {
+      "key": "3:C",
+      "agentId": 3,
+      "agent": "Clove",
+      "role": "controller",
+      "slot": "C",
+      "ability": "Pick-me-up",
+      "kind": "basic",
+      "source": "secondary",
+      "primitives": [
+        "status.haste",
+        "status.overheal",
+        "support.heal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "3:Q",
+      "agentId": 3,
+      "agent": "Clove",
+      "role": "controller",
+      "slot": "Q",
+      "ability": "Meddle",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "projectile.generic",
+        "status.decay"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "3:E",
+      "agentId": 3,
+      "agent": "Clove",
+      "role": "controller",
+      "slot": "E",
+      "ability": "Ruse",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "placement.mapTargeted",
+        "vision.smoke"
+      ],
+      "extra": "castable while dead; map placement",
+      "override": true
+    },
+    {
+      "key": "3:X",
+      "agentId": 3,
+      "agent": "Clove",
+      "role": "controller",
+      "slot": "X",
+      "ability": "Not Dead Yet",
+      "kind": "ultimate",
+      "source": "secondary",
+      "primitives": [
+        "support.revive"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "4:C",
+      "agentId": 4,
+      "agent": "Harbor",
+      "role": "controller",
+      "slot": "C",
+      "ability": "Storm Surge",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "projectile.generic",
+        "status.nearsight",
+        "status.slow"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "4:Q",
+      "agentId": 4,
+      "agent": "Harbor",
+      "role": "controller",
+      "slot": "Q",
+      "ability": "High Tide",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "status.slow",
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "4:E",
+      "agentId": 4,
+      "agent": "Harbor",
+      "role": "controller",
+      "slot": "E",
+      "ability": "Cove",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "placement.mapTargeted",
+        "vision.smoke",
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": true
+    },
+    {
+      "key": "4:X",
+      "agentId": 4,
+      "agent": "Harbor",
+      "role": "controller",
+      "slot": "X",
+      "ability": "Reckoning",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "placement.mapTargeted",
+        "status.nearsight",
+        "status.slow"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "5:C",
+      "agentId": 5,
+      "agent": "Miks",
+      "role": "controller",
+      "slot": "C",
+      "ability": "M-pulse",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "projectile.generic",
+        "status.concuss",
+        "support.heal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "5:Q",
+      "agentId": 5,
+      "agent": "Miks",
+      "role": "controller",
+      "slot": "Q",
+      "ability": "Harmonize",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "status.combatStim",
+        "status.haste"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "5:E",
+      "agentId": 5,
+      "agent": "Miks",
+      "role": "controller",
+      "slot": "E",
+      "ability": "Waveform",
+      "kind": "signature",
+      "source": "estimate",
+      "primitives": [
+        "placement.mapTargeted",
+        "vision.smoke"
+      ],
+      "extra": "",
+      "override": true
+    },
+    {
+      "key": "5:X",
+      "agentId": 5,
+      "agent": "Miks",
+      "role": "controller",
+      "slot": "X",
+      "ability": "Bassquake",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "info.audioOrMinimap",
+        "movement.knockback",
+        "status.deafen",
+        "status.slow"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "6:C",
+      "agentId": 6,
+      "agent": "Omen",
+      "role": "controller",
+      "slot": "C",
+      "ability": "Shrouded Step",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "movement.teleport"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "6:Q",
+      "agentId": 6,
+      "agent": "Omen",
+      "role": "controller",
+      "slot": "Q",
+      "ability": "Paranoia",
+      "kind": "basic",
+      "source": "secondary",
+      "primitives": [
+        "info.audioOrMinimap",
+        "projectile.generic",
+        "status.deafen",
+        "status.nearsight"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "6:E",
+      "agentId": 6,
+      "agent": "Omen",
+      "role": "controller",
+      "slot": "E",
+      "ability": "Dark Cover",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "placement.mapTargeted",
+        "vision.smoke"
+      ],
+      "extra": "",
+      "override": true
+    },
+    {
+      "key": "6:X",
+      "agentId": 6,
+      "agent": "Omen",
+      "role": "controller",
+      "slot": "X",
+      "ability": "From the Shadows",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "movement.teleport",
+        "placement.mapTargeted"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "7:passive",
+      "agentId": 7,
+      "agent": "Viper",
+      "role": "controller",
+      "slot": "passive",
+      "ability": "Fuel and Toxin",
+      "kind": "passive",
+      "source": "verified",
+      "primitives": [
+        "resource.passiveMeter",
+        "status.decay"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "7:C",
+      "agentId": 7,
+      "agent": "Viper",
+      "role": "controller",
+      "slot": "C",
+      "ability": "Snake Bite",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.generic",
+        "status.vulnerable"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "7:Q",
+      "agentId": 7,
+      "agent": "Viper",
+      "role": "controller",
+      "slot": "Q",
+      "ability": "Poison Cloud",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "status.decay",
+        "vision.smoke"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "7:E",
+      "agentId": 7,
+      "agent": "Viper",
+      "role": "controller",
+      "slot": "E",
+      "ability": "Toxic Screen",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "status.decay",
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "7:X",
+      "agentId": 7,
+      "agent": "Viper",
+      "role": "controller",
+      "slot": "X",
+      "ability": "Viper's Pit",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "status.decay",
+        "status.nearsight",
+        "vision.smoke"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "8:C",
+      "agentId": 8,
+      "agent": "Iso",
+      "role": "duelist",
+      "slot": "C",
+      "ability": "Contingency",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "8:Q",
+      "agentId": 8,
+      "agent": "Iso",
+      "role": "duelist",
+      "slot": "Q",
+      "ability": "Undercut",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "projectile.generic",
+        "status.suppress",
+        "status.vulnerable"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "8:E",
+      "agentId": 8,
+      "agent": "Iso",
+      "role": "duelist",
+      "slot": "E",
+      "ability": "Double Tap",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "support.shield"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "8:X",
+      "agentId": 8,
+      "agent": "Iso",
+      "role": "duelist",
+      "slot": "X",
+      "ability": "Kill Contract",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "status.suppress"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "9:passive",
+      "agentId": 9,
+      "agent": "Jett",
+      "role": "duelist",
+      "slot": "passive",
+      "ability": "Drift",
+      "kind": "passive",
+      "source": "sheet",
+      "primitives": [
+        "movement.glide"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "9:C",
+      "agentId": 9,
+      "agent": "Jett",
+      "role": "duelist",
+      "slot": "C",
+      "ability": "Cloudburst",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "vision.smoke"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "9:Q",
+      "agentId": 9,
+      "agent": "Jett",
+      "role": "duelist",
+      "slot": "Q",
+      "ability": "Updraft",
+      "kind": "basic",
+      "source": "estimate",
+      "primitives": [
+        "movement.knockback"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "9:E",
+      "agentId": 9,
+      "agent": "Jett",
+      "role": "duelist",
+      "slot": "E",
+      "ability": "Tailwind",
+      "kind": "signature",
+      "source": "verified",
+      "primitives": [
+        "movement.dash"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "9:X",
+      "agentId": 9,
+      "agent": "Jett",
+      "role": "duelist",
+      "slot": "X",
+      "ability": "Blade Storm",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "10:passive",
+      "agentId": 10,
+      "agent": "Neon",
+      "role": "duelist",
+      "slot": "passive",
+      "ability": "Energy",
+      "kind": "passive",
+      "source": "sheet",
+      "primitives": [
+        "resource.passiveMeter"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "10:C",
+      "agentId": 10,
+      "agent": "Neon",
+      "role": "duelist",
+      "slot": "C",
+      "ability": "Fast Lane",
+      "kind": "basic",
+      "source": "secondary",
+      "primitives": [
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "10:Q",
+      "agentId": 10,
+      "agent": "Neon",
+      "role": "duelist",
+      "slot": "Q",
+      "ability": "Relay Bolt",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "projectile.generic",
+        "status.concuss"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "10:E",
+      "agentId": 10,
+      "agent": "Neon",
+      "role": "duelist",
+      "slot": "E",
+      "ability": "High Gear",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "movement.dash",
+        "status.haste"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "10:X",
+      "agentId": 10,
+      "agent": "Neon",
+      "role": "duelist",
+      "slot": "X",
+      "ability": "Overdrive",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "11:passive",
+      "agentId": 11,
+      "agent": "Phoenix",
+      "role": "duelist",
+      "slot": "passive",
+      "ability": "Heating Up",
+      "kind": "passive",
+      "source": "sheet",
+      "primitives": [
+        "support.heal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "11:C",
+      "agentId": 11,
+      "agent": "Phoenix",
+      "role": "duelist",
+      "slot": "C",
+      "ability": "Blaze",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "support.heal",
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "11:Q",
+      "agentId": 11,
+      "agent": "Phoenix",
+      "role": "duelist",
+      "slot": "Q",
+      "ability": "Hot Hands",
+      "kind": "basic",
+      "source": "estimate",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.generic",
+        "support.heal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "11:E",
+      "agentId": 11,
+      "agent": "Phoenix",
+      "role": "duelist",
+      "slot": "E",
+      "ability": "Curveball",
+      "kind": "signature",
+      "source": "secondary",
+      "primitives": [
+        "projectile.flash",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "11:X",
+      "agentId": 11,
+      "agent": "Phoenix",
+      "role": "duelist",
+      "slot": "X",
+      "ability": "Run it Back",
+      "kind": "ultimate",
+      "source": "verified",
+      "primitives": [
+        "support.revive"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "12:C",
+      "agentId": 12,
+      "agent": "Raze",
+      "role": "duelist",
+      "slot": "C",
+      "ability": "Boom Bot",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "projectile.generic",
+        "projectile.homing"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "12:Q",
+      "agentId": 12,
+      "agent": "Raze",
+      "role": "duelist",
+      "slot": "Q",
+      "ability": "Blast Pack",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "movement.knockback",
+        "projectile.bouncing",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "12:E",
+      "agentId": 12,
+      "agent": "Raze",
+      "role": "duelist",
+      "slot": "E",
+      "ability": "Paint Shells",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.bouncing",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "12:X",
+      "agentId": 12,
+      "agent": "Raze",
+      "role": "duelist",
+      "slot": "X",
+      "ability": "Showstopper",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "movement.knockback"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "13:passive",
+      "agentId": 13,
+      "agent": "Reyna",
+      "role": "duelist",
+      "slot": "passive",
+      "ability": "Soul Harvest",
+      "kind": "passive",
+      "source": "sheet",
+      "primitives": [
+        "resource.passiveMeter"
+      ],
+      "extra": "soul orb economy; not map placement",
+      "override": true
+    },
+    {
+      "key": "13:C",
+      "agentId": 13,
+      "agent": "Reyna",
+      "role": "duelist",
+      "slot": "C",
+      "ability": "Leer",
+      "kind": "basic",
+      "source": "secondary",
+      "primitives": [
+        "projectile.generic",
+        "status.nearsight"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "13:Q",
+      "agentId": 13,
+      "agent": "Reyna",
+      "role": "duelist",
+      "slot": "Q",
+      "ability": "Devour",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "support.heal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "13:E",
+      "agentId": 13,
+      "agent": "Reyna",
+      "role": "duelist",
+      "slot": "E",
+      "ability": "Dismiss",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "status.intangible"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "13:X",
+      "agentId": 13,
+      "agent": "Reyna",
+      "role": "duelist",
+      "slot": "X",
+      "ability": "Empress",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "info.reveal",
+        "status.combatStim"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "14:C",
+      "agentId": 14,
+      "agent": "Waylay",
+      "role": "duelist",
+      "slot": "C",
+      "ability": "Saturate",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "projectile.generic",
+        "status.hinder"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "14:Q",
+      "agentId": 14,
+      "agent": "Waylay",
+      "role": "duelist",
+      "slot": "Q",
+      "ability": "Lightspeed",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "movement.dash"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "14:E",
+      "agentId": 14,
+      "agent": "Waylay",
+      "role": "duelist",
+      "slot": "E",
+      "ability": "Refract",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "movement.teleport",
+        "status.intangible",
+        "status.nearsight"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "14:X",
+      "agentId": 14,
+      "agent": "Waylay",
+      "role": "duelist",
+      "slot": "X",
+      "ability": "Convergent Paths",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "status.haste",
+        "status.hinder"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "15:C",
+      "agentId": 15,
+      "agent": "Yoru",
+      "role": "duelist",
+      "slot": "C",
+      "ability": "Fakeout",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "projectile.flash",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "15:Q",
+      "agentId": 15,
+      "agent": "Yoru",
+      "role": "duelist",
+      "slot": "Q",
+      "ability": "Blindside",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "projectile.flash",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "15:E",
+      "agentId": 15,
+      "agent": "Yoru",
+      "role": "duelist",
+      "slot": "E",
+      "ability": "Gatecrash",
+      "kind": "signature",
+      "source": "secondary",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "movement.teleport",
+        "projectile.generic",
+        "projectile.steerable"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "15:X",
+      "agentId": 15,
+      "agent": "Yoru",
+      "role": "duelist",
+      "slot": "X",
+      "ability": "Dimensional Drift",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "movement.glide",
+        "status.intangible"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "16:C",
+      "agentId": 16,
+      "agent": "Breach",
+      "role": "initiator",
+      "slot": "C",
+      "ability": "Aftershock",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "16:Q",
+      "agentId": 16,
+      "agent": "Breach",
+      "role": "initiator",
+      "slot": "Q",
+      "ability": "Flashpoint",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "projectile.flash",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "16:E",
+      "agentId": 16,
+      "agent": "Breach",
+      "role": "initiator",
+      "slot": "E",
+      "ability": "Fault Line",
+      "kind": "signature",
+      "source": "verified",
+      "primitives": [
+        "projectile.generic",
+        "status.concuss"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "16:X",
+      "agentId": 16,
+      "agent": "Breach",
+      "role": "initiator",
+      "slot": "X",
+      "ability": "Rolling Thunder",
+      "kind": "ultimate",
+      "source": "verified",
+      "primitives": [
+        "movement.knockback",
+        "projectile.generic",
+        "status.concuss"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "17:passive",
+      "agentId": 17,
+      "agent": "Fade",
+      "role": "initiator",
+      "slot": "passive",
+      "ability": "Terror Trail",
+      "kind": "passive",
+      "source": "sheet",
+      "primitives": [
+        "info.reveal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "17:C",
+      "agentId": 17,
+      "agent": "Fade",
+      "role": "initiator",
+      "slot": "C",
+      "ability": "Prowler",
+      "kind": "basic",
+      "source": "secondary",
+      "primitives": [
+        "info.reveal",
+        "projectile.generic",
+        "projectile.homing",
+        "status.nearsight"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "17:Q",
+      "agentId": 17,
+      "agent": "Fade",
+      "role": "initiator",
+      "slot": "Q",
+      "ability": "Seize",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "info.audioOrMinimap",
+        "movement.pull",
+        "projectile.generic",
+        "status.deafen",
+        "status.decay",
+        "status.tether",
+        "trigger.zone"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "17:E",
+      "agentId": 17,
+      "agent": "Fade",
+      "role": "initiator",
+      "slot": "E",
+      "ability": "Haunt",
+      "kind": "signature",
+      "source": "verified",
+      "primitives": [
+        "info.reveal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "17:X",
+      "agentId": 17,
+      "agent": "Fade",
+      "role": "initiator",
+      "slot": "X",
+      "ability": "Nightfall",
+      "kind": "ultimate",
+      "source": "verified",
+      "primitives": [
+        "info.audioOrMinimap",
+        "status.deafen",
+        "status.decay",
+        "status.tether"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "18:passive",
+      "agentId": 18,
+      "agent": "Gekko",
+      "role": "initiator",
+      "slot": "passive",
+      "ability": "Globules",
+      "kind": "passive",
+      "source": "verified",
+      "primitives": [
+        "resource.passiveMeter"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "18:C",
+      "agentId": 18,
+      "agent": "Gekko",
+      "role": "initiator",
+      "slot": "C",
+      "ability": "Mosh Pit",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "18:Q",
+      "agentId": 18,
+      "agent": "Gekko",
+      "role": "initiator",
+      "slot": "Q",
+      "ability": "Wingman",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "projectile.generic",
+        "projectile.homing",
+        "status.concuss"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "18:E",
+      "agentId": 18,
+      "agent": "Gekko",
+      "role": "initiator",
+      "slot": "E",
+      "ability": "Dizzy",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "projectile.flash",
+        "projectile.generic",
+        "projectile.homing"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "18:X",
+      "agentId": 18,
+      "agent": "Gekko",
+      "role": "initiator",
+      "slot": "X",
+      "ability": "Thrash",
+      "kind": "ultimate",
+      "source": "verified",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "projectile.homing",
+        "status.detain"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "19:C",
+      "agentId": 19,
+      "agent": "KAY/O",
+      "role": "initiator",
+      "slot": "C",
+      "ability": "FRAG/ment",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "19:Q",
+      "agentId": 19,
+      "agent": "KAY/O",
+      "role": "initiator",
+      "slot": "Q",
+      "ability": "FLASH/drive",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "projectile.flash",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "19:E",
+      "agentId": 19,
+      "agent": "KAY/O",
+      "role": "initiator",
+      "slot": "E",
+      "ability": "ZERO/point",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "info.reveal",
+        "projectile.generic",
+        "status.suppress"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "19:X",
+      "agentId": 19,
+      "agent": "KAY/O",
+      "role": "initiator",
+      "slot": "X",
+      "ability": "NULL/cmd",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "status.combatStim",
+        "status.suppress"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "20:C",
+      "agentId": 20,
+      "agent": "Skye",
+      "role": "initiator",
+      "slot": "C",
+      "ability": "Regrowth",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "support.heal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "20:Q",
+      "agentId": 20,
+      "agent": "Skye",
+      "role": "initiator",
+      "slot": "Q",
+      "ability": "Trailblazer",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.generic",
+        "projectile.homing",
+        "status.concuss",
+        "support.heal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "20:E",
+      "agentId": 20,
+      "agent": "Skye",
+      "role": "initiator",
+      "slot": "E",
+      "ability": "Guiding Light",
+      "kind": "signature",
+      "source": "verified",
+      "primitives": [
+        "projectile.flash",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "20:X",
+      "agentId": 20,
+      "agent": "Skye",
+      "role": "initiator",
+      "slot": "X",
+      "ability": "Seekers",
+      "kind": "ultimate",
+      "source": "secondary",
+      "primitives": [
+        "info.reveal",
+        "projectile.homing",
+        "status.nearsight",
+        "status.slow"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "21:C",
+      "agentId": 21,
+      "agent": "Sova",
+      "role": "initiator",
+      "slot": "C",
+      "ability": "Owl Drone",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "info.reveal",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "21:Q",
+      "agentId": 21,
+      "agent": "Sova",
+      "role": "initiator",
+      "slot": "Q",
+      "ability": "Shock Bolt",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.bouncing",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "21:E",
+      "agentId": 21,
+      "agent": "Sova",
+      "role": "initiator",
+      "slot": "E",
+      "ability": "Recon Bolt",
+      "kind": "signature",
+      "source": "verified",
+      "primitives": [
+        "info.reveal",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "21:X",
+      "agentId": 21,
+      "agent": "Sova",
+      "role": "initiator",
+      "slot": "X",
+      "ability": "Hunter's Fury",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "info.reveal",
+        "placement.mapTargeted"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "22:C",
+      "agentId": 22,
+      "agent": "Tejo",
+      "role": "initiator",
+      "slot": "C",
+      "ability": "Stealth Drone",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "info.reveal",
+        "projectile.generic",
+        "status.suppress"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "22:Q",
+      "agentId": 22,
+      "agent": "Tejo",
+      "role": "initiator",
+      "slot": "Q",
+      "ability": "Special Delivery",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.bouncing",
+        "projectile.generic",
+        "status.concuss"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "22:E",
+      "agentId": 22,
+      "agent": "Tejo",
+      "role": "initiator",
+      "slot": "E",
+      "ability": "Guided Salvo",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "placement.mapTargeted"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "22:X",
+      "agentId": 22,
+      "agent": "Tejo",
+      "role": "initiator",
+      "slot": "X",
+      "ability": "Armageddon",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "placement.mapTargeted"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "23:C",
+      "agentId": 23,
+      "agent": "Chamber",
+      "role": "sentinel",
+      "slot": "C",
+      "ability": "Trademark",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "status.slow",
+        "trigger.zone"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "23:Q",
+      "agentId": 23,
+      "agent": "Chamber",
+      "role": "sentinel",
+      "slot": "Q",
+      "ability": "Headhunter",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "info.reveal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "23:E",
+      "agentId": 23,
+      "agent": "Chamber",
+      "role": "sentinel",
+      "slot": "E",
+      "ability": "Rendezvous",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "movement.teleport"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "23:X",
+      "agentId": 23,
+      "agent": "Chamber",
+      "role": "sentinel",
+      "slot": "X",
+      "ability": "Tour De Force",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "status.slow"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "24:C",
+      "agentId": 24,
+      "agent": "Cypher",
+      "role": "sentinel",
+      "slot": "C",
+      "ability": "Trapwire",
+      "kind": "basic",
+      "source": "secondary",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "info.reveal",
+        "status.slow",
+        "status.snapshot",
+        "trigger.zone"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "24:Q",
+      "agentId": 24,
+      "agent": "Cypher",
+      "role": "sentinel",
+      "slot": "Q",
+      "ability": "Cyber Cage",
+      "kind": "basic",
+      "source": "secondary",
+      "primitives": [
+        "info.audioOrMinimap",
+        "vision.smoke"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "24:E",
+      "agentId": 24,
+      "agent": "Cypher",
+      "role": "sentinel",
+      "slot": "E",
+      "ability": "Spycam",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "info.reveal",
+        "status.snapshot"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "24:X",
+      "agentId": 24,
+      "agent": "Cypher",
+      "role": "sentinel",
+      "slot": "X",
+      "ability": "Neural Theft",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "info.reveal",
+        "status.snapshot"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "25:C",
+      "agentId": 25,
+      "agent": "Deadlock",
+      "role": "sentinel",
+      "slot": "C",
+      "ability": "Barrier Mesh",
+      "kind": "basic",
+      "source": "secondary",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "25:Q",
+      "agentId": 25,
+      "agent": "Deadlock",
+      "role": "sentinel",
+      "slot": "Q",
+      "ability": "Sonic Sensor",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "status.concuss",
+        "trigger.zone"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "25:E",
+      "agentId": 25,
+      "agent": "Deadlock",
+      "role": "sentinel",
+      "slot": "E",
+      "ability": "GravNet",
+      "kind": "signature",
+      "source": "verified",
+      "primitives": [
+        "status.slow"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "25:X",
+      "agentId": 25,
+      "agent": "Deadlock",
+      "role": "sentinel",
+      "slot": "X",
+      "ability": "Annihilation",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "26:passive",
+      "agentId": 26,
+      "agent": "Killjoy",
+      "role": "sentinel",
+      "slot": "passive",
+      "ability": "Out of range",
+      "kind": "passive",
+      "source": "verified",
+      "primitives": [
+        "device.summonOrPlaceable"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "26:C",
+      "agentId": 26,
+      "agent": "Killjoy",
+      "role": "sentinel",
+      "slot": "C",
+      "ability": "Nanoswarm",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "projectile.generic"
+      ],
+      "extra": "thrown placeable swarm",
+      "override": true
+    },
+    {
+      "key": "26:Q",
+      "agentId": 26,
+      "agent": "Killjoy",
+      "role": "sentinel",
+      "slot": "Q",
+      "ability": "Alarmbot",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "status.vulnerable",
+        "trigger.zone"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "26:E",
+      "agentId": 26,
+      "agent": "Killjoy",
+      "role": "sentinel",
+      "slot": "E",
+      "ability": "Turret",
+      "kind": "signature",
+      "source": "verified",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "status.slow"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "26:X",
+      "agentId": 26,
+      "agent": "Killjoy",
+      "role": "sentinel",
+      "slot": "X",
+      "ability": "Lockdown",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "status.detain"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "27:C",
+      "agentId": 27,
+      "agent": "Sage",
+      "role": "sentinel",
+      "slot": "C",
+      "ability": "Barrier Orb",
+      "kind": "basic",
+      "source": "verified",
+      "primitives": [
+        "vision.wallOrVolume"
+      ],
+      "extra": "world-placed wall; not tactical-map targeted",
+      "override": true
+    },
+    {
+      "key": "27:Q",
+      "agentId": 27,
+      "agent": "Sage",
+      "role": "sentinel",
+      "slot": "Q",
+      "ability": "Slow Orb",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "projectile.generic",
+        "status.slow"
+      ],
+      "extra": "thrown slow field",
+      "override": true
+    },
+    {
+      "key": "27:E",
+      "agentId": 27,
+      "agent": "Sage",
+      "role": "sentinel",
+      "slot": "E",
+      "ability": "Healing Orb",
+      "kind": "signature",
+      "source": "verified",
+      "primitives": [
+        "support.heal"
+      ],
+      "extra": "ally/self heal; not map-targeted",
+      "override": true
+    },
+    {
+      "key": "27:X",
+      "agentId": 27,
+      "agent": "Sage",
+      "role": "sentinel",
+      "slot": "X",
+      "ability": "Resurrection",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "support.revive"
+      ],
+      "extra": "",
+      "override": true
+    },
+    {
+      "key": "28:C",
+      "agentId": 28,
+      "agent": "Veto",
+      "role": "sentinel",
+      "slot": "C",
+      "ability": "Crosscut",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "movement.teleport"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "28:Q",
+      "agentId": 28,
+      "agent": "Veto",
+      "role": "sentinel",
+      "slot": "Q",
+      "ability": "Chokehold",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "info.audioOrMinimap",
+        "status.deafen",
+        "status.decay",
+        "status.tether",
+        "trigger.zone"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "28:E",
+      "agentId": 28,
+      "agent": "Veto",
+      "role": "sentinel",
+      "slot": "E",
+      "ability": "Interceptor",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "28:X",
+      "agentId": 28,
+      "agent": "Veto",
+      "role": "sentinel",
+      "slot": "X",
+      "ability": "Evolution",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "status.combatStim",
+        "support.heal"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "29:C",
+      "agentId": 29,
+      "agent": "Vyse",
+      "role": "sentinel",
+      "slot": "C",
+      "ability": "Razorvine",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "status.slow",
+        "trigger.zone"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "29:Q",
+      "agentId": 29,
+      "agent": "Vyse",
+      "role": "sentinel",
+      "slot": "Q",
+      "ability": "Shear",
+      "kind": "basic",
+      "source": "sheet",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "trigger.zone",
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "29:E",
+      "agentId": 29,
+      "agent": "Vyse",
+      "role": "sentinel",
+      "slot": "E",
+      "ability": "Arc Rose",
+      "kind": "signature",
+      "source": "sheet",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "projectile.flash",
+        "projectile.generic"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "29:X",
+      "agentId": 29,
+      "agent": "Vyse",
+      "role": "sentinel",
+      "slot": "X",
+      "ability": "Steel Garden",
+      "kind": "ultimate",
+      "source": "sheet",
+      "primitives": [
+        "vision.wallOrVolume"
+      ],
+      "extra": "",
+      "override": false
+    },
+    {
+      "key": "30:passive",
+      "agentId": 30,
+      "agent": "Hush",
+      "role": "duelist",
+      "slot": "passive",
+      "ability": "Telekinesis",
+      "kind": "passive",
+      "source": "secondary",
+      "primitives": [
+        "interact.pickup"
+      ],
+      "extra": "Hush secondary/aggregator; range null",
+      "override": true
+    },
+    {
+      "key": "30:C",
+      "agentId": 30,
+      "agent": "Hush",
+      "role": "duelist",
+      "slot": "C",
+      "ability": "Flow",
+      "kind": "basic",
+      "source": "aggregator",
+      "primitives": [
+        "movement.dash",
+        "movement.glide",
+        "status.levitate"
+      ],
+      "extra": "Hush: secondary/aggregator data only; Hush secondary/aggregator",
+      "override": false
+    },
+    {
+      "key": "30:Q",
+      "agentId": 30,
+      "agent": "Hush",
+      "role": "duelist",
+      "slot": "Q",
+      "ability": "Flashbulb",
+      "kind": "basic",
+      "source": "aggregator",
+      "primitives": [
+        "projectile.flash",
+        "projectile.generic",
+        "projectile.steerable"
+      ],
+      "extra": "Hush: secondary/aggregator data only; Hush secondary/aggregator",
+      "override": false
+    },
+    {
+      "key": "30:E",
+      "agentId": 30,
+      "agent": "Hush",
+      "role": "duelist",
+      "slot": "E",
+      "ability": "Displacement",
+      "kind": "signature",
+      "source": "aggregator",
+      "primitives": [
+        "movement.pull",
+        "projectile.generic",
+        "projectile.steerable",
+        "status.concuss"
+      ],
+      "extra": "Hush: secondary/aggregator data only; Hush secondary/aggregator; concuss 1.5 vs global 2.5",
+      "override": false
+    },
+    {
+      "key": "30:X",
+      "agentId": 30,
+      "agent": "Hush",
+      "role": "duelist",
+      "slot": "X",
+      "ability": "Suspension",
+      "kind": "ultimate",
+      "source": "aggregator",
+      "primitives": [
+        "projectile.generic",
+        "projectile.steerable",
+        "status.levitate"
+      ],
+      "extra": "Hush: secondary/aggregator data only; Hush secondary/aggregator; levitate duration null",
+      "override": false
+    }
+  ],
+  "auditFixes": [
+    "Sage Barrier Orb / Slow Orb / Healing Orb: removed placement.mapTargeted",
+    "Reyna Soul Harvest: removed placement.mapTargeted; uses resource.passiveMeter",
+    "Map smokes (Sky Smoke, Ruse, Cove, Waveform, Dark Cover, Nebula/Dissipate): added placement.mapTargeted",
+    "Brimstone Incendiary: added projectile.generic + projectile.bouncing",
+    "Killjoy Nanoswarm: added projectile.generic",
+    "Brimstone Orbital Strike: removed projectile.generic; kept placement.mapTargeted",
+    "Hush Telekinesis: removed device.summonOrPlaceable; added interact.pickup",
+    "resource.charges / signatureRecharge / ultPoints moved to core (not per-ability)"
+  ]
+}

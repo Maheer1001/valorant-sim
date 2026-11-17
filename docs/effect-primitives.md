@@ -2,449 +2,482 @@
 
 Tag: **design**. This document plans shared engine primitives so every live agent in `agent-reference.json` (patch 13.10, 30 agents, 130 abilities including passives) can become fully executable. It invents no ability numbers. Game figures stay tagged with their existing sources (`verified` / `secondary` / `sheet` / `estimate` / `aggregator`).
 
-The sim today only executes **Sky Smoke** (vision.smoke + resource.charges + placement.mapTargeted). Everything else below is a build plan.
+Sections 1, 3, and 4 are generated from `data/ability-primitives.json` and `data/primitive-stages.json` via `tools/regenerate-effect-primitives-doc.mjs`. Rebuild with `node tools/build-ability-primitives.mjs` then this script.
+
+**Core engine state** (not per-ability primitives): resource.charges, resource.signatureRecharge, resource.ultPoints.
+
+The sim today only executes **Sky Smoke** as a special case. Under the corrected mapping it also needs `placement.mapTargeted`.
 
 ## 1. Ability → primitives table
 
 | Agent | Slot | Ability | Source | Primitives | Extra rules |
 | --- | --- | --- | --- | --- | --- |
-| Astra | passive | Astral Form / Stars | sheet | placement.mapTargeted, resource.charges | star buy; astral form placement |
-| Astra | C | Gravity Well | verified | movement.pull, projectile.generic, resource.charges, status.vulnerable | Fragile = Vulnerable synonym |
-| Astra | Q | Nova Pulse | verified | projectile.generic, resource.charges, status.concuss | standard 2.5s concuss |
-| Astra | E | Nebula / Dissipate | sheet | resource.charges, resource.signatureRecharge, vision.smoke | star economy; Dissipate recall |
-| Astra | X | Cosmic Divide | verified | info.audioOrMinimap, resource.charges, resource.ultPoints, vision.wallOrVolume | audio/vision wall across map |
-| Brimstone | C | Stim Beacon | verified | device.summonOrPlaceable, resource.charges, status.combatStim, status.haste | Haste + Combat Stim |
-| Brimstone | Q | Incendiary | sheet | damage.zoneOrHit, resource.charges | ally damage reduced (fraction unpublished) |
-| Brimstone | E | Sky Smoke | secondary | resource.charges, resource.signatureRecharge, vision.smoke | already executable in sim |
-| Brimstone | X | Orbital Strike | sheet | damage.zoneOrHit, placement.mapTargeted, projectile.generic, resource.charges, resource.ultPoints, vision.wallOrVolume | ally damage reduced (fraction unpublished) |
-| Clove | C | Pick-me-up | secondary | resource.charges, status.haste, status.overheal, support.heal | Haste 10% (secondary 13.09) |
-| Clove | Q | Meddle | sheet | projectile.generic, resource.charges, status.decay | decay then restore |
-| Clove | E | Ruse | sheet | resource.charges, resource.signatureRecharge, vision.smoke | castable while dead |
-| Clove | X | Not Dead Yet | secondary | resource.charges, resource.ultPoints, support.revive | killer reward note (secondary) |
-| Harbor | C | Storm Surge | sheet | resource.charges, status.nearsight, status.slow | nearsight+slow projectile |
-| Harbor | Q | High Tide | sheet | resource.charges, status.slow, vision.wallOrVolume | moving wall |
-| Harbor | E | Cove | sheet | resource.charges, resource.signatureRecharge, vision.smoke, vision.wallOrVolume | bullet-blocking smoke |
-| Harbor | X | Reckoning | sheet | resource.charges, resource.ultPoints, status.nearsight, status.slow | nearsight+slow cove pulses |
-| Miks | C | M-pulse | sheet | resource.charges, status.concuss, support.heal | concuss pulses + heal |
-| Miks | Q | Harmonize | sheet | resource.charges, status.combatStim, status.haste, trigger.zone | Combat Stim + Haste |
-| Miks | E | Waveform | estimate | resource.charges, resource.signatureRecharge, vision.smoke | smoke (estimate figures) |
-| Miks | X | Bassquake | sheet | info.audioOrMinimap, movement.knockback, resource.charges, resource.ultPoints, status.deafen, status.slow | knockback + Deafen + Slow |
-| Omen | C | Shrouded Step | sheet | movement.teleport, resource.charges | short TP |
-| Omen | Q | Paranoia | secondary | info.audioOrMinimap, projectile.generic, resource.charges, status.deafen, status.nearsight | Nearsight + Deafen projectile |
-| Omen | E | Dark Cover | sheet | resource.charges, resource.signatureRecharge, vision.smoke | one-way / bounce cast options |
-| Omen | X | From the Shadows | sheet | movement.teleport, placement.mapTargeted, resource.charges, resource.ultPoints | global TP with cancel/vulnerable window |
-| Viper | passive | Fuel and Toxin | verified | resource.charges, status.decay | passive fuel + toxin |
-| Viper | C | Snake Bite | sheet | damage.zoneOrHit, resource.charges, status.vulnerable | fuel-gated mollie |
-| Viper | Q | Poison Cloud | sheet | resource.charges, status.decay, vision.smoke | fuel-gated smoke |
-| Viper | E | Toxic Screen | sheet | resource.charges, resource.signatureRecharge, status.decay, vision.wallOrVolume | fuel-gated wall |
-| Viper | X | Viper's Pit | sheet | resource.charges, resource.ultPoints, status.decay, status.nearsight, vision.smoke | nearsight+decay smoke zone |
-| Iso | C | Contingency | sheet | resource.charges, vision.wallOrVolume | invulnerable wall segment |
-| Iso | Q | Undercut | sheet | projectile.generic, resource.charges, status.suppress, status.vulnerable | Vulnerable+Suppress through walls |
-| Iso | E | Double Tap | sheet | resource.charges, resource.signatureRecharge, support.shield | focus shield on kill/assist |
-| Iso | X | Kill Contract | sheet | resource.charges, resource.ultPoints, status.suppress | 1v1 arena |
-| Jett | passive | Drift | sheet | movement.glide, resource.charges | hold to slow fall |
-| Jett | C | Cloudburst | verified | resource.charges, vision.smoke | smoke; sim catalog still placeholder |
-| Jett | Q | Updraft | estimate | movement.knockback, resource.charges | vertical launch; height model needed |
-| Jett | E | Tailwind | verified | movement.dash, resource.charges, resource.signatureRecharge | 2-kill signature recharge |
-| Jett | X | Blade Storm | sheet | damage.zoneOrHit, resource.charges, resource.ultPoints | knife charges; kill refresh |
-| Neon | passive | Energy | sheet | resource.charges | sprint battery resource |
-| Neon | C | Fast Lane | secondary | resource.charges, vision.wallOrVolume | vision-block walls |
-| Neon | Q | Relay Bolt | verified | projectile.generic, resource.charges, status.concuss |  |
-| Neon | E | High Gear | sheet | movement.dash, resource.charges, resource.signatureRecharge, status.combatStim, status.haste | battery sprint resource |
-| Neon | X | Overdrive | sheet | damage.zoneOrHit, resource.charges, resource.ultPoints, status.combatStim | hitscan beam / battery |
-| Phoenix | passive | Heating Up | sheet | resource.charges, support.heal | self-heal from own fire |
-| Phoenix | C | Blaze | sheet | damage.zoneOrHit, resource.charges, support.heal, vision.wallOrVolume | wall+damage+self heal |
-| Phoenix | Q | Hot Hands | estimate | damage.zoneOrHit, resource.charges, support.heal |  |
-| Phoenix | E | Curveball | secondary | projectile.flash, projectile.generic, resource.charges, resource.signatureRecharge | 2-kill signature recharge |
-| Phoenix | X | Run it Back | verified | resource.charges, resource.ultPoints, support.revive | checkpoint revive |
-| Raze | C | Boom Bot | sheet | damage.zoneOrHit, device.summonOrPlaceable, projectile.generic, resource.charges |  |
-| Raze | Q | Blast Pack | sheet | damage.zoneOrHit, movement.knockback, projectile.bouncing, projectile.generic, resource.charges |  |
-| Raze | E | Paint Shells | sheet | damage.zoneOrHit, projectile.bouncing, projectile.generic, resource.charges, resource.signatureRecharge | 2-kill signature recharge |
-| Raze | X | Showstopper | sheet | damage.zoneOrHit, movement.knockback, resource.charges, resource.ultPoints |  |
-| Reyna | passive | Soul Harvest | sheet | placement.mapTargeted, resource.charges | soul orb economy |
-| Reyna | C | Leer | secondary | resource.charges, status.nearsight |  |
-| Reyna | Q | Devour | sheet | resource.charges, resource.signatureRecharge, support.heal |  |
-| Reyna | E | Dismiss | sheet | resource.charges, resource.signatureRecharge, status.intangible |  |
-| Reyna | X | Empress | sheet | info.reveal, resource.charges, resource.ultPoints, status.combatStim |  |
-| Waylay | C | Saturate | sheet | projectile.generic, resource.charges, status.hinder | Hinder multipliers unpublished |
-| Waylay | Q | Lightspeed | sheet | movement.dash, resource.charges | multi-segment dash charges |
-| Waylay | E | Refract | sheet | movement.teleport, resource.charges, resource.signatureRecharge, status.intangible, status.nearsight | beacon return; nearsight at beacon |
-| Waylay | X | Convergent Paths | sheet | resource.charges, resource.ultPoints, status.haste, status.hinder | Haste rename; Hinder |
-| Yoru | C | Fakeout | sheet | device.summonOrPlaceable, projectile.flash, projectile.generic, resource.charges | footstep decoy then flash |
-| Yoru | Q | Blindside | sheet | projectile.flash, projectile.generic, resource.charges |  |
-| Yoru | E | Gatecrash | secondary | device.summonOrPlaceable, movement.teleport, projectile.generic, projectile.steerable, resource.charges, resource.signatureRecharge | beacon TP; 2-kill recharge |
-| Yoru | X | Dimensional Drift | sheet | resource.charges, resource.ultPoints, status.intangible | out-of-world travel |
-| Breach | C | Aftershock | verified | damage.zoneOrHit, projectile.generic, resource.charges |  |
-| Breach | Q | Flashpoint | verified | projectile.flash, projectile.generic, resource.charges |  |
-| Breach | E | Fault Line | verified | projectile.generic, resource.charges, resource.signatureRecharge, status.concuss |  |
-| Breach | X | Rolling Thunder | verified | movement.knockback, projectile.generic, resource.charges, resource.ultPoints, status.concuss |  |
-| Fade | passive | Terror Trail | sheet | info.reveal, resource.charges |  |
-| Fade | C | Prowler | secondary | info.reveal, projectile.generic, projectile.homing, resource.charges, status.nearsight | Terror Trail interaction |
-| Fade | Q | Seize | sheet | info.audioOrMinimap, resource.charges, status.deafen, status.decay, status.tether, trigger.zone | tether/mark trail; Terror Trail interaction |
-| Fade | E | Haunt | verified | info.reveal, resource.charges, resource.signatureRecharge | Terror Trail interaction |
-| Fade | X | Nightfall | verified | info.audioOrMinimap, resource.charges, resource.ultPoints, status.deafen, status.decay, status.tether | tether/mark trail; Terror Trail interaction |
-| Gekko | passive | Globules | verified | resource.charges | reclaim pet charges |
-| Gekko | C | Mosh Pit | sheet | damage.zoneOrHit, device.summonOrPlaceable, projectile.generic, resource.charges | Gekko reclaim globules |
-| Gekko | Q | Wingman | verified | device.summonOrPlaceable, projectile.generic, projectile.homing, resource.charges, status.concuss | plant/defuse assist |
-| Gekko | E | Dizzy | sheet | device.summonOrPlaceable, projectile.flash, projectile.generic, projectile.homing, resource.charges, resource.signatureRecharge | Gekko reclaim globules |
-| Gekko | X | Thrash | verified | device.summonOrPlaceable, projectile.homing, resource.charges, resource.ultPoints, status.detain | Gekko reclaim globules |
-| KAY/O | C | FRAG/ment | sheet | damage.zoneOrHit, projectile.generic, resource.charges | cookie pulse damage |
-| KAY/O | Q | FLASH/drive | verified | projectile.flash, projectile.generic, resource.charges | over/underhand flash |
-| KAY/O | E | ZERO/point | sheet | info.reveal, resource.charges, resource.signatureRecharge, status.suppress | knife stick; suppress+reveal |
-| KAY/O | X | NULL/cmd | sheet | resource.charges, resource.ultPoints, status.combatStim, status.suppress | downed/empowered state |
-| Skye | C | Regrowth | sheet | resource.charges, support.heal |  |
-| Skye | Q | Trailblazer | sheet | damage.zoneOrHit, info.reveal, projectile.generic, projectile.homing, resource.charges, status.concuss, support.heal |  |
-| Skye | E | Guiding Light | verified | projectile.flash, projectile.generic, resource.charges, resource.signatureRecharge | bird flash; recharge on cancel |
-| Skye | X | Seekers | secondary | info.reveal, projectile.generic, projectile.homing, resource.charges, resource.ultPoints, status.nearsight, status.slow | three homing nearsight |
-| Sova | C | Owl Drone | sheet | device.summonOrPlaceable, info.reveal, projectile.generic, resource.charges | pilot drone; dart reveal |
-| Sova | Q | Shock Bolt | sheet | damage.zoneOrHit, projectile.bouncing, projectile.generic, resource.charges |  |
-| Sova | E | Recon Bolt | verified | info.reveal, projectile.generic, resource.charges, resource.signatureRecharge | dart pulses reveal |
-| Sova | X | Hunter's Fury | sheet | damage.zoneOrHit, info.reveal, projectile.generic, resource.charges, resource.ultPoints | three map-piercing blasts |
-| Tejo | C | Stealth Drone | sheet | device.summonOrPlaceable, info.reveal, projectile.generic, resource.charges, status.suppress | suppress on contact |
-| Tejo | Q | Special Delivery | sheet | damage.zoneOrHit, projectile.bouncing, projectile.generic, resource.charges, status.concuss | bounce concuss grenade |
-| Tejo | E | Guided Salvo | sheet | damage.zoneOrHit, placement.mapTargeted, projectile.generic, resource.charges, resource.signatureRecharge | map-targeted rockets |
-| Tejo | X | Armageddon | sheet | damage.zoneOrHit, placement.mapTargeted, resource.charges, resource.ultPoints, trigger.zone | map-targeted strike |
-| Chamber | C | Trademark | sheet | device.summonOrPlaceable, resource.charges, status.slow, trigger.zone | trap slow; recall |
-| Chamber | Q | Headhunter | sheet | damage.zoneOrHit, info.reveal, resource.charges | heavy pistol buy charges |
-| Chamber | E | Rendezvous | sheet | movement.teleport, resource.charges, resource.signatureRecharge | two anchors; range limit |
-| Chamber | X | Tour De Force | sheet | damage.zoneOrHit, resource.charges, resource.ultPoints, status.slow | operator ult |
-| Cypher | C | Trapwire | secondary | damage.zoneOrHit, device.summonOrPlaceable, info.reveal, resource.charges, status.slow, status.snapshot, trigger.zone |  |
-| Cypher | Q | Cyber Cage | secondary | info.audioOrMinimap, resource.charges, vision.smoke | sound on enemy cross |
-| Cypher | E | Spycam | sheet | device.summonOrPlaceable, info.reveal, resource.charges, resource.signatureRecharge, status.snapshot | Snapshot silhouette; dart reveal |
-| Cypher | X | Neural Theft | sheet | info.reveal, resource.charges, resource.ultPoints, status.snapshot | Snapshot silhouette |
-| Deadlock | C | Barrier Mesh | secondary | device.summonOrPlaceable, resource.charges, vision.wallOrVolume | destructible wall geometry |
-| Deadlock | Q | Sonic Sensor | verified | device.summonOrPlaceable, resource.charges, status.concuss, trigger.zone |  |
-| Deadlock | E | GravNet | verified | resource.charges, resource.signatureRecharge, status.slow | forced crouch until removed |
-| Deadlock | X | Annihilation | sheet | device.summonOrPlaceable, resource.charges, resource.ultPoints, vision.wallOrVolume | cocoon HP race |
-| Killjoy | passive | Out of range | verified | device.summonOrPlaceable, resource.charges | 40m device deactivate |
-| Killjoy | C | Nanoswarm | sheet | damage.zoneOrHit, device.summonOrPlaceable, resource.charges, trigger.zone |  |
-| Killjoy | Q | Alarmbot | verified | device.summonOrPlaceable, projectile.generic, resource.charges, status.vulnerable, trigger.zone |  |
-| Killjoy | E | Turret | verified | damage.zoneOrHit, device.summonOrPlaceable, resource.charges, resource.signatureRecharge, status.slow |  |
-| Killjoy | X | Lockdown | sheet | device.summonOrPlaceable, resource.charges, resource.ultPoints, status.detain | large detain windup device |
-| Sage | C | Barrier Orb | verified | placement.mapTargeted, projectile.generic, resource.charges, vision.wallOrVolume | destructible wall geometry |
-| Sage | Q | Slow Orb | sheet | placement.mapTargeted, projectile.generic, resource.charges, status.slow |  |
-| Sage | E | Healing Orb | verified | placement.mapTargeted, projectile.generic, resource.charges, resource.signatureRecharge, support.heal | ally/self targeting |
-| Sage | X | Resurrection | sheet | resource.charges, resource.ultPoints, support.revive | full HP no armor |
-| Veto | C | Crosscut | sheet | movement.teleport, resource.charges | buy-phase reclaimable TP |
-| Veto | Q | Chokehold | sheet | info.audioOrMinimap, resource.charges, status.deafen, status.decay, status.tether, trigger.zone | tether/mark trail; tether+deafen+decay |
-| Veto | E | Interceptor | sheet | damage.zoneOrHit, device.summonOrPlaceable, resource.charges, resource.signatureRecharge | destroy enemy utility |
-| Veto | X | Evolution | sheet | resource.charges, resource.ultPoints, status.combatStim, support.heal | debuff immunity |
-| Vyse | C | Razorvine | sheet | damage.zoneOrHit, device.summonOrPlaceable, resource.charges, status.slow, trigger.zone |  |
-| Vyse | Q | Shear | sheet | device.summonOrPlaceable, resource.charges, trigger.zone, vision.wallOrVolume | destructible wall geometry |
-| Vyse | E | Arc Rose | sheet | device.summonOrPlaceable, projectile.flash, projectile.generic, resource.charges, resource.signatureRecharge |  |
-| Vyse | X | Steel Garden | sheet | resource.charges, resource.ultPoints, vision.wallOrVolume | weapon jam (primary) |
-| Hush **[Hush: secondary/aggregator]** | passive | Telekinesis | secondary | device.summonOrPlaceable, resource.charges | Hush: secondary/aggregator data only; extended interact range; Spike attacker-only |
-| Hush **[Hush: secondary/aggregator]** | C | Flow | aggregator | movement.dash, movement.glide, resource.charges, status.levitate | Hush: secondary/aggregator data only; anchor dash; air levitate first |
-| Hush **[Hush: secondary/aggregator]** | Q | Flashbulb | aggregator | projectile.flash, projectile.generic, projectile.steerable, resource.charges | Hush: secondary/aggregator data only; steerable flash; aggregator |
-| Hush **[Hush: secondary/aggregator]** | E | Displacement | aggregator | movement.pull, projectile.generic, projectile.steerable, resource.charges, resource.signatureRecharge, status.concuss | Hush: secondary/aggregator data only; pull+concuss 1.5s conflicts with 2.5s standard |
-| Hush **[Hush: secondary/aggregator]** | X | Suspension | aggregator | projectile.generic, projectile.steerable, resource.charges, resource.ultPoints, status.levitate | Hush: secondary/aggregator data only; steerable ult; levitate duration null |
+| Astra | passive | Astral Form / Stars | sheet | placement.mapTargeted, resource.passiveMeter |  |
+| Astra | C | Gravity Well | verified | movement.pull, projectile.generic, status.vulnerable |  |
+| Astra | Q | Nova Pulse | verified | projectile.generic, status.concuss |  |
+| Astra | E | Nebula / Dissipate | sheet | placement.mapTargeted, resource.passiveMeter, vision.smoke |  |
+| Astra | X | Cosmic Divide | verified | info.audioOrMinimap, placement.mapTargeted, vision.wallOrVolume |  |
+| Brimstone | C | Stim Beacon | verified | device.summonOrPlaceable, status.combatStim, status.haste | Haste + Combat Stim; indestructible beacon |
+| Brimstone | Q | Incendiary | sheet | damage.zoneOrHit, projectile.bouncing, projectile.generic | thrown mollie; ally damage fraction unpublished |
+| Brimstone | E | Sky Smoke | secondary | placement.mapTargeted, vision.smoke | already executable in sim; cast via tactical map |
+| Brimstone | X | Orbital Strike | sheet | damage.zoneOrHit, placement.mapTargeted, vision.wallOrVolume | map-targeted strike; not a projectile; ally damage fraction unpublished |
+| Clove | C | Pick-me-up | secondary | status.haste, status.overheal, support.heal |  |
+| Clove | Q | Meddle | sheet | projectile.generic, status.decay |  |
+| Clove | E | Ruse | sheet | placement.mapTargeted, vision.smoke | castable while dead; map placement |
+| Clove | X | Not Dead Yet | secondary | support.revive |  |
+| Harbor | C | Storm Surge | sheet | projectile.generic, status.nearsight, status.slow |  |
+| Harbor | Q | High Tide | sheet | status.slow, vision.wallOrVolume |  |
+| Harbor | E | Cove | sheet | placement.mapTargeted, vision.smoke, vision.wallOrVolume |  |
+| Harbor | X | Reckoning | sheet | placement.mapTargeted, status.nearsight, status.slow |  |
+| Miks | C | M-pulse | sheet | projectile.generic, status.concuss, support.heal |  |
+| Miks | Q | Harmonize | sheet | status.combatStim, status.haste |  |
+| Miks | E | Waveform | estimate | placement.mapTargeted, vision.smoke |  |
+| Miks | X | Bassquake | sheet | info.audioOrMinimap, movement.knockback, status.deafen, status.slow |  |
+| Omen | C | Shrouded Step | sheet | movement.teleport |  |
+| Omen | Q | Paranoia | secondary | info.audioOrMinimap, projectile.generic, status.deafen, status.nearsight |  |
+| Omen | E | Dark Cover | sheet | placement.mapTargeted, vision.smoke |  |
+| Omen | X | From the Shadows | sheet | movement.teleport, placement.mapTargeted |  |
+| Viper | passive | Fuel and Toxin | verified | resource.passiveMeter, status.decay |  |
+| Viper | C | Snake Bite | sheet | damage.zoneOrHit, projectile.generic, status.vulnerable |  |
+| Viper | Q | Poison Cloud | sheet | status.decay, vision.smoke |  |
+| Viper | E | Toxic Screen | sheet | status.decay, vision.wallOrVolume |  |
+| Viper | X | Viper's Pit | sheet | status.decay, status.nearsight, vision.smoke |  |
+| Iso | C | Contingency | sheet | vision.wallOrVolume |  |
+| Iso | Q | Undercut | sheet | projectile.generic, status.suppress, status.vulnerable |  |
+| Iso | E | Double Tap | sheet | support.shield |  |
+| Iso | X | Kill Contract | sheet | status.suppress |  |
+| Jett | passive | Drift | sheet | movement.glide |  |
+| Jett | C | Cloudburst | verified | vision.smoke |  |
+| Jett | Q | Updraft | estimate | movement.knockback |  |
+| Jett | E | Tailwind | verified | movement.dash |  |
+| Jett | X | Blade Storm | sheet | damage.zoneOrHit |  |
+| Neon | passive | Energy | sheet | resource.passiveMeter |  |
+| Neon | C | Fast Lane | secondary | vision.wallOrVolume |  |
+| Neon | Q | Relay Bolt | verified | projectile.generic, status.concuss |  |
+| Neon | E | High Gear | sheet | movement.dash, status.haste |  |
+| Neon | X | Overdrive | sheet | damage.zoneOrHit |  |
+| Phoenix | passive | Heating Up | sheet | support.heal |  |
+| Phoenix | C | Blaze | sheet | damage.zoneOrHit, support.heal, vision.wallOrVolume |  |
+| Phoenix | Q | Hot Hands | estimate | damage.zoneOrHit, projectile.generic, support.heal |  |
+| Phoenix | E | Curveball | secondary | projectile.flash, projectile.generic |  |
+| Phoenix | X | Run it Back | verified | support.revive |  |
+| Raze | C | Boom Bot | sheet | damage.zoneOrHit, device.summonOrPlaceable, projectile.generic, projectile.homing |  |
+| Raze | Q | Blast Pack | sheet | damage.zoneOrHit, movement.knockback, projectile.bouncing, projectile.generic |  |
+| Raze | E | Paint Shells | sheet | damage.zoneOrHit, projectile.bouncing, projectile.generic |  |
+| Raze | X | Showstopper | sheet | damage.zoneOrHit, movement.knockback |  |
+| Reyna | passive | Soul Harvest | sheet | resource.passiveMeter | soul orb economy; not map placement |
+| Reyna | C | Leer | secondary | projectile.generic, status.nearsight |  |
+| Reyna | Q | Devour | sheet | support.heal |  |
+| Reyna | E | Dismiss | sheet | status.intangible |  |
+| Reyna | X | Empress | sheet | info.reveal, status.combatStim |  |
+| Waylay | C | Saturate | sheet | projectile.generic, status.hinder |  |
+| Waylay | Q | Lightspeed | sheet | movement.dash |  |
+| Waylay | E | Refract | sheet | movement.teleport, status.intangible, status.nearsight |  |
+| Waylay | X | Convergent Paths | sheet | status.haste, status.hinder |  |
+| Yoru | C | Fakeout | sheet | device.summonOrPlaceable, projectile.flash, projectile.generic |  |
+| Yoru | Q | Blindside | sheet | projectile.flash, projectile.generic |  |
+| Yoru | E | Gatecrash | secondary | device.summonOrPlaceable, movement.teleport, projectile.generic, projectile.steerable |  |
+| Yoru | X | Dimensional Drift | sheet | movement.glide, status.intangible |  |
+| Breach | C | Aftershock | verified | damage.zoneOrHit, projectile.generic |  |
+| Breach | Q | Flashpoint | verified | projectile.flash, projectile.generic |  |
+| Breach | E | Fault Line | verified | projectile.generic, status.concuss |  |
+| Breach | X | Rolling Thunder | verified | movement.knockback, projectile.generic, status.concuss |  |
+| Fade | passive | Terror Trail | sheet | info.reveal |  |
+| Fade | C | Prowler | secondary | info.reveal, projectile.generic, projectile.homing, status.nearsight |  |
+| Fade | Q | Seize | sheet | info.audioOrMinimap, movement.pull, projectile.generic, status.deafen, status.decay, status.tether, trigger.zone |  |
+| Fade | E | Haunt | verified | info.reveal |  |
+| Fade | X | Nightfall | verified | info.audioOrMinimap, status.deafen, status.decay, status.tether |  |
+| Gekko | passive | Globules | verified | resource.passiveMeter |  |
+| Gekko | C | Mosh Pit | sheet | damage.zoneOrHit, device.summonOrPlaceable, projectile.generic |  |
+| Gekko | Q | Wingman | verified | device.summonOrPlaceable, projectile.generic, projectile.homing, status.concuss |  |
+| Gekko | E | Dizzy | sheet | device.summonOrPlaceable, projectile.flash, projectile.generic, projectile.homing |  |
+| Gekko | X | Thrash | verified | device.summonOrPlaceable, projectile.homing, status.detain |  |
+| KAY/O | C | FRAG/ment | sheet | damage.zoneOrHit, projectile.generic |  |
+| KAY/O | Q | FLASH/drive | verified | projectile.flash, projectile.generic |  |
+| KAY/O | E | ZERO/point | sheet | info.reveal, projectile.generic, status.suppress |  |
+| KAY/O | X | NULL/cmd | sheet | status.combatStim, status.suppress |  |
+| Skye | C | Regrowth | sheet | support.heal |  |
+| Skye | Q | Trailblazer | sheet | damage.zoneOrHit, projectile.generic, projectile.homing, status.concuss, support.heal |  |
+| Skye | E | Guiding Light | verified | projectile.flash, projectile.generic |  |
+| Skye | X | Seekers | secondary | info.reveal, projectile.homing, status.nearsight, status.slow |  |
+| Sova | C | Owl Drone | sheet | device.summonOrPlaceable, info.reveal, projectile.generic |  |
+| Sova | Q | Shock Bolt | sheet | damage.zoneOrHit, projectile.bouncing, projectile.generic |  |
+| Sova | E | Recon Bolt | verified | info.reveal, projectile.generic |  |
+| Sova | X | Hunter's Fury | sheet | damage.zoneOrHit, info.reveal, placement.mapTargeted |  |
+| Tejo | C | Stealth Drone | sheet | device.summonOrPlaceable, info.reveal, projectile.generic, status.suppress |  |
+| Tejo | Q | Special Delivery | sheet | damage.zoneOrHit, projectile.bouncing, projectile.generic, status.concuss |  |
+| Tejo | E | Guided Salvo | sheet | damage.zoneOrHit, placement.mapTargeted |  |
+| Tejo | X | Armageddon | sheet | damage.zoneOrHit, placement.mapTargeted |  |
+| Chamber | C | Trademark | sheet | device.summonOrPlaceable, status.slow, trigger.zone |  |
+| Chamber | Q | Headhunter | sheet | damage.zoneOrHit, info.reveal |  |
+| Chamber | E | Rendezvous | sheet | movement.teleport |  |
+| Chamber | X | Tour De Force | sheet | damage.zoneOrHit, status.slow |  |
+| Cypher | C | Trapwire | secondary | damage.zoneOrHit, device.summonOrPlaceable, info.reveal, status.slow, status.snapshot, trigger.zone |  |
+| Cypher | Q | Cyber Cage | secondary | info.audioOrMinimap, vision.smoke |  |
+| Cypher | E | Spycam | sheet | device.summonOrPlaceable, info.reveal, status.snapshot |  |
+| Cypher | X | Neural Theft | sheet | info.reveal, status.snapshot |  |
+| Deadlock | C | Barrier Mesh | secondary | device.summonOrPlaceable, vision.wallOrVolume |  |
+| Deadlock | Q | Sonic Sensor | verified | device.summonOrPlaceable, status.concuss, trigger.zone |  |
+| Deadlock | E | GravNet | verified | status.slow |  |
+| Deadlock | X | Annihilation | sheet | device.summonOrPlaceable, vision.wallOrVolume |  |
+| Killjoy | passive | Out of range | verified | device.summonOrPlaceable |  |
+| Killjoy | C | Nanoswarm | sheet | damage.zoneOrHit, device.summonOrPlaceable, projectile.generic | thrown placeable swarm |
+| Killjoy | Q | Alarmbot | verified | device.summonOrPlaceable, status.vulnerable, trigger.zone |  |
+| Killjoy | E | Turret | verified | damage.zoneOrHit, device.summonOrPlaceable, status.slow |  |
+| Killjoy | X | Lockdown | sheet | device.summonOrPlaceable, status.detain |  |
+| Sage | C | Barrier Orb | verified | vision.wallOrVolume | world-placed wall; not tactical-map targeted |
+| Sage | Q | Slow Orb | sheet | projectile.generic, status.slow | thrown slow field |
+| Sage | E | Healing Orb | verified | support.heal | ally/self heal; not map-targeted |
+| Sage | X | Resurrection | sheet | support.revive |  |
+| Veto | C | Crosscut | sheet | movement.teleport |  |
+| Veto | Q | Chokehold | sheet | info.audioOrMinimap, status.deafen, status.decay, status.tether, trigger.zone |  |
+| Veto | E | Interceptor | sheet | damage.zoneOrHit, device.summonOrPlaceable |  |
+| Veto | X | Evolution | sheet | status.combatStim, support.heal |  |
+| Vyse | C | Razorvine | sheet | damage.zoneOrHit, device.summonOrPlaceable, status.slow, trigger.zone |  |
+| Vyse | Q | Shear | sheet | device.summonOrPlaceable, trigger.zone, vision.wallOrVolume |  |
+| Vyse | E | Arc Rose | sheet | device.summonOrPlaceable, projectile.flash, projectile.generic |  |
+| Vyse | X | Steel Garden | sheet | vision.wallOrVolume |  |
+| Hush **[Hush: secondary/aggregator]** | passive | Telekinesis | secondary | interact.pickup | Hush secondary/aggregator; range null |
+| Hush **[Hush: secondary/aggregator]** | C | Flow | aggregator | movement.dash, movement.glide, status.levitate | Hush: secondary/aggregator data only; Hush secondary/aggregator |
+| Hush **[Hush: secondary/aggregator]** | Q | Flashbulb | aggregator | projectile.flash, projectile.generic, projectile.steerable | Hush: secondary/aggregator data only; Hush secondary/aggregator |
+| Hush **[Hush: secondary/aggregator]** | E | Displacement | aggregator | movement.pull, projectile.generic, projectile.steerable, status.concuss | Hush: secondary/aggregator data only; Hush secondary/aggregator; concuss 1.5 vs global 2.5 |
+| Hush **[Hush: secondary/aggregator]** | X | Suspension | aggregator | projectile.generic, projectile.steerable, status.levitate | Hush: secondary/aggregator data only; Hush secondary/aggregator; levitate duration null |
 
-Row count: **130**. Hush rows are marked in the Agent column; their numbers are not primary-confirmed.
+Row count: **130**. Audit fixes applied when regenerating the mapping:
+
+- Sage Barrier Orb / Slow Orb / Healing Orb: removed placement.mapTargeted
+- Reyna Soul Harvest: removed placement.mapTargeted; uses resource.passiveMeter
+- Map smokes (Sky Smoke, Ruse, Cove, Waveform, Dark Cover, Nebula/Dissipate): added placement.mapTargeted
+- Brimstone Incendiary: added projectile.generic + projectile.bouncing
+- Killjoy Nanoswarm: added projectile.generic
+- Brimstone Orbital Strike: removed projectile.generic; kept placement.mapTargeted
+- Hush Telekinesis: removed device.summonOrPlaceable; added interact.pickup
+- resource.charges / signatureRecharge / ultPoints moved to core (not per-ability)
 
 ## 2. Primitive list
 
-Proposal below follows the user’s list, with three small splits justified by the reference data:
+See `data/ability-primitives.json` `primitives` definitions. Core charge / signature-recharge / ult-point handling lives outside the per-ability list. New primitive `interact.pickup` covers Hush Telekinesis.
 
-1. **`status.tether` / mark trails** — Fade Seize/Nightfall and Veto Chokehold need sticky trails distinct from Snapshot. **design**
-2. **`projectile.flash`** — Kept as a projectile subtype (facing check + smoke block) rather than only a status, because flashes are thrown/steered devices first. **design**
-3. **`info.audioOrMinimap`** — Separated from Snapshot/reveal because Cyber Cage / Cosmic Divide / Deafen change information without applying a Snapshot silhouette. **design**
-
-Vulnerable and Fragile are one primitive (`status.vulnerable`); the sheet uses Riot’s Fragile wording for Gravity Well. **design**
-
-### Status effects
-| Primitive | Meaning |
-| --- | --- |
-| status.concuss | stun/accuracy debuff for a duration |
-| status.nearsight | vision radius clamp |
-| status.deafen | audio muffling |
-| status.slow | move-speed reduction / forced crouch |
-| status.hinder | unpublished multiplier family (Waylay) |
-| status.vulnerable | Fragile/Vulnerable damage amp |
-| status.suppress | blocks casts / silences abilities |
-| status.decay | temporary HP drain then restore |
-| status.detain | root/disable in place |
-| status.levitate | suspend in air (Hush Suspension/Flow) |
-| status.haste | movement-speed buff |
-| status.combatStim | fire-rate / equip / reload / recovery buff |
-| status.snapshot | still-image silhouette reveal |
-| status.overheal | temporary HP above max |
-| status.intangible | untargetable / phase |
-| status.tether | trail/tether attach (Fade/Veto) |
-
-### Vision blockers
-| Primitive | Meaning |
-| --- | --- |
-| vision.smoke | LOS disk/volume with deploy + expiry (existing Sky Smoke model) |
-| vision.wallOrVolume | walls, cages, pits, audio walls, bullet-block volumes |
-
-### Damage
-| Primitive | Meaning |
-| --- | --- |
-| damage.zoneOrHit | instant hits and timed damage fields |
-
-### Projectiles
-| Primitive | Meaning |
-| --- | --- |
-| projectile.generic | thrown/fired payload with travel time |
-| projectile.arcing | (folded into generic + gravity param) |
-| projectile.bouncing | wall bounces |
-| projectile.steerable | crosshair redirect after cast |
-| projectile.homing | seeks agents / trails |
-| projectile.flash | facing-dependent blind; blocked by smokes |
-
-### Movement
-| Primitive | Meaning |
-| --- | --- |
-| movement.dash | short burst translation |
-| movement.teleport | instant relocate / beacon return |
-| movement.glide | fall control / air hold |
-| movement.pull | attract toward a point |
-| movement.knockback | push / launch / knockup |
-
-### Devices, triggers, support, info, resources
-| Primitive | Meaning |
-| --- | --- |
-| device.summonOrPlaceable | HP, arm, recall, destroy cooldown |
-| trigger.zone | arm + detect + trigger |
-| support.heal | ally/self heal over time |
-| support.revive | return from death / checkpoint |
-| support.shield | temporary absorb HP |
-| placement.mapTargeted | map/astral/global placement |
-| info.reveal | live or pulsed enemy reveal |
-| info.audioOrMinimap | sound cues / minimap obscure |
-| resource.charges | spend/buy/max charges |
-| resource.signatureRecharge | cooldown, 2-kill, reclaim, fuel |
-| resource.ultPoints | orbs/kills/plant/defuse economy |
+Vulnerable and Fragile remain one primitive (`status.vulnerable`). **design**
 
 ## 3. Primitive usage and engine work
 
-Counts are ability rows that list the primitive (passives included). Sources for numbers stay in `agent-reference.json`; this section does not invent figures.
+Counts exclude core resource fields.
 
-### `resource.charges` — 130 abilities, 30 agents
-Agents: Astra, Breach, Brimstone, Chamber, Clove, Cypher, Deadlock, Fade, Gekko, Harbor, Hush, Iso, Jett, KAY/O, Killjoy, Miks, Neon, Omen, Phoenix, Raze, Reyna, Sage, Skye, Sova, Tejo, Veto, Viper, Vyse, Waylay, Yoru.
+### `projectile.generic` — 45 abilities, 25 agents
+Agents: Astra, Breach, Brimstone, Clove, Fade, Gekko, Harbor, Hush, Iso, KAY/O, Killjoy, Miks, Neon, Omen, Phoenix, Raze, Reyna, Sage, Skye, Sova, Tejo, Viper, Vyse, Waylay, Yoru.
 
-**Engine:** already partially present (`charges` on agents, cast validation). Extend buy/reclaim and per-ability pools. **Events:** charge-spent, charge-gained. **Orders:** cast already. **Tests:** spend/reject empty.
+thrown/fired payload with travel time
 
-### `projectile.generic` — 43 abilities, 21 agents
-Agents: Astra, Breach, Brimstone, Clove, Fade, Gekko, Hush, Iso, KAY/O, Killjoy, Neon, Omen, Phoenix, Raze, Sage, Skye, Sova, Tejo, Vyse, Waylay, Yoru.
-
-**Engine:** ballistic/queued travel jobs with collision. **State:** `projectiles[]`. **Events:** projectile-spawn/land. **Orders:** cast with aim vector/point. **Tests:** travel time determinism.
-
-### `resource.signatureRecharge` — 31 abilities, 30 agents
-Agents: Astra, Breach, Brimstone, Chamber, Clove, Cypher, Deadlock, Fade, Gekko, Harbor, Hush, Iso, Jett, KAY/O, Killjoy, Miks, Neon, Omen, Phoenix, Raze, Reyna, Sage, Skye, Sova, Tejo, Veto, Viper, Vyse, Waylay, Yoru.
-
-**Engine:** cooldown clocks, 2-kill counters, Gekko reclaim, fuel meters. **State:** `cooldownReadyAtMs`, kill credit hooks. **Events:** signature-recharged. **Tests:** 2-kill vs cooldown paths.
-
-### `resource.ultPoints` — 30 abilities, 30 agents
-Agents: Astra, Breach, Brimstone, Chamber, Clove, Cypher, Deadlock, Fade, Gekko, Harbor, Hush, Iso, Jett, KAY/O, Killjoy, Miks, Neon, Omen, Phoenix, Raze, Reyna, Sage, Skye, Sova, Tejo, Veto, Viper, Vyse, Waylay, Yoru.
-
-**Engine:** point ledger from kill/death/orb/plant/defuse; assists do not grant points (`rules.assists.givesUltPoints: false`, verified assist defs). **Events:** ult-point-gained, ult-cast. **Tests:** cost gate.
+**Engine:** travel jobs with collision. **State:** `projectiles[]`. **Orders:** cast with aim/point.
 
 ### `damage.zoneOrHit` — 27 abilities, 17 agents
 Agents: Breach, Brimstone, Chamber, Cypher, Gekko, Jett, KAY/O, Killjoy, Neon, Phoenix, Raze, Skye, Sova, Tejo, Veto, Viper, Vyse.
 
-**Engine:** timed AoE ticks and instant hits; ally damage policy when recorded. **Events:** damage-applied. **Tests:** DPS windows, death.
+instant hits and timed damage fields
 
-### `device.summonOrPlaceable` — 26 abilities, 13 agents
-Agents: Brimstone, Chamber, Cypher, Deadlock, Gekko, Hush, Killjoy, Raze, Sova, Tejo, Veto, Vyse, Yoru.
+**Engine:** timed AoE ticks and instant hits. **Events:** damage-applied. **Tests:** DPS windows, death.
 
-**Engine:** placeable entities with HP, arm time, recall, destroy cooldowns (45s verified where noted). **State:** `devices[]`. **Events:** device-placed/destroyed/recalled. **Tests:** destroy cooldown.
+### `device.summonOrPlaceable` — 25 abilities, 12 agents
+Agents: Brimstone, Chamber, Cypher, Deadlock, Gekko, Killjoy, Raze, Sova, Tejo, Veto, Vyse, Yoru.
 
-### `info.reveal` — 15 abilities, 8 agents
+HP, arm, recall, destroy cooldown
+
+**Engine:** placeables with HP, arm, recall, destroy cooldowns. **State:** `devices[]`.
+
+### `info.reveal` — 14 abilities, 8 agents
 Agents: Chamber, Cypher, Fade, KAY/O, Reyna, Skye, Sova, Tejo.
 
-**Engine:** feed `view()` / beliefs. **Tests:** Recon Bolt pulses.
+live or pulsed enemy reveal
+
+**Engine:** feed view()/beliefs.
+
+### `placement.mapTargeted` — 14 abilities, 8 agents
+Agents: Astra, Brimstone, Clove, Harbor, Miks, Omen, Sova, Tejo.
+
+tactical-map / astral / global placement
+
+**Engine:** tactical-map / astral placement orders. **Orders:** map-cast.
 
 ### `vision.wallOrVolume` — 13 abilities, 10 agents
 Agents: Astra, Brimstone, Deadlock, Harbor, Iso, Neon, Phoenix, Sage, Viper, Vyse.
 
-**Engine:** wall segments with HP/fortify/decay; LOS and optional bullet block. **State:** `walls[]` dynamic. **Events:** wall-raised, wall-destroyed. **Orders:** cast with segment/placement. **Tests:** clip movement + LOS.
+walls, cages, pits, audio walls, bullet-block volumes
+
+**Engine:** dynamic wall segments with HP/fortify; LOS and optional bullet block. **State:** `walls[]`. **Events:** wall-raised/destroyed.
 
 ### `status.slow` — 12 abilities, 9 agents
 Agents: Chamber, Cypher, Deadlock, Harbor, Killjoy, Miks, Sage, Skye, Vyse.
 
-**Engine:** speed multiplier + GravNet forced crouch. **Tests:** move distance under slow.
+move-speed reduction / forced crouch
 
-### `trigger.zone` — 11 abilities, 9 agents
-Agents: Chamber, Cypher, Deadlock, Fade, Killjoy, Miks, Tejo, Veto, Vyse.
-
-**Engine:** arm timer + detection predicates (sound, presence). **Events:** trigger-fired. **Tests:** walking vs running for Sonic Sensor.
+**Engine:** speed multiplier / forced crouch.
 
 ### `status.concuss` — 10 abilities, 9 agents
 Agents: Astra, Breach, Deadlock, Gekko, Hush, Miks, Neon, Skye, Tejo.
 
-**Engine:** status list on agents; 2.5s standard set vs exceptions (Hush 1.5s aggregator — keep both). **Tests:** duration table.
+stun/accuracy debuff for a duration
 
-### `vision.smoke` — 10 abilities, 9 agents
-Agents: Astra, Brimstone, Clove, Cypher, Harbor, Jett, Miks, Omen, Viper.
-
-**Engine:** exists (Sky Smoke). Generalise multi-smoke owners, one-ways, bullet-block flag (Harbor Cove). **Tests:** LOS block/expiry.
+**Engine:** status list; keep Hush 1.5s aggregator vs 2.5s standard.
 
 ### `support.heal` — 10 abilities, 7 agents
 Agents: Clove, Miks, Phoenix, Reyna, Sage, Skye, Veto.
 
-**Engine:** HoT; healingAssist rule (verified 13.10). **Tests:** Healing Orb.
+ally/self heal over time
 
-### `placement.mapTargeted` — 9 abilities, 6 agents
-Agents: Astra, Brimstone, Omen, Reyna, Sage, Tejo.
+**Engine:** HoT; healingAssist (verified 13.10).
 
-**Engine:** map pick UI / order target on minimap space. **Orders:** map-cast. **Tests:** Astra stars.
+### `vision.smoke` — 10 abilities, 9 agents
+Agents: Astra, Brimstone, Clove, Cypher, Harbor, Jett, Miks, Omen, Viper.
+
+LOS disk/volume with deploy + expiry
+
+**Engine:** exists (Sky Smoke). Generalise multi-smoke owners and map placement. **Tests:** LOS block/expiry.
 
 ### `projectile.flash` — 9 abilities, 8 agents
 Agents: Breach, Gekko, Hush, KAY/O, Phoenix, Skye, Vyse, Yoru.
 
-**Engine:** facing test + smoke/cage block (13.05-style). **Events:** flash-applied/blocked. **Tests:** looking-at vs looking-away.
+facing-dependent blind; blocked by smokes
+
+**Engine:** facing test + smoke block. **Events:** flash-applied/blocked.
 
 ### `status.decay` — 8 abilities, 4 agents
 Agents: Clove, Fade, Veto, Viper.
 
-**Engine:** temp HP drain/restore timeline. **Tests:** Meddle restore.
+temporary HP drain then restore
+
+**Engine:** temp HP drain/restore timeline.
 
 ### `status.nearsight` — 8 abilities, 7 agents
 Agents: Fade, Harbor, Omen, Reyna, Skye, Viper, Waylay.
 
-**Engine:** per-ability vision radius (Prowler 7, Paranoia 7.5, Leer 6, Seekers 7.5 — secondary). **Tests:** view() respects nearsight.
+vision radius clamp
+
+**Engine:** per-ability vision radius. **Tests:** view() respects nearsight.
+
+### `trigger.zone` — 8 abilities, 7 agents
+Agents: Chamber, Cypher, Deadlock, Fade, Killjoy, Veto, Vyse.
+
+arm + detect + trigger
+
+**Engine:** arm + detection predicates. **Events:** trigger-fired.
 
 ### `info.audioOrMinimap` — 7 abilities, 6 agents
 Agents: Astra, Cypher, Fade, Miks, Omen, Veto.
 
-**Engine:** optional audio channel in fog model. **Tests:** Cyber Cage cross cue.
+sound cues / minimap obscure
 
-### `status.combatStim` — 7 abilities, 6 agents
-Agents: Brimstone, KAY/O, Miks, Neon, Reyna, Veto.
+**Engine:** optional audioCues on side view.
 
-**Engine:** fire-rate/equip/reload modifiers from globals.combatStim. **Tests:** auto-fire interval interaction.
+### `projectile.homing` — 7 abilities, 4 agents
+Agents: Fade, Gekko, Raze, Skye.
+
+seeks agents / trails
+
+**Engine:** retarget nearest valid enemy each tick.
 
 ### `movement.teleport` — 6 abilities, 5 agents
 Agents: Chamber, Omen, Veto, Waylay, Yoru.
 
-**Engine:** instant move + beacon link. **Tests:** Rendezvous range.
+instant relocate / beacon return
 
-### `projectile.homing` — 6 abilities, 3 agents
-Agents: Fade, Gekko, Skye.
+**Engine:** instant move + beacon link.
 
-**Engine:** retarget nearest valid enemy each tick; trail follow for Fade. **Tests:** seeker path.
+### `resource.passiveMeter` — 6 abilities, 5 agents
+Agents: Astra, Gekko, Neon, Reyna, Viper.
 
-### `status.haste` — 5 abilities, 5 agents
-Agents: Brimstone, Clove, Miks, Neon, Waylay.
+fuel / battery / soul-orb / star economy (non-charge)
 
-**Engine:** speed buff stacking rules (**design**). **Tests:** Pick-me-up 10% secondary.
+**Engine:** fuel/battery/soul/star meters separate from ability charges.
 
 ### `movement.knockback` — 5 abilities, 4 agents
 Agents: Breach, Jett, Miks, Raze.
 
-**Engine:** impulse + optional launch. **Tests:** Blast Pack.
+push / launch / knockup
+
+**Engine:** impulse / knockup.
+
+### `projectile.bouncing` — 5 abilities, 4 agents
+Agents: Brimstone, Raze, Sova, Tejo.
+
+wall/floor bounces
+
+**Engine:** bounce count on Drill Hall segments.
+
+### `status.combatStim` — 5 abilities, 5 agents
+Agents: Brimstone, KAY/O, Miks, Reyna, Veto.
+
+fire-rate / equip / reload / recovery buff
+
+**Engine:** fire-rate/equip/reload from globals.combatStim.
 
 ### `status.deafen` — 5 abilities, 4 agents
 Agents: Fade, Miks, Omen, Veto.
 
-**Engine:** audio info filter for beliefs. **Tests:** decision context omits sound cues.
+audio muffling
+
+**Engine:** audio info filter.
+
+### `status.haste` — 5 abilities, 5 agents
+Agents: Brimstone, Clove, Miks, Neon, Waylay.
+
+movement-speed buff
+
+**Engine:** move-speed buff; stacks with Combat Stim (**design**).
 
 ### `status.suppress` — 5 abilities, 3 agents
 Agents: Iso, KAY/O, Tejo.
 
-**Engine:** block casts while suppressed. **Tests:** cast-rejected while suppressed.
+blocks casts
 
-### `status.vulnerable` — 4 abilities, 4 agents
-Agents: Astra, Iso, Killjoy, Viper.
-
-**Engine:** damage amp flag. **Tests:** amplified Rifle A hit.
+**Engine:** block casts while suppressed.
 
 ### `movement.dash` — 4 abilities, 4 agents
 Agents: Hush, Jett, Neon, Waylay.
 
-**Engine:** displace along path with collision. **Orders:** dash destination / segment. **Tests:** Tailwind window.
+short burst translation
 
-### `projectile.bouncing` — 4 abilities, 3 agents
-Agents: Raze, Sova, Tejo.
-
-**Engine:** bounce count + wall normals on Drill Hall segments. **Tests:** bounce count.
+**Engine:** path displace with collision.
 
 ### `projectile.steerable` — 4 abilities, 2 agents
 Agents: Hush, Yoru.
 
-**Engine:** mid-flight aim updates; see turn-layer §5. **Orders:** steer segments. **Tests:** path under recorded steer plan.
+crosshair redirect after cast
 
-### `support.revive` — 3 abilities, 3 agents
-Agents: Clove, Phoenix, Sage.
+**Engine:** mid-flight aim samples (N≤4 per window). **Orders:** steer polyline.
 
-**Engine:** dead→alive transitions; Not Dead Yet killer rewards (secondary). **Tests:** Resurrection.
+### `status.vulnerable` — 4 abilities, 4 agents
+Agents: Astra, Iso, Killjoy, Viper.
+
+Fragile/Vulnerable damage amp
+
+**Engine:** damage amp flag.
+
+### `movement.glide` — 3 abilities, 3 agents
+Agents: Hush, Jett, Yoru.
+
+fall control / air hold
+
+**Engine:** fall-speed control; height model.
+
+### `movement.pull` — 3 abilities, 3 agents
+Agents: Astra, Fade, Hush.
+
+attract toward a point
+
+**Engine:** force toward point.
 
 ### `status.intangible` — 3 abilities, 3 agents
 Agents: Reyna, Waylay, Yoru.
 
-**Engine:** untargetable; shot withheld. **Tests:** Dismiss.
+untargetable / phase
 
-### `status.tether` — 3 abilities, 2 agents
-Agents: Fade, Veto.
-
-**Engine:** trail attach + break rules. **Tests:** Seize/Chokehold.
+**Engine:** untargetable; shot withheld.
 
 ### `status.snapshot` — 3 abilities, 1 agents
 Agents: Cypher.
 
-**Engine:** frozen silhouette pose for reveal UX / beliefs. **Tests:** Spycam dart / Neural Theft.
+still-image silhouette reveal
 
-### `movement.pull` — 2 abilities, 2 agents
-Agents: Astra, Hush.
+**Engine:** frozen silhouette for beliefs.
 
-**Engine:** force integrate toward point. **Tests:** Gravity Well / Displacement.
+### `status.tether` — 3 abilities, 2 agents
+Agents: Fade, Veto.
 
-### `movement.glide` — 2 abilities, 2 agents
-Agents: Hush, Jett.
+trail/tether attach
 
-**Engine:** fall-speed control; height model. **Tests:** Drift hold.
+**Engine:** trail attach + break rules.
 
-### `status.hinder` — 2 abilities, 1 agents
-Agents: Waylay.
+### `support.revive` — 3 abilities, 3 agents
+Agents: Clove, Phoenix, Sage.
 
-**Engine:** placeholder multipliers until published. **Tests:** apply/remove only.
+return from death / checkpoint
+
+**Engine:** dead→alive transitions.
 
 ### `status.detain` — 2 abilities, 2 agents
 Agents: Gekko, Killjoy.
 
-**Engine:** hard lock movement/actions. **Tests:** Lockdown/Thrash.
+root/disable in place
+
+**Engine:** hard lock movement/actions.
+
+### `status.hinder` — 2 abilities, 1 agents
+Agents: Waylay.
+
+unpublished multiplier family (Waylay)
+
+**Engine:** apply/remove only until multipliers published.
 
 ### `status.levitate` — 2 abilities, 1 agents
 Agents: Hush.
 
-**Engine:** vertical hold; needs height model decision. **Tests:** Suspension (aggregator).
+suspend in air
+
+**Engine:** vertical hold; height model decision.
+
+### `interact.pickup` — 1 abilities, 1 agents
+Agents: Hush.
+
+pick up weapons/Spike and use switches from range
+
+**Engine:** extended interact range for weapons/Spike/switches. **State:** interactRangeMm (null until sourced).
 
 ### `status.overheal` — 1 abilities, 1 agents
 Agents: Clove.
 
-**Engine:** temp HP pool decay. **Tests:** Pick-me-up overheal.
+temporary HP above max
+
+**Engine:** temp HP pool decay.
 
 ### `support.shield` — 1 abilities, 1 agents
 Agents: Iso.
 
-**Engine:** absorb layer before HP. **Tests:** Double Tap.
+temporary absorb HP
 
+**Engine:** absorb layer before HP.
 
 ## 4. Recommended build order
 
-Ranked by how many *new* abilities a stage unlocks once prior stages exist. Tags on stages are **design**. Numbers cited stay with their JSON sources.
+Generated from `data/primitive-stages.json`. An agent is listed at the first stage whose cumulative primitives cover every primitive that agent's abilities need. Hush is forced last. Core charge/ult fields are assumed available as engine state throughout.
 
-| Stage | Primitives unlocked | Why this order | Newly completable agents (all C/Q/E/X + passives executable) |
+| Stage | Primitives added | Agents newly complete | Roles fully complete after |
 | --- | --- | --- | --- |
-| 0 (done) | vision.smoke (basic), resource.charges (basic), damage via Rifle A, LOS | Milestone 1–2 | none fully; Brimstone only Sky Smoke live |
-| 1 | resource.signatureRecharge (cooldown), projectile.generic, projectile.flash, status.nearsight (flash-adjacent), vision.smoke generalisation | Unlocks the densest “throw utility” set and finishes several initiator/controller basics | *Partial kits only* |
-| 2 | status.concuss, status.slow, damage.zoneOrHit (mollies), device.summonOrPlaceable (simple) | Concuss+slow are the most common combat statuses | **Breach** (Aftershock, Flashpoint, Fault Line, Rolling Thunder — all verified-heavy) |
-| 3 | vision.wallOrVolume, placement.mapTargeted, status.decay, status.vulnerable | Controller walls/smokes/decay | **Brimstone** (full), then **Harbor** once bullet-block smoke exists; **Viper** when fuel meter exists |
-| 4 | movement.dash, movement.teleport, resource.signatureRecharge (2-kill), status.intangible | Duelist entry | **Jett** (needs height for Updraft/Drift — or stub vertical as **design** no-op on flat map), **Phoenix** after heal-from-fire |
-| 5 | info.reveal, projectile.homing, status.tether, device drones | Initiator info | **Sova**, **Fade**, **Skye** |
-| 6 | trigger.zone, device HP/recall/destroy CD, status.snapshot, status.detain | Sentinel kits | **Cypher**, **Killjoy**, **Deadlock**, **Sage** (heal/revive), **Chamber** |
-| 7 | status.combatStim, status.haste, status.suppress, support.heal/shield/revive polish | Buff/economy completeness | **Reyna**, **KAY/O**, **Iso**, **Clove**, **Miks**, **Veto**, **Neon**, **Raze**, **Yoru**, **Waylay**, **Tejo**, **Gekko**, **Astra**, **Omen**, **Vyse** |
-| 8 | projectile.steerable, movement.pull/levitate, Telekinesis interacts | Hush last (aggregator) | **Hush** **[secondary/aggregator]** |
+| 0 (foundation (done)) | — | — | — |
+| 1 (stage-1) | damage.zoneOrHit, movement.knockback, projectile.flash, projectile.generic, status.concuss | Breach | — |
+| 2 (stage-2) | device.summonOrPlaceable, placement.mapTargeted, projectile.bouncing, status.combatStim, status.haste, vision.smoke, vision.wallOrVolume | Brimstone | — |
+| 3 (stage-3) | projectile.homing | Raze | — |
+| 4 (stage-4) | info.reveal | Sova | — |
+| 5 (stage-5) | status.suppress | KAY/O, Tejo | — |
+| 6 (stage-6) | status.slow, trigger.zone | Deadlock, Vyse | — |
+| 7 (stage-7) | movement.teleport | Chamber | — |
+| 8 (stage-8) | status.nearsight | Harbor | — |
+| 9 (stage-9) | support.heal | Skye | — |
+| 10 (stage-10) | support.revive | Phoenix, Sage | — |
+| 11 (stage-11) | status.decay, status.overheal | Clove | — |
+| 12 (stage-12) | info.audioOrMinimap, status.snapshot | Cypher | — |
+| 13 (stage-13) | status.deafen | Miks, Omen | — |
+| 14 (stage-14) | status.tether | Veto | — |
+| 15 (stage-15) | movement.pull | Fade | — |
+| 16 (stage-16) | resource.passiveMeter, status.vulnerable | Astra, Viper | controller |
+| 17 (stage-17) | status.detain | Gekko, Killjoy | controller, initiator, sentinel |
+| 18 (stage-18) | support.shield | Iso | controller, initiator, sentinel |
+| 19 (stage-19) | movement.dash | Neon | controller, initiator, sentinel |
+| 20 (stage-20) | movement.glide | Jett | controller, initiator, sentinel |
+| 21 (stage-21) | status.intangible | Reyna | controller, initiator, sentinel |
+| 22 (stage-22) | status.hinder | Waylay | controller, initiator, sentinel |
+| 23 (stage-23) | projectile.steerable | Yoru | controller, initiator, sentinel |
+| 24 (stage-24) | interact.pickup, status.levitate | Hush | controller, duelist, initiator, sentinel |
 
-### Earliest whole-role completion
+### Role completion (from generated stages)
 
-- **Initiators first complete role:** after Stage 5 (+ Gekko reclaim in Stage 7). Breach alone is Stage 2; full initiator row needs reveal/homing/reclaim.
-- **Sentinels:** Stage 6 delivers Cypher/Killjoy/Deadlock/Sage; Chamber/Vyse/Veto finish in Stage 7.
-- **Controllers:** Stage 3 gets Brimstone + Harbor (+ Viper with fuel); Astra/Omen/Clove/Miks need map placement / TP / stim in Stage 7.
-- **Duelists:** staggered; no clean early full-role cut without height + 2-kill + stim. Earliest “all duelists” is late Stage 7–8.
+- **controller:** first fully complete after stage 16.
+- **duelist:** first fully complete after stage 24.
+- **initiator:** first fully complete after stage 17.
+- **sentinel:** first fully complete after stage 17.
 
-**Recommendation (design):** chase **Stage 2 → Breach complete**, then **Stage 3 → Brimstone complete**, then **Stage 5–6 → Sova + Cypher**, matching the old “FLASH/DRIVE, Tailwind, Trapwire” next-task but under this primitive spine.
+**Recommendation (design):** implement stage 1 (Breach) then stage 2 (Brimstone) as the first executable milestone — see `docs/stage-1-plan.md`.
+
 
 ## 5. Turn layer changes (`src/sim/round.ts`) — describe only
 
@@ -459,6 +492,8 @@ Tag: **design**. Do not implement here.
 7. **Determinism.** Steer polylines and channel timings are part of the plan seed; no `Math.random`. Steerable aggregator kits (Hush) use the same queue ordering `(timeMs, sequence, agentId)`.
 
 ## 6. Decisions needed (max 10)
+
+**Approved:** all ten recommended answers are approved by the project owner (17 Nov 2026).
 
 | # | Question | Recommended answer | Tag |
 | --- | --- | --- | --- |

@@ -1,0 +1,708 @@
+{
+  "version": 1,
+  "patch": "13.10",
+  "core": [
+    "resource.charges",
+    "resource.signatureRecharge",
+    "resource.ultPoints"
+  ],
+  "stages": [
+    {
+      "id": 0,
+      "label": "foundation (done)",
+      "primitives": [],
+      "note": "Milestone 1–2: event queue, Rifle A, LOS, Sky Smoke as a special case. Under the corrected mapping no agent is fully complete yet (Sky Smoke needs placement.mapTargeted in the general model).",
+      "agentsCompleted": [],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 1,
+      "label": "stage-1",
+      "primitives": [
+        "damage.zoneOrHit",
+        "movement.knockback",
+        "projectile.flash",
+        "projectile.generic",
+        "status.concuss"
+      ],
+      "agentsCompleted": [
+        "Breach"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 2,
+      "label": "stage-2",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "placement.mapTargeted",
+        "projectile.bouncing",
+        "status.combatStim",
+        "status.haste",
+        "vision.smoke",
+        "vision.wallOrVolume"
+      ],
+      "agentsCompleted": [
+        "Brimstone"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 3,
+      "label": "stage-3",
+      "primitives": [
+        "projectile.homing"
+      ],
+      "agentsCompleted": [
+        "Raze"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 4,
+      "label": "stage-4",
+      "primitives": [
+        "info.reveal"
+      ],
+      "agentsCompleted": [
+        "Sova"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 5,
+      "label": "stage-5",
+      "primitives": [
+        "status.suppress"
+      ],
+      "agentsCompleted": [
+        "KAY/O",
+        "Tejo"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 6,
+      "label": "stage-6",
+      "primitives": [
+        "status.slow",
+        "trigger.zone"
+      ],
+      "agentsCompleted": [
+        "Deadlock",
+        "Vyse"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 7,
+      "label": "stage-7",
+      "primitives": [
+        "movement.teleport"
+      ],
+      "agentsCompleted": [
+        "Chamber"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 8,
+      "label": "stage-8",
+      "primitives": [
+        "status.nearsight"
+      ],
+      "agentsCompleted": [
+        "Harbor"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 9,
+      "label": "stage-9",
+      "primitives": [
+        "support.heal"
+      ],
+      "agentsCompleted": [
+        "Skye"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 10,
+      "label": "stage-10",
+      "primitives": [
+        "support.revive"
+      ],
+      "agentsCompleted": [
+        "Phoenix",
+        "Sage"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 11,
+      "label": "stage-11",
+      "primitives": [
+        "status.decay",
+        "status.overheal"
+      ],
+      "agentsCompleted": [
+        "Clove"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 12,
+      "label": "stage-12",
+      "primitives": [
+        "info.audioOrMinimap",
+        "status.snapshot"
+      ],
+      "agentsCompleted": [
+        "Cypher"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 13,
+      "label": "stage-13",
+      "primitives": [
+        "status.deafen"
+      ],
+      "agentsCompleted": [
+        "Miks",
+        "Omen"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 14,
+      "label": "stage-14",
+      "primitives": [
+        "status.tether"
+      ],
+      "agentsCompleted": [
+        "Veto"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 15,
+      "label": "stage-15",
+      "primitives": [
+        "movement.pull"
+      ],
+      "agentsCompleted": [
+        "Fade"
+      ],
+      "rolesFullyCompleteAfter": []
+    },
+    {
+      "id": 16,
+      "label": "stage-16",
+      "primitives": [
+        "resource.passiveMeter",
+        "status.vulnerable"
+      ],
+      "agentsCompleted": [
+        "Astra",
+        "Viper"
+      ],
+      "rolesFullyCompleteAfter": [
+        "controller"
+      ]
+    },
+    {
+      "id": 17,
+      "label": "stage-17",
+      "primitives": [
+        "status.detain"
+      ],
+      "agentsCompleted": [
+        "Gekko",
+        "Killjoy"
+      ],
+      "rolesFullyCompleteAfter": [
+        "controller",
+        "initiator",
+        "sentinel"
+      ]
+    },
+    {
+      "id": 18,
+      "label": "stage-18",
+      "primitives": [
+        "support.shield"
+      ],
+      "agentsCompleted": [
+        "Iso"
+      ],
+      "rolesFullyCompleteAfter": [
+        "controller",
+        "initiator",
+        "sentinel"
+      ]
+    },
+    {
+      "id": 19,
+      "label": "stage-19",
+      "primitives": [
+        "movement.dash"
+      ],
+      "agentsCompleted": [
+        "Neon"
+      ],
+      "rolesFullyCompleteAfter": [
+        "controller",
+        "initiator",
+        "sentinel"
+      ]
+    },
+    {
+      "id": 20,
+      "label": "stage-20",
+      "primitives": [
+        "movement.glide"
+      ],
+      "agentsCompleted": [
+        "Jett"
+      ],
+      "rolesFullyCompleteAfter": [
+        "controller",
+        "initiator",
+        "sentinel"
+      ]
+    },
+    {
+      "id": 21,
+      "label": "stage-21",
+      "primitives": [
+        "status.intangible"
+      ],
+      "agentsCompleted": [
+        "Reyna"
+      ],
+      "rolesFullyCompleteAfter": [
+        "controller",
+        "initiator",
+        "sentinel"
+      ]
+    },
+    {
+      "id": 22,
+      "label": "stage-22",
+      "primitives": [
+        "status.hinder"
+      ],
+      "agentsCompleted": [
+        "Waylay"
+      ],
+      "rolesFullyCompleteAfter": [
+        "controller",
+        "initiator",
+        "sentinel"
+      ]
+    },
+    {
+      "id": 23,
+      "label": "stage-23",
+      "primitives": [
+        "projectile.steerable"
+      ],
+      "agentsCompleted": [
+        "Yoru"
+      ],
+      "rolesFullyCompleteAfter": [
+        "controller",
+        "initiator",
+        "sentinel"
+      ]
+    },
+    {
+      "id": 24,
+      "label": "stage-24",
+      "primitives": [
+        "interact.pickup",
+        "status.levitate"
+      ],
+      "agentsCompleted": [
+        "Hush"
+      ],
+      "rolesFullyCompleteAfter": [
+        "controller",
+        "duelist",
+        "initiator",
+        "sentinel"
+      ]
+    }
+  ],
+  "agentRequirements": {
+    "Astra": {
+      "role": "controller",
+      "primitives": [
+        "info.audioOrMinimap",
+        "movement.pull",
+        "placement.mapTargeted",
+        "projectile.generic",
+        "resource.passiveMeter",
+        "status.concuss",
+        "status.vulnerable",
+        "vision.smoke",
+        "vision.wallOrVolume"
+      ]
+    },
+    "Brimstone": {
+      "role": "controller",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "placement.mapTargeted",
+        "projectile.bouncing",
+        "projectile.generic",
+        "status.combatStim",
+        "status.haste",
+        "vision.smoke",
+        "vision.wallOrVolume"
+      ]
+    },
+    "Clove": {
+      "role": "controller",
+      "primitives": [
+        "placement.mapTargeted",
+        "projectile.generic",
+        "status.decay",
+        "status.haste",
+        "status.overheal",
+        "support.heal",
+        "support.revive",
+        "vision.smoke"
+      ]
+    },
+    "Harbor": {
+      "role": "controller",
+      "primitives": [
+        "placement.mapTargeted",
+        "projectile.generic",
+        "status.nearsight",
+        "status.slow",
+        "vision.smoke",
+        "vision.wallOrVolume"
+      ]
+    },
+    "Miks": {
+      "role": "controller",
+      "primitives": [
+        "info.audioOrMinimap",
+        "movement.knockback",
+        "placement.mapTargeted",
+        "projectile.generic",
+        "status.combatStim",
+        "status.concuss",
+        "status.deafen",
+        "status.haste",
+        "status.slow",
+        "support.heal",
+        "vision.smoke"
+      ]
+    },
+    "Omen": {
+      "role": "controller",
+      "primitives": [
+        "info.audioOrMinimap",
+        "movement.teleport",
+        "placement.mapTargeted",
+        "projectile.generic",
+        "status.deafen",
+        "status.nearsight",
+        "vision.smoke"
+      ]
+    },
+    "Viper": {
+      "role": "controller",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.generic",
+        "resource.passiveMeter",
+        "status.decay",
+        "status.nearsight",
+        "status.vulnerable",
+        "vision.smoke",
+        "vision.wallOrVolume"
+      ]
+    },
+    "Iso": {
+      "role": "duelist",
+      "primitives": [
+        "projectile.generic",
+        "status.suppress",
+        "status.vulnerable",
+        "support.shield",
+        "vision.wallOrVolume"
+      ]
+    },
+    "Jett": {
+      "role": "duelist",
+      "primitives": [
+        "damage.zoneOrHit",
+        "movement.dash",
+        "movement.glide",
+        "movement.knockback",
+        "vision.smoke"
+      ]
+    },
+    "Neon": {
+      "role": "duelist",
+      "primitives": [
+        "damage.zoneOrHit",
+        "movement.dash",
+        "projectile.generic",
+        "resource.passiveMeter",
+        "status.concuss",
+        "status.haste",
+        "vision.wallOrVolume"
+      ]
+    },
+    "Phoenix": {
+      "role": "duelist",
+      "primitives": [
+        "damage.zoneOrHit",
+        "projectile.flash",
+        "projectile.generic",
+        "support.heal",
+        "support.revive",
+        "vision.wallOrVolume"
+      ]
+    },
+    "Raze": {
+      "role": "duelist",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "movement.knockback",
+        "projectile.bouncing",
+        "projectile.generic",
+        "projectile.homing"
+      ]
+    },
+    "Reyna": {
+      "role": "duelist",
+      "primitives": [
+        "info.reveal",
+        "projectile.generic",
+        "resource.passiveMeter",
+        "status.combatStim",
+        "status.intangible",
+        "status.nearsight",
+        "support.heal"
+      ]
+    },
+    "Waylay": {
+      "role": "duelist",
+      "primitives": [
+        "movement.dash",
+        "movement.teleport",
+        "projectile.generic",
+        "status.haste",
+        "status.hinder",
+        "status.intangible",
+        "status.nearsight"
+      ]
+    },
+    "Yoru": {
+      "role": "duelist",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "movement.glide",
+        "movement.teleport",
+        "projectile.flash",
+        "projectile.generic",
+        "projectile.steerable",
+        "status.intangible"
+      ]
+    },
+    "Breach": {
+      "role": "initiator",
+      "primitives": [
+        "damage.zoneOrHit",
+        "movement.knockback",
+        "projectile.flash",
+        "projectile.generic",
+        "status.concuss"
+      ]
+    },
+    "Fade": {
+      "role": "initiator",
+      "primitives": [
+        "info.audioOrMinimap",
+        "info.reveal",
+        "movement.pull",
+        "projectile.generic",
+        "projectile.homing",
+        "status.deafen",
+        "status.decay",
+        "status.nearsight",
+        "status.tether",
+        "trigger.zone"
+      ]
+    },
+    "Gekko": {
+      "role": "initiator",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "projectile.flash",
+        "projectile.generic",
+        "projectile.homing",
+        "resource.passiveMeter",
+        "status.concuss",
+        "status.detain"
+      ]
+    },
+    "KAY/O": {
+      "role": "initiator",
+      "primitives": [
+        "damage.zoneOrHit",
+        "info.reveal",
+        "projectile.flash",
+        "projectile.generic",
+        "status.combatStim",
+        "status.suppress"
+      ]
+    },
+    "Skye": {
+      "role": "initiator",
+      "primitives": [
+        "damage.zoneOrHit",
+        "info.reveal",
+        "projectile.flash",
+        "projectile.generic",
+        "projectile.homing",
+        "status.concuss",
+        "status.nearsight",
+        "status.slow",
+        "support.heal"
+      ]
+    },
+    "Sova": {
+      "role": "initiator",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "info.reveal",
+        "placement.mapTargeted",
+        "projectile.bouncing",
+        "projectile.generic"
+      ]
+    },
+    "Tejo": {
+      "role": "initiator",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "info.reveal",
+        "placement.mapTargeted",
+        "projectile.bouncing",
+        "projectile.generic",
+        "status.concuss",
+        "status.suppress"
+      ]
+    },
+    "Chamber": {
+      "role": "sentinel",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "info.reveal",
+        "movement.teleport",
+        "status.slow",
+        "trigger.zone"
+      ]
+    },
+    "Cypher": {
+      "role": "sentinel",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "info.audioOrMinimap",
+        "info.reveal",
+        "status.slow",
+        "status.snapshot",
+        "trigger.zone",
+        "vision.smoke"
+      ]
+    },
+    "Deadlock": {
+      "role": "sentinel",
+      "primitives": [
+        "device.summonOrPlaceable",
+        "status.concuss",
+        "status.slow",
+        "trigger.zone",
+        "vision.wallOrVolume"
+      ]
+    },
+    "Killjoy": {
+      "role": "sentinel",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "projectile.generic",
+        "status.detain",
+        "status.slow",
+        "status.vulnerable",
+        "trigger.zone"
+      ]
+    },
+    "Sage": {
+      "role": "sentinel",
+      "primitives": [
+        "projectile.generic",
+        "status.slow",
+        "support.heal",
+        "support.revive",
+        "vision.wallOrVolume"
+      ]
+    },
+    "Veto": {
+      "role": "sentinel",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "info.audioOrMinimap",
+        "movement.teleport",
+        "status.combatStim",
+        "status.deafen",
+        "status.decay",
+        "status.tether",
+        "support.heal",
+        "trigger.zone"
+      ]
+    },
+    "Vyse": {
+      "role": "sentinel",
+      "primitives": [
+        "damage.zoneOrHit",
+        "device.summonOrPlaceable",
+        "projectile.flash",
+        "projectile.generic",
+        "status.slow",
+        "trigger.zone",
+        "vision.wallOrVolume"
+      ]
+    },
+    "Hush": {
+      "role": "duelist",
+      "primitives": [
+        "interact.pickup",
+        "movement.dash",
+        "movement.glide",
+        "movement.pull",
+        "projectile.flash",
+        "projectile.generic",
+        "projectile.steerable",
+        "status.concuss",
+        "status.levitate"
+      ]
+    }
+  }
+}

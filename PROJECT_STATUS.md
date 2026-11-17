@@ -226,7 +226,7 @@ A live smoke or cage blocks the look a flash needs, and that block ends when the
 
 1. **Done.** Drill, catalog, live smoke, both-team draft, coverage, JSON scenario.
 2. **Done.** Interactive planning windows, fog-of-war view, defense hold stub, auto-engage, hp/death.
-3. **Next.** Shared effect primitives before more abilities — see [`docs/effect-primitives.md`](docs/effect-primitives.md); then implement along that build order (FLASH/DRIVE, Tailwind, and Trapwire remain early consumers). Keep every new number secondary or verified. Definitions already exist as placeholders.
+3. **Next.** Shared effect primitives — see [`docs/effect-primitives.md`](docs/effect-primitives.md) and checkable data in `data/ability-primitives.json` / `data/primitive-stages.json`. First implementation milestone: Breach + Brimstone per [`docs/stage-1-plan.md`](docs/stage-1-plan.md).
 4. Richer draft report: map fit, synergies, counter-composition, and which plans a composition can support. Suitability stays separate from any win claim.
 5. More complete kits and Sova recon. Each new ability flips its own status.
 6. Versioned weapons and armor. Replace Rifle A only where a primary source exists.
@@ -241,4 +241,4 @@ A live smoke or cage blocks the look a flash needs, and that block ends when the
 
 ## Next task
 
-Implement executable FLASH/DRIVE, Tailwind, and Trapwire, with tests for ownership, charges, timing, and geometry. Tag these from the sources already opened: FLASH/DRIVE underhand maximum 2.25s (11.08), Trapwire windup 0.7s (13.00), Tailwind windup 1s and dash window 7.5s (7.04). Leave Trapwire slow potency and the 11m dash distance unmarked. If Nightfall decay is stored later, use 75 from the US 11.08 note and keep the wiki's 80 beside it. Store nearsight radii per ability: Prowler 7m, Paranoia 7.5m, Leer 6m, Seekers 7.5m.
+Implement stage 1 from `docs/stage-1-plan.md`: Breach and Brimstone fully executable in the Drill Hall round (primitives, orders, charges/ult/buy stub, tests). Keep every new number tagged from `agent-reference.json`; do not invent missing ally-damage fractions or Flashpoint speed units.
