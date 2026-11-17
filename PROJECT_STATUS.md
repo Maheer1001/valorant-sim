@@ -1,8 +1,8 @@
 # Project status
 
-Updated: 21 October 2026. Milestone 1 is implemented.
+Updated: 17 November 2026. Milestone 2 (interactive turn window) is implemented. Milestone 1 remains in place.
 
-Agent records for patch 13.08 are in `agent-reference.json`. Each ability stores the sheet's duration, effect, damage, team damage, windup, and remaining stats. That file is a reference, not the sim catalog.
+Agent records for patch 13.10 are in `agent-reference.json`. Each ability stores the sheet's duration, effect, damage, team damage, windup, and remaining stats. That file is a reference, not the sim catalog.
 
 ## Stack
 
@@ -12,7 +12,7 @@ No backend. No machine-learning runtime. Opponent code, when it exists, will be 
 
 ## Architecture
 
-One package. `src/sim`, `src/tactics`, `src/learning`, `src/persistence`, and `src/rules` do not import React or the UI. A boundary test scans those folders. The UI holds a session and renders snapshots.
+One package. `src/sim`, `src/tactics`, `src/learning`, `src/persistence`, and `src/rules` do not import React or the UI. A boundary test scans those folders. The UI holds a session or interactive round and renders snapshots.
 
 ```text
 src/
@@ -27,6 +27,7 @@ src/
     rng.ts
     clock.ts
     run.ts
+    round.ts
     session.ts
     describe.ts
     map/geometry.ts
@@ -44,6 +45,7 @@ src/
     scenario/types.ts
     scenario/default-drill.ts
   tactics/decision.ts
+  tactics/defense-stub.ts
   learning/record.ts
   persistence/scenario-file.ts
   rules/provenance.ts
@@ -53,17 +55,19 @@ tests/
 
 `runScenario` executes scenario orders only. It does not call `DecisionContext` or write learning records. Those modules export their contracts and version constants so later milestones can fill them without reshaping the runner.
 
+`openRound` / `submitPlan` / `resolveWindow` run the interactive turn layer. Both sides submit a plan for a fixed window; the shared event queue drains `[t, t + windowMs]` with the same `(timeMs, sequence, agentId)` ordering. `view(side)` returns fog-of-war. `defenseHoldPlan` is a hold-position stub in `tactics/`.
+
 Coverage is the only composition evaluator. `PLANNED_EVALUATORS` names map suitability, synergy, counter-composition, and supported plans. `evaluateCoverage` accepts an opposing profile and does not score it. A coverage report is not a match prediction.
 
 ## Simulation state and randomness
 
-`runScenario` and `openSession` / `stepSession` do not render. React stores the latest session. Play, pause, and step call the session. The board reads positions, charges, and smokes from the snapshot at the cursor.
+`runScenario` and `openSession` / `stepSession` do not render. The interactive UI stores a `Round`. Play, pause, and step walk the last resolved window log. The board reads positions, charges, and smokes from the stepped snapshot, fogged to attack view unless truth mode is on.
 
 Time is integer milliseconds. Positions are integer millimeters. The queue orders events by `(timeMs, sequence, agentId)`.
 
-`src/sim/rng.ts` forks named streams from the scenario seed. The combat stream is `combat`. The simulation does not call `Math.random`. A withheld shot does not draw. A resolved shot stores hit chance, in basis points, and the draw as separate fields. Smoke placement is deterministic.
+`src/sim/rng.ts` forks named streams from the scenario seed and can resume a stream from a saved mulberry32 state across windows. The combat stream is `combat`. The simulation does not call `Math.random`. A withheld shot does not draw. A resolved shot stores hit chance, in basis points, and the draw as separate fields. Smoke placement is deterministic.
 
-Identical scenario, ruleset, catalog version, and seed deep-equal. Seeds 1 and 2 change the rifle draw and keep the same hit chance.
+Identical scenario, ruleset, catalog version, seed, and window plans deep-equal. Seeds 1 and 2 change the rifle draw and keep the same hit chance.
 
 ## Rules and provenance
 
@@ -74,12 +78,15 @@ Standard ruleset id: `standard-competitive`.
 | Team size 5 | `teamSize` | secondary. Wiki gameplay summary says ten players are split into two teams. Not confirmed in the live client. |
 | Agent uniqueness | `per-team` | secondary. The same page says one of each agent can be selected on each team, and that the other team's locks stay hidden until the first buy phase. That is not a cross-team ban. Not confirmed in the live client, so it is not verified. |
 | `per-match` and `none` | selectable on a ruleset | available for later modes and tests. They are not the standard ruleset. |
+| Planning window 3000 ms | `windowMs` | assumed. Lab turn length for simultaneous plans. Not a Valorant timer. |
+| Walk speed 3500 mm/s | `walkSpeedMmPerSec` | assumed. Matches the milestone-1 drill script. Not a measured Valorant walk speed. |
+| Auto-fire interval 1000 ms | `autoFireIntervalMs` | assumed. Agents without a shoot order auto-engage the nearest visible enemy with Rifle A on this interval. Not a Valorant fire rate. |
 
 The same agent may be drafted on both teams. A second copy on one team is rejected. A sixth member is rejected.
 
 Sky Smoke figures are secondary, from the Sky Smoke wiki page: 3 charges, 100 credits, 19.25 s, 1 s deploy, 4.15 m radius, 55 m cast range. They were not re-measured in the client. Patch 13.05 is the primary source for blocking ending once the smoke is gone. The instant cutoff at `expiresAtMs`, and the rule that any intersection with the disk blocks sight, are assumed. There is no fade.
 
-Rifle A is an original assumed weapon. It is not a Valorant rifle. Body damage is 40. Hit chance falls from 7500 to 2500 basis points over 15 m. A draw below the chance hits. There is no headshot, armor, spray, or reload.
+Rifle A is an original assumed weapon. It is not a Valorant rifle. Body damage is 40. Hit chance falls from 7500 to 2500 basis points over 15 m. A draw below the chance hits. There is no headshot, armor, spray, or reload. Starting hp is 100 (assumed). Death is `hp <= 0`.
 
 The drill starts with recorded charge pools already full. That setup note is assumed. It is not a buy phase.
 
@@ -102,7 +109,7 @@ Drill Hall is an original two-room schematic with a doorway, a dividing wall, an
 
 Default scenario: Brimstone on attack walks to the doorway and casts Sky Smoke. Jett on defense holds the angle. The shot during the smoke is withheld. The shot after expiry resolves with Rifle A. The user can replace either agent, add catalog agents up to five per team, inspect a kit, and read coverage. Play, pause, and step follow the engine log. Export and import round-trip scenario JSON version 1.
 
-### Checks
+### Checks (Milestone 1)
 
 | Command | Result |
 | --- | --- |
@@ -129,9 +136,51 @@ Browser check on the dev server: stepping reached the active smoke on the board;
 12. The draft panel lists the four agents, shows implementation badges, and the attack coverage text loses Brimstone Sky Smoke when he is removed.
 13. Step and play advance the session cursor. The event list is the session log.
 
+## Milestone 2 result
+
+Interactive chess-like planning windows on Drill Hall.
+
+Each side submits orders for a 3000 ms window (assumed). `resolveWindow` merges both plans into the existing event queue and drains through the window end. Defense uses a hold stub. Attack plans from the UI: select an attacker, click the map to queue a move or Sky Smoke, then resolve. The board shows `view('attack')` by default, with a truth toggle. Timeline play/pause/step walks the last window's event log.
+
+Window orders: hold, move (assumed walk speed, walls clip), cast (existing validation and rejection codes), shoot a named visible enemy. Agents without a shoot order auto-engage the nearest visible enemy on the assumed auto-fire interval with Rifle A. Invalid plans are rejected entirely with a typed reason and are not stored.
+
+### Checks (Milestone 2)
+
+| Command | Result |
+| --- | --- |
+| `npm test` | Pass. Vitest 5.0.5, 11 files, 29 tests, 17 November 2026. |
+| `npm run lint` | Pass. ESLint completed with no findings. |
+| `npm run typecheck` | Pass. `tsc --noEmit` completed with no errors. |
+| `npm run build` | Pass. Vite 8.3.4 produced `dist/` in 171 ms. |
+
+### Acceptance
+
+1. Same seed and plans deep-equal; a different seed changes the draw but not the hit chance.
+2. Both sides' same-time actions resolve in queue order (`timeMs`, then `sequence`, then `agentId`), not attacker-first.
+3. Walls block movement. An active smoke blocks auto-engage until it expires.
+4. An invalid order rejects the whole plan with a typed reason.
+5. `view('attack')` hides an enemy behind a wall and shows them once in line of sight.
+6. Existing Milestone 1 tests still pass. Architecture boundary test still passes.
+
+## Agent reference review (17 November 2026, patches 13.09 / 13.10)
+
+`agent-reference.json` is now patch 13.10, recorded 2026-11-17. It stays a reference file, not the sim catalog. New source tag: `aggregator` = third-party site that says it reads game files, not checked against the files or a primary page.
+
+13.09 / 13.10 data updates in the file:
+
+- Clove Pick-me-up bonus movement speed 15% → 10% (secondary, Liquipedia 13.09).
+- Clove Not Dead Yet: killing Clove after cast grants the killer 1 ult point and 1 signature refresh point; earlier rewards not stated and not guessed (secondary).
+- `buffTerms`: Haste (movement speed), Combat Stim (fire rate / equip / reload / recovery), Snapshot (still-image silhouette reveal). Haste shown by Stim Beacon, Pick-me-up, Harmonize, High Gear, Overdrive, and Waylay Convergent Paths (renamed to Haste). Snapshot from Neural Theft and Spycam. Names only (secondary).
+- Cypher Spycam destroy cooldown 60s → 45s, reclaim 15s → 20s (verified, Riot 13.10). Killjoy Turret and Vyse Arc Rose destroy cooldowns 60s → 45s (verified). Sage Healing Orb: ally targeting accuracy and visible crosshair note only (verified).
+- `rules.assists`: damageAssist (>10 damage within 3s), totalDamageAssist (≥50 damage whenever dealt), healingAssist (kill within 10s after heal ends); `givesUltPoints: false` matches the existing ult-point rule (verified for the three assist definitions).
+- Hush is live (file id 30; Riot calls Hush Agent 31 — not used as the id). Keys C Flow, Q Flashbulb, E Displacement, X Suspension, plus Telekinesis. Aggregator raw units are stored unlabeled and not converted to meters.
+- Deadlock keys in JSON were already C Barrier Mesh, Q Sonic Sensor, E GravNet; left unchanged.
+
+Still unconfirmed for Hush: Telekinesis range; Flashbulb charges; Flow levitate duration; Flashbulb radius; Displacement/Suspension radius units; costs and numbers not confirmed by a primary source opened here. Displacement aggregator concuss 1.5s conflicts with the standardised 2.5s Concuss list in globals; both are kept.
+
 ## Agent reference review (21 October 2026, revised sheet)
 
-A second patch 13.08 roster sheet was checked against Riot notes 13.08, 11.08, and 7.04, and against the Weird Gloop wiki stat tables. It was not copied into the catalog. Hush is announced for 27 October 2026 and is not a live agent.
+A second patch 13.08 roster sheet was checked against Riot notes 13.08, 11.08, and 7.04, and against the Weird Gloop wiki stat tables. It was not copied into the catalog. Hush was then announced for 27 October 2026; the 17 November 2026 update above records Hush as live in the reference file.
 
 The revision fixes several earlier mismatches, and those fixes match the sources:
 
@@ -164,28 +213,32 @@ A live smoke or cage blocks the look a flash needs, and that block ends when the
 
 - One original map and four agents. Only Sky Smoke executes.
 - No flash, dash, trip, spike, economy, buy phase, or ultimate effect.
-- No opponent choice, tendency update, or difficulty preset.
+- Defense is a hold stub. No opponent choice, tendency update, or difficulty preset.
 - No IndexedDB. Persistence is versioned JSON text.
 - Jett's Tailwind page and Cypher's Trapwire and Cyber Cage pages were opened for the revised sheet. Their roles were not re-fetched as separate pages.
 - Uniqueness and team size are secondary, not client-verified.
 - Drill Hall is 20 m wide, so the secondary 4.15 m smoke covers a large part of the doorway. That is the recorded radius on this small schematic.
+- Planning window length, walk speed, and auto-fire interval are assumed lab values.
+- No armor. Auto-engage and player shoot orders use Rifle A only.
+- Mid-window moves that finish after the window end are advanced by integer lerp and carried in the pending queue.
 
 ## Roadmap
 
 1. **Done.** Drill, catalog, live smoke, both-team draft, coverage, JSON scenario.
-2. **Next.** KAY/O FLASH/DRIVE, Jett Tailwind, and Cypher Trapwire. Ownership, charges, timing, and geometry. Keep every new number secondary or verified. Definitions already exist as placeholders.
-3. Richer draft report: map fit, synergies, counter-composition, and which plans a composition can support. Suitability stays separate from any win claim.
-4. More complete kits and Sova recon. Each new ability flips its own status.
-5. Versioned weapons and armor. Replace Rifle A only where a primary source exists.
-6. Beliefs. Smokes, and later trips and recon, limit what a decision context may contain.
-7. Spike plant and defuse, including post-plant utility that exists.
-8. Economy, ability purchases, and signature replenishment.
-9. Halves, side switch, overtime.
-10. Planner. Steps name the agent, resources, timing, dependencies, and fallbacks. Beginner and Intermediate presets.
-11. Feasible plans change with the draft, deaths, and spent utility.
-12. Learning records keyed by agent, sequence, map, side, economy band, and both composition ids. Radiant and VCT read that store under the same rules.
-13. Replay judgments and batch comparison.
+2. **Done.** Interactive planning windows, fog-of-war view, defense hold stub, auto-engage, hp/death.
+3. **Next.** KAY/O FLASH/DRIVE, Jett Tailwind, and Cypher Trapwire. Ownership, charges, timing, and geometry. Keep every new number secondary or verified. Definitions already exist as placeholders.
+4. Richer draft report: map fit, synergies, counter-composition, and which plans a composition can support. Suitability stays separate from any win claim.
+5. More complete kits and Sova recon. Each new ability flips its own status.
+6. Versioned weapons and armor. Replace Rifle A only where a primary source exists.
+7. Beliefs. Smokes, and later trips and recon, limit what a decision context may contain. Wire `view(side)` into `DecisionContext`.
+8. Spike plant and defuse, including post-plant utility that exists.
+9. Economy, ability purchases, and signature replenishment.
+10. Halves, side switch, overtime.
+11. Planner. Steps name the agent, resources, timing, dependencies, and fallbacks. Beginner and Intermediate presets.
+12. Feasible plans change with the draft, deaths, and spent utility.
+13. Learning records keyed by agent, sequence, map, side, economy band, and both composition ids. Radiant and VCT read that store under the same rules.
+14. Replay judgments and batch comparison.
 
 ## Next task
 
-Implement milestone 2: make FLASH/DRIVE, Tailwind, and Trapwire executable, with tests for ownership, charges, timing, and geometry. Tag these from the sources already opened: FLASH/DRIVE underhand maximum 2.25s (11.08), Trapwire windup 0.7s (13.00), Tailwind windup 1s and dash window 7.5s (7.04). Leave Trapwire slow potency and the 11m dash distance unmarked. If Nightfall decay is stored later, use 75 from the US 11.08 note and keep the wiki's 80 beside it. Store nearsight radii per ability: Prowler 7m, Paranoia 7.5m, Leer 6m, Seekers 7.5m.
+Implement executable FLASH/DRIVE, Tailwind, and Trapwire, with tests for ownership, charges, timing, and geometry. Tag these from the sources already opened: FLASH/DRIVE underhand maximum 2.25s (11.08), Trapwire windup 0.7s (13.00), Tailwind windup 1s and dash window 7.5s (7.04). Leave Trapwire slow potency and the 11m dash distance unmarked. If Nightfall decay is stored later, use 75 from the US 11.08 note and keep the wiki's 80 beside it. Store nearsight radii per ability: Prowler 7m, Paranoia 7.5m, Leer 6m, Seekers 7.5m.

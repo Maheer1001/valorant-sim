@@ -1,13 +1,14 @@
 {
-  "patch": "13.08",
-  "recorded": "2026-10-21",
-  "idNote": "id is this file's integer, in roster order. It is not Riot's agent number.",
+  "patch": "13.10",
+  "recorded": "2026-11-17",
+  "idNote": "id is this file's integer, in roster order. It is not Riot's agent number. Riot's own agent numbering is different (Riot calls Hush Agent 31); do not use Riot's number as the id.",
   "usage": "Reference only. Not the sim catalog. null means that stat was not in the shared sheet. An object with estimate:true is a sheet (est.) measurement. Do not copy a value into code and call it verified.",
   "source": {
     "verified": "Riot patch note opened in this project",
     "secondary": "wiki page opened in this project",
     "sheet": "corrected 21 Oct 2026 ability sheet",
-    "estimate": "sheet marked (est.)"
+    "estimate": "sheet marked (est.)",
+    "aggregator": "third-party site that says it reads game files, not checked against the files or a primary page"
   },
   "fields": {
     "id": "int",
@@ -49,7 +50,7 @@
       "Skye Trailblazer: 2.5s at the edge to 4s at the centre",
       "Breach Rolling Thunder: 4s",
       "Miks M-pulse: up to 2s per pulse",
-      "Hush Displacement: concusses a player pulled into a surface or another player; duration unpublished"
+      "Hush Displacement: aggregator concussSec 1.5; conflicts with standardised 2.5s Concuss in globals; both kept"
     ],
     "nearsightVisionRadiusM": {
       "Fade Prowler": 7,
@@ -454,7 +455,7 @@
           "stats": {
             "usableAfterKillSec": 4.5,
             "castSec": 0.7,
-            "moveSpeed": 0.15,
+            "moveSpeed": 0.1,
             "moveSpeedSec": 3,
             "overhealHp": 50,
             "overhealSec": 10,
@@ -468,9 +469,10 @@
             },
             "damageCreditWindowSec": 6,
             "capHealthShieldsOverheal": 150,
-            "selfOnly": true
+            "selfOnly": true,
+            "moveSpeedNote": "13.09: bonus movement speed 15% to 10% (Liquipedia patch 13.09 page)."
           },
-          "source": "sheet"
+          "source": "secondary"
         },
         {
           "slot": "Q",
@@ -558,9 +560,11 @@
             "guns": "reloaded",
             "failEffect": "dies again",
             "roundEndKeepsAlive": true,
-            "cannotShootWhileIntangible": true
+            "cannotShootWhileIntangible": true,
+            "killerRewardNote": "Killing Clove after she casts Not Dead Yet grants the killer 1 ult point and 1 signature refresh point. Previous rewards are not stated anywhere and are not guessed.",
+            "killerRewardSource": "secondary"
           },
-          "source": "sheet"
+          "source": "secondary"
         }
       ]
     },
@@ -3677,7 +3681,7 @@
       "signature": "Spycam",
       "signatureSlot": "E",
       "signatureDurationSec": null,
-      "signatureRecharge": "free until destroyed; 60s if destroyed, 15s if recalled",
+      "signatureRecharge": "free until destroyed; 45s if destroyed, 20s if recalled",
       "ultimate": "Neural Theft",
       "ultimatePoints": 7,
       "abilities": [
@@ -3755,7 +3759,7 @@
           "kind": "signature",
           "costCredits": 0,
           "maxCharges": 1,
-          "recharge": "60s if destroyed, 15s if recalled",
+          "recharge": "45s if destroyed, 20s if recalled",
           "effect": [
             "reveal"
           ],
@@ -3773,10 +3777,11 @@
             "dartRevealIntervalSec": 2,
             "dartRemoveSec": 1.85,
             "dartCooldownSec": 6,
-            "destroyedCooldownSec": 60,
-            "recallCooldownSec": 15
+            "destroyedCooldownSec": 45,
+            "recallCooldownSec": 20,
+            "patch1310Note": "Destroyed cooldown 60s to 45s; reclaim cooldown 15s to 20s."
           },
-          "source": "sheet"
+          "source": "verified"
         },
         {
           "slot": "X",
@@ -3967,7 +3972,7 @@
       "signature": "Turret",
       "signatureSlot": "E",
       "signatureDurationSec": null,
-      "signatureRecharge": "free until destroyed; 60s if destroyed, 20s if recalled",
+      "signatureRecharge": "free until destroyed; 45s if destroyed, 20s if recalled",
       "ultimate": "Lockdown",
       "ultimatePoints": 9,
       "abilities": [
@@ -4065,7 +4070,7 @@
           "kind": "signature",
           "costCredits": 0,
           "maxCharges": 1,
-          "recharge": "60s if destroyed, 20s if recalled",
+          "recharge": "45s if destroyed, 20s if recalled",
           "effect": [
             "damage",
             "Slow"
@@ -4095,10 +4100,11 @@
             "fireRateBuff": 0.5,
             "fireRateBuffPatch": "13.00",
             "tagSlowPercent": 50,
-            "destroyedCooldownSec": 60,
+            "destroyedCooldownSec": 45,
             "recallCooldownSec": 20,
             "destroyCooldownVerified": "11.08 from 45s",
-            "tagSlowVerified": "11.08"
+            "tagSlowVerified": "11.08",
+            "patch1310Note": "Destroyed cooldown 60s to 45s."
           },
           "source": "verified"
         },
@@ -4225,9 +4231,10 @@
             "healHpPerSec": 20,
             "fire": "ally in crosshair",
             "altFire": "Sage",
-            "selfHealFrom": "13.00, up from 50"
+            "selfHealFrom": "13.00, up from 50",
+            "patch1310Note": "Ally targeting accuracy improved and the crosshair shows while targeting (13.10). No number changes."
           },
-          "source": "sheet"
+          "source": "verified"
         },
         {
           "slot": "X",
@@ -4416,7 +4423,7 @@
       "signature": "Arc Rose",
       "signatureSlot": "E",
       "signatureDurationSec": 2,
-      "signatureRecharge": "free; 20s if recalled, 60s if destroyed",
+      "signatureRecharge": "free; 20s if recalled, 45s if destroyed",
       "ultimate": "Steel Garden",
       "ultimatePoints": 8,
       "abilities": [
@@ -4486,7 +4493,7 @@
           "kind": "signature",
           "costCredits": 0,
           "maxCharges": 1,
-          "recharge": "20s if recalled, 60s if destroyed",
+          "recharge": "20s if recalled, 45s if destroyed",
           "effect": [
             "flash"
           ],
@@ -4504,11 +4511,12 @@
             "flashSec": 2,
             "recallRangeM": 32.5,
             "recallCooldownSec": 20,
-            "destroyedCooldownSec": 60,
+            "destroyedCooldownSec": 45,
             "destructibleOnceWindupStarts": true,
-            "requiresSeen": true
+            "requiresSeen": true,
+            "patch1310Note": "Destroyed cooldown 60s to 45s; recalled cooldown 20s unchanged."
           },
-          "source": "sheet"
+          "source": "verified"
         },
         {
           "slot": "X",
@@ -4541,7 +4549,7 @@
       "id": 30,
       "name": "Hush",
       "role": "duelist",
-      "live": false,
+      "live": true,
       "keys": {
         "C": "Flow",
         "Q": "Flashbulb",
@@ -4553,7 +4561,15 @@
       "signatureDurationSec": null,
       "signatureRecharge": "2 kills",
       "ultimate": "Suspension",
-      "ultimatePoints": null,
+      "ultimatePoints": 8,
+      "knownGaps": [
+        "Telekinesis range",
+        "Flashbulb charges",
+        "Flow levitate duration",
+        "Flashbulb radius",
+        "Displacement/Suspension radius units are unconfirmed",
+        "costs and numbers for Hush are not confirmed by a primary source I have opened"
+      ],
       "abilities": [
         {
           "slot": "passive",
@@ -4563,7 +4579,9 @@
           "maxCharges": null,
           "recharge": null,
           "effect": [
-            "interact"
+            "pick up weapons",
+            "pick up Spike (attacker side only)",
+            "use map switches from increased range"
           ],
           "durationSec": null,
           "windupSec": null,
@@ -4571,88 +4589,130 @@
           "teamDamage": null,
           "hitsAllies": null,
           "stats": {
-            "range": "increased",
+            "range": null,
             "canPickUp": [
               "weapons",
-              "Spike"
+              "Spike (attacker side only)"
             ],
             "canUseSwitches": true,
-            "costs": null,
-            "note": "announced for 27 Oct 2026; costs, charges, and ult points unpublished"
+            "note": "Range unpublished."
           },
-          "source": "sheet"
+          "source": "secondary"
         },
         {
           "slot": "C",
           "name": "Flow",
           "kind": "basic",
-          "costCredits": null,
-          "maxCharges": null,
-          "recharge": null,
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
           "effect": [
-            "dash"
+            "instantly creates an anchor; used in the air she briefly levitates in place first; after a delay she propels toward the anchor"
           ],
           "durationSec": null,
-          "windupSec": null,
+          "windupSec": 0.75,
           "damage": null,
           "teamDamage": null,
           "hitsAllies": null,
           "stats": {
-            "anchor": "instant",
-            "delay": "short",
-            "air": "levitates briefly first",
-            "costCredits": null,
-            "maxCharges": null
+            "windupSec": 0.75,
+            "windupSource": "secondary",
+            "windupNote": "wiki snippet",
+            "levitateDurationSec": null,
+            "baseSpeed": {
+              "value": 2250,
+              "unit": "unlabeled game units"
+            },
+            "traceLength": {
+              "value": 1500,
+              "unit": "unlabeled game units"
+            },
+            "forceDuration": {
+              "value": 0.4,
+              "unit": "unlabeled game units"
+            },
+            "fallGraceDistance": {
+              "value": 1000,
+              "unit": "unlabeled game units"
+            },
+            "maxUpwardsSpeed": {
+              "value": 500,
+              "unit": "unlabeled game units"
+            }
           },
-          "source": "sheet"
+          "source": "aggregator"
         },
         {
           "slot": "Q",
           "name": "Flashbulb",
           "kind": "basic",
-          "costCredits": null,
+          "costCredits": 250,
           "maxCharges": null,
           "recharge": null,
           "effect": [
-            "flash"
+            "explodes on any surface or after a delay, flashing all players looking at it; steered toward the crosshair in flight"
           ],
           "durationSec": null,
-          "windupSec": null,
+          "windupSec": 0.5,
           "damage": null,
           "teamDamage": null,
-          "hitsAllies": null,
+          "hitsAllies": true,
           "stats": {
-            "cast": "throw or prep, then redirect toward the crosshair",
-            "detonates": "on a surface or after a delay",
-            "costCredits": null
+            "windupSec": 0.5,
+            "flashDuration": {
+              "value": 0.4,
+              "unit": "unlabeled game units"
+            },
+            "maxTargetingDistance": {
+              "value": 6500,
+              "unit": "unlabeled game units"
+            },
+            "minTargetingDistance": {
+              "value": 3250,
+              "unit": "unlabeled game units"
+            },
+            "equipDelaySec": 0.8,
+            "chargesNote": "maxCharges not listed"
           },
-          "source": "sheet"
+          "source": "aggregator"
         },
         {
           "slot": "E",
           "name": "Displacement",
           "kind": "signature",
-          "costCredits": null,
-          "maxCharges": null,
+          "costCredits": 0,
+          "maxCharges": 1,
           "recharge": "2 kills",
           "effect": [
-            "pull",
-            "Concuss"
+            "explodes on any surface or after a delay, pulling all players toward the center, and concussing them if they collide with a surface or another player"
           ],
           "durationSec": null,
-          "windupSec": null,
+          "windupSec": 0.5,
           "damage": null,
           "teamDamage": null,
-          "hitsAllies": null,
+          "hitsAllies": true,
           "stats": {
-            "cast": "throw or prep, then redirect",
-            "explodes": "on impact or after a delay",
-            "pull": "toward centre",
-            "concussWhen": "pulled into a surface or another player",
-            "costCredits": null,
-            "maxCharges": null
+            "rechargeSource": "secondary",
+            "rechargeNote": "2 kills from the 13.09 notes",
+            "concussSec": 1.5,
+            "pullDurationSec": 0.5,
+            "windupSec": 0.5,
+            "equipDelaySec": 0.8,
+            "radiusRaw": {
+              "value": 575,
+              "unit": "unlabeled game units"
+            },
+            "maxTargetingDistance": {
+              "value": 6500,
+              "unit": "unlabeled game units"
+            },
+            "minTargetingDistance": {
+              "value": 5000,
+              "unit": "unlabeled game units"
+            },
+            "conflicts": "concuss 1.5 s differs from the standardised 2.5 s Concuss value in globals; keep both and do not overwrite the standard"
           },
-          "source": "sheet"
+          "source": "aggregator"
         },
         {
           "slot": "X",
@@ -4660,23 +4720,98 @@
           "kind": "ultimate",
           "costCredits": null,
           "maxCharges": null,
-          "recharge": null,
+          "recharge": "8 ult points",
           "effect": [
-            "levitate"
+            "prepare, fire it forward and steer it with the crosshair, then reactivate or fire again to detonate; levitates all players in range"
           ],
           "durationSec": null,
           "windupSec": null,
           "damage": null,
           "teamDamage": null,
-          "hitsAllies": null,
+          "hitsAllies": true,
           "stats": {
-            "cast": "sent forward and steered with the crosshair",
-            "detonate": "reactivate or fire again",
-            "ultPoints": null
+            "ultPoints": 8,
+            "ultPointsSource": "secondary",
+            "ultPointsNote": "Riot's own cosplay guide reportedly confirms 8, but that page was not opened",
+            "levitateDurationSec": null,
+            "levitateDurationNote": "4 s is the closest labeled value (ultDurationSec) and is unconfirmed as the levitate duration",
+            "ultDurationSec": 4,
+            "ultTargetingDurationSec": 6,
+            "ultFlightDurationSec": 2,
+            "projectileSpeedRaw": {
+              "value": 2500,
+              "unit": "unlabeled game units"
+            },
+            "playerHitRadiusRaw": {
+              "value": 700,
+              "unit": "unlabeled game units"
+            },
+            "itemHitRadiusRaw": {
+              "value": 900,
+              "unit": "unlabeled game units"
+            },
+            "fizzleTimerSec": 6,
+            "movementSpeedMultiplierWhileAffected": 0.167
           },
-          "source": "sheet"
+          "source": "aggregator"
         }
       ]
     }
-  ]
+  ],
+  "patchLog": [
+    {
+      "patch": "13.09",
+      "date": "2026-11-17",
+      "summary": "Clove Pick-me-up move speed 15% to 10%; Not Dead Yet killer reward note; buffTerms (Haste, Combat Stim, Snapshot) recorded."
+    },
+    {
+      "patch": "13.10",
+      "date": "2026-11-17",
+      "summary": "Sentinel destroy cooldowns 60s to 45s; Spycam recall 15s to 20s; Sage Healing Orb targeting note; assist rules; Hush live with aggregator stats."
+    }
+  ],
+  "buffTerms": {
+    "Haste": {
+      "definition": "movement speed buff",
+      "shownBy": [
+        "Brimstone Stim Beacon",
+        "Clove Pick-me-up",
+        "Miks Harmonize",
+        "Neon High Gear",
+        "Neon Overdrive",
+        "Waylay Convergent Paths"
+      ],
+      "note": "Waylay Convergent Paths was renamed to Haste; same effect. Names only; no number changes in this entry.",
+      "source": "secondary"
+    },
+    "Combat Stim": {
+      "definition": "separate buff (fire rate, equip, reload, recovery)",
+      "note": "Distinct from Haste. See globals.combatStim for modifiers.",
+      "source": "secondary"
+    },
+    "Snapshot": {
+      "definition": "still-image silhouette reveal debuff",
+      "appliedBy": [
+        "Cypher Neural Theft",
+        "Cypher Spycam"
+      ],
+      "note": "Names only; no number changes in this entry.",
+      "source": "secondary"
+    }
+  },
+  "rules": {
+    "assists": {
+      "damageAssist": "more than 10 damage to an enemy within 3 s of a teammate securing the kill.",
+      "totalDamageAssist": "at least 50 damage to an enemy a teammate kills, whenever the damage was dealt.",
+      "healingAssist": "only when a healed player gets a kill within 10 s after the heal effect ends.",
+      "givesUltPoints": false,
+      "source": {
+        "damageAssist": "verified",
+        "totalDamageAssist": "verified",
+        "healingAssist": "verified",
+        "givesUltPointsNote": "Existing ult point rule in this file (globals.ultPointSources / ultPointValue). Assists do not grant ult points. Do not change that rule."
+      },
+      "note": "damageAssist, totalDamageAssist, and healingAssist from Riot patch notes 13.10."
+    }
+  }
 }
