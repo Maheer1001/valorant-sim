@@ -1,0 +1,142 @@
+:root {
+  color: #e7ecf1;
+  background: #14171c;
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.4;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button,
+select,
+input[type="number"] {
+  background: #242b33;
+  border: 1px solid #3a4450;
+  border-radius: 4px;
+  padding: 6px 8px;
+}
+
+button { cursor: pointer; }
+button:disabled { cursor: default; opacity: 0.55; }
+
+.app {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr);
+  gap: 16px;
+  padding: 16px;
+}
+
+.masthead,
+.board,
+.timeline,
+.draft {
+  background: #1c2128;
+  border: 1px solid #3a4450;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.masthead { grid-column: 1 / -1; }
+.masthead h1 { margin: 0 0 4px; font-size: 22px; }
+.masthead p,
+.footnote { margin: 0; color: #9aa6b2; }
+
+.board h2,
+.timeline h2,
+.draft h2,
+.draft h3 { margin: 0 0 8px; font-size: 16px; }
+
+.board svg {
+  width: 100%;
+  height: auto;
+  background: #10141a;
+  border-radius: 4px;
+}
+
+.draft { grid-column: 2; grid-row: 2 / span 2; }
+.timeline { grid-column: 1; }
+
+.catalog,
+.team-actions,
+.transport {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.catalog button[aria-pressed="true"] {
+  border-color: #d28a2e;
+}
+
+.kit p,
+.member {
+  margin: 0 0 8px;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid #3a4450;
+  border-radius: 999px;
+  color: #9aa6b2;
+  font-size: 12px;
+}
+
+.coverage {
+  white-space: pre-wrap;
+  margin: 0;
+  font-family: Consolas, monospace;
+  font-size: 13px;
+}
+
+.message { min-height: 1.2em; color: #e0b15a; }
+
+.event-log {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.event-log li {
+  padding: 4px 6px;
+  border-top: 1px solid #2a323b;
+}
+
+.event-log li[aria-current="step"] {
+  background: #2a2418;
+}
+
+.file-box {
+  width: 100%;
+  min-height: 72px;
+  margin-top: 8px;
+  background: #10141a;
+  border: 1px solid #3a4450;
+  border-radius: 4px;
+}
+
+.ruleset-note {
+  color: #9aa6b2;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .draft { grid-column: 1; grid-row: auto; }
+}

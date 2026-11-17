@@ -1,0 +1,4682 @@
+{
+  "patch": "13.08",
+  "recorded": "2026-10-21",
+  "idNote": "id is this file's integer, in roster order. It is not Riot's agent number.",
+  "usage": "Reference only. Not the sim catalog. null means that stat was not in the shared sheet. An object with estimate:true is a sheet (est.) measurement. Do not copy a value into code and call it verified.",
+  "source": {
+    "verified": "Riot patch note opened in this project",
+    "secondary": "wiki page opened in this project",
+    "sheet": "corrected 21 Oct 2026 ability sheet",
+    "estimate": "sheet marked (est.)"
+  },
+  "fields": {
+    "id": "int",
+    "name": "string",
+    "role": "controller | duelist | initiator | sentinel",
+    "live": "bool",
+    "keys": "C, Q, E, X ability names",
+    "signature": "string",
+    "signatureSlot": "C | Q | E",
+    "signatureDurationSec": "number | null",
+    "signatureRecharge": "string",
+    "ultimate": "string",
+    "ultimatePoints": "int | null",
+    "abilities": "slot, name, kind, costCredits, maxCharges, recharge, effect, durationSec, windupSec, damage, teamDamage, hitsAllies, stats, source"
+  },
+  "globals": {
+    "baseHp": 100,
+    "armorCap": 50,
+    "allyDamage": "Recorded only on the ability whose row states it. The sheet says reduced to allies for Incendiary, Orbital Strike, and Blaze, and it does not give a fraction. Bullets do not damage teammates.",
+    "signatureChargeCarry": "recharged charges never carry into the next round; unused bought charges do",
+    "ultPointSources": [
+      "kill",
+      "death",
+      "orb",
+      "plant",
+      "defuse"
+    ],
+    "ultPointValue": 1,
+    "concussExactly2_5s": [
+      "Breach Fault Line",
+      "Gekko Wingman",
+      "Neon Relay Bolt",
+      "Astra Nova Pulse",
+      "Tejo Special Delivery",
+      "Deadlock Sonic Sensor"
+    ],
+    "concussNote": "These are the effects set to exactly 2.5s. Other concusses use a different duration.",
+    "otherConcuss": [
+      "Skye Trailblazer: 2.5s at the edge to 4s at the centre",
+      "Breach Rolling Thunder: 4s",
+      "Miks M-pulse: up to 2s per pulse",
+      "Hush Displacement: concusses a player pulled into a surface or another player; duration unpublished"
+    ],
+    "nearsightVisionRadiusM": {
+      "Fade Prowler": 7,
+      "Omen Paranoia": 7.5,
+      "Reyna Leer": 6,
+      "Skye Seekers": 7.5,
+      "riot1108Note": "11.08 set all four from 5m to 7m. Per-ability radii above are the wiki game-file stats."
+    },
+    "combatStim": {
+      "fireRateModifier": 1.1,
+      "reloadTimeModifier": 0.9,
+      "drawTimeModifier": 0.9,
+      "spreadRecoveryModifier": 1.1,
+      "sheetShorthand": "+10% fire rate, reload, equip, recovery",
+      "appliesTo": [
+        "Brimstone Stim Beacon",
+        "KAY/O NULL/cmd",
+        "Reyna Empress",
+        "Miks Harmonize",
+        "Veto Evolution"
+      ],
+      "note": "The 11.08 unification block states a reload time modifier of 0.9 and a weapon draw time modifier of 0.9, with fire rate 1.1 and spread recovery 1.1, for Stim Beacon, NULL/cmd, and Empress. The same note also describes a 10% reload-time decrease and a 10% draw-speed increase. A 10% speed increase is a time multiplier of about 0.909, which is not 0.9. Brimstone's +10% movement is separate. Miks and Veto use the sheet's +10% shorthand and were not in that 11.08 list."
+    },
+    "initiatorSignatureCooldownSec": 50,
+    "initiatorSignatureCooldownAppliesTo": [
+      "Sova Recon Bolt",
+      "Fade Haunt",
+      "Skye Guiding Light",
+      "Breach Fault Line",
+      "KAY/O ZERO/point"
+    ],
+    "initiatorSignatureCooldownHistory": "40s to 60s in 11.08, then 60s to 50s in 13.00",
+    "twoKillSignatures": [
+      "Tailwind",
+      "Paint Shells",
+      "Neon slide",
+      "Refract",
+      "Curveball",
+      "Gatecrash",
+      "Hush Displacement"
+    ],
+    "twoKillExceptions": [
+      "Iso Double Tap is a 12s window and a shield orb",
+      "Reyna spends Soul Orbs",
+      "Neon sprint is a battery"
+    ]
+  },
+  "gaps": [
+    "Waylay Saturate equip time since 12.06 is unpublished",
+    "Hinder exact multipliers are unpublished",
+    "Jett glide fall speed is unpublished",
+    "Astra Cosmic Divide duration was not on the wiki page",
+    "Viper's Pit wiki still lists 30 initial Decay; 11.08 made it 10",
+    "Killjoy Nanoswarm wiki total of 180 is stale; 45/s for 5s is 225",
+    "Killjoy Alarmbot speed and Turret fire rate on the wiki are the pre-13.00 bases, with the +50% buffs noted",
+    "Vyse Shear windup may be stale",
+    "Skye Guiding Light wiki infobox can still show 60s; 13.00 set initiator signatures to 50s",
+    "Nightfall wiki stat table says 80 Decay; Riot's US 11.08 note says 75",
+    "Trapwire slow strength is not listed"
+  ],
+  "agents": [
+    {
+      "id": 1,
+      "name": "Astra",
+      "role": "controller",
+      "live": true,
+      "keys": {
+        "C": "Gravity Well",
+        "Q": "Nova Pulse",
+        "E": "Nebula / Dissipate",
+        "X": "Cosmic Divide"
+      },
+      "signature": "Nebula / Dissipate",
+      "signatureSlot": "E",
+      "signatureDurationSec": 14.25,
+      "signatureRecharge": "spends a Star; 35s after Dissipate; max 2 Nebula",
+      "ultimate": "Cosmic Divide",
+      "ultimatePoints": 7,
+      "abilities": [
+        {
+          "slot": "passive",
+          "name": "Astral Form / Stars",
+          "kind": "passive",
+          "costCredits": 150,
+          "maxCharges": 5,
+          "recharge": "buy stars",
+          "effect": [
+            "map placement"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "costPerStar": 150,
+            "maxStars": 5,
+            "placeSec": {
+              "value": 1.5,
+              "estimate": true
+            },
+            "armAfterBarriersDropSec": 1.4,
+            "dissipatedStarReturnSec": 25,
+            "buyPhaseRecallRefund": "instant",
+            "activation": "from inside or outside Astral Form"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "C",
+          "name": "Gravity Well",
+          "kind": "basic",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "spends a Star; 60s",
+          "effect": [
+            "pull",
+            "Fragile"
+          ],
+          "durationSec": 2.5,
+          "windupSec": 1.25,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "cooldownSec": 60,
+            "windupSec": 1.25,
+            "radiusM": 4.75,
+            "pullSec": 2,
+            "fragileSec": 2.5,
+            "fragileMeans": "double damage taken",
+            "wikiName": "Vulnerable",
+            "riotName": "Fragile",
+            "canBeWalkedAgainst": true,
+            "canPullDefuserOffSpike": true,
+            "hitsAstra": true
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "Q",
+          "name": "Nova Pulse",
+          "kind": "basic",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "spends a Star; 60s",
+          "effect": [
+            "Concuss"
+          ],
+          "durationSec": 2.5,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "cooldownSec": 60,
+            "windupSec": 1,
+            "radiusM": 4.75,
+            "concussSec": 2.5
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "E",
+          "name": "Nebula / Dissipate",
+          "kind": "signature",
+          "costCredits": null,
+          "maxCharges": 2,
+          "recharge": "spends a Star; 35s",
+          "effect": [
+            "smoke"
+          ],
+          "durationSec": 14.25,
+          "windupSec": 0.75,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "maxCharges": 2,
+            "rechargeSec": 35,
+            "windupSec": 0.75,
+            "radiusM": 4.75,
+            "durationSec": 14.25,
+            "warningAtSec": {
+              "value": 12.75,
+              "estimate": true
+            },
+            "dissipateSmokeSec": 1,
+            "clearVisionInside": true,
+            "dissipateKey": "F"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Cosmic Divide",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "7 ult points",
+          "effect": [
+            "wall",
+            "audio block"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 7,
+            "durationSec": null,
+            "durationNote": "wiki page failed to load, so duration is not verified",
+            "blocksBullets": true,
+            "audio": "sheet says heavily dampens audio; patch 7.04 says audio is blocked completely rather than muffled"
+          },
+          "source": "verified"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Brimstone",
+      "role": "controller",
+      "live": true,
+      "keys": {
+        "C": "Stim Beacon",
+        "Q": "Incendiary",
+        "E": "Sky Smoke",
+        "X": "Orbital Strike"
+      },
+      "signature": "Sky Smoke",
+      "signatureSlot": "E",
+      "signatureDurationSec": 19.25,
+      "signatureRecharge": "1 free, +100 each, max 3",
+      "ultimate": "Orbital Strike",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Stim Beacon",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Combat Stim",
+            "movement speed"
+          ],
+          "durationSec": 12,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "radiusM": 6,
+            "beaconSec": 12,
+            "lingerAfterLeavingSec": 4,
+            "unequipSec": 0.7,
+            "fireRate": 1.1,
+            "reloadTime": 0.9,
+            "drawTime": 0.9,
+            "spreadRecovery": 1.1,
+            "movementSpeed": 1.1,
+            "indestructible": true,
+            "enemiesSeeRadius": false,
+            "cast": "instant throw"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "Q",
+          "name": "Incendiary",
+          "kind": "basic",
+          "costCredits": 250,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": 8,
+          "windupSec": null,
+          "damage": "1 per tick at 60 ticks/s (60 DPS); 420 to 465 total if you stand in it",
+          "teamDamage": "reduced to allies",
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 1.1,
+            "radiusM": 4.5,
+            "burstSec": 0.25,
+            "spreadSec": 0.75,
+            "fullSizeSec": 7,
+            "damagePerTick": 1,
+            "ticksPerSec": 60,
+            "dps": 60,
+            "damageTotalMin": 420,
+            "damageTotalMax": 465,
+            "objectDamageMultiplier": 0.5,
+            "floorBounces": 2,
+            "detonatesOn": "next floor contact after up to two floor bounces"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Sky Smoke",
+          "kind": "signature",
+          "costCredits": 100,
+          "maxCharges": 3,
+          "recharge": "1 free plus bought extras",
+          "effect": [
+            "smoke"
+          ],
+          "durationSec": 19.25,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "equipSec": 0.8,
+            "rangeM": 55,
+            "deploySec": 1,
+            "radiusM": 4.15,
+            "durationSec": 19.25,
+            "warningAtSec": 17.75,
+            "cast": "tactical map centred on Brimstone; fire marks each spot; alt-fire launches all",
+            "landingMarkersVisibleTo": "everyone",
+            "blocksVisionWhileActive": true
+          },
+          "source": "secondary"
+        },
+        {
+          "slot": "X",
+          "name": "Orbital Strike",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points",
+          "effect": [
+            "damage",
+            "vision block"
+          ],
+          "durationSec": 3,
+          "windupSec": 2,
+          "damage": "20 every 0.15s (about 133 DPS) for 3s; 400 to 500 total",
+          "teamDamage": "reduced to allies",
+          "hitsAllies": true,
+          "stats": {
+            "ultPoints": 8,
+            "rangeM": 60,
+            "windupSec": 2,
+            "radiusM": 9,
+            "damageEverySec": 0.15,
+            "damagePerInterval": 20,
+            "dps": 133,
+            "dpsApproximate": true,
+            "activeSec": 3,
+            "shrinkSec": 0.75,
+            "damageTotalMin": 400,
+            "damageTotalMax": 500,
+            "blocksLineOfSight": true,
+            "blocksFlashesAndRecon": true,
+            "damagesObjects": true
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Clove",
+      "role": "controller",
+      "live": true,
+      "keys": {
+        "C": "Pick-me-up",
+        "Q": "Meddle",
+        "E": "Ruse",
+        "X": "Not Dead Yet"
+      },
+      "signature": "Ruse",
+      "signatureSlot": "E",
+      "signatureDurationSec": 14,
+      "signatureRecharge": "1 free, +150, max 2; 40s; 1 charge while dead",
+      "ultimate": "Not Dead Yet",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Pick-me-up",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought; unlocks when an enemy Clove killed or damaged dies",
+          "effect": [
+            "movement speed",
+            "overheal"
+          ],
+          "durationSec": 10,
+          "windupSec": 0.7,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "usableAfterKillSec": 4.5,
+            "castSec": 0.7,
+            "moveSpeed": 0.15,
+            "moveSpeedSec": 3,
+            "overhealHp": 50,
+            "overhealSec": 10,
+            "overhealGainHpPerSec": {
+              "value": 50,
+              "estimate": true
+            },
+            "overhealDecayHpPerSec": {
+              "value": 25,
+              "estimate": true
+            },
+            "damageCreditWindowSec": 6,
+            "capHealthShieldsOverheal": 150,
+            "selfOnly": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Meddle",
+          "kind": "basic",
+          "costCredits": 250,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Decay"
+          ],
+          "durationSec": 5,
+          "windupSec": 0.75,
+          "damage": "Decay up to 90 HP over 0.75s, restored over 1.75s",
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.8,
+            "windupAfterLandingSec": 0.75,
+            "radiusM": 4,
+            "decayHp": 90,
+            "decaySec": 0.75,
+            "restoreSec": 1.75,
+            "totalSec": 5,
+            "requiresLineOfSight": true,
+            "hitsClove": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Ruse",
+          "kind": "signature",
+          "costCredits": 150,
+          "maxCharges": 2,
+          "recharge": "1 free plus bought; 40s",
+          "effect": [
+            "smoke"
+          ],
+          "durationSec": 14,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "chargesWhileDead": 1,
+            "rechargeSec": 40,
+            "rangeAliveM": 60,
+            "rangeDeadM": 42.5,
+            "windupSec": 1,
+            "radiusM": 4,
+            "durationAliveSec": 14,
+            "durationDeadSec": 6,
+            "formSec": 0.5,
+            "fadeSec": 0.5,
+            "castWhileDead": true,
+            "deadSmokeDarker": true,
+            "deadMap": "smaller map centred on the body"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Not Dead Yet",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points",
+          "effect": [
+            "revive"
+          ],
+          "durationSec": 10,
+          "windupSec": 1.5,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 8,
+            "reviveSec": 1.5,
+            "intangibleSec": 2,
+            "recastEndsIntangibleEarly": true,
+            "killOrDamagingAssistSec": 10,
+            "reviveHp": "full",
+            "shields": "none",
+            "guns": "reloaded",
+            "failEffect": "dies again",
+            "roundEndKeepsAlive": true,
+            "cannotShootWhileIntangible": true
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Harbor",
+      "role": "controller",
+      "live": true,
+      "keys": {
+        "C": "Storm Surge",
+        "Q": "High Tide",
+        "E": "Cove",
+        "X": "Reckoning"
+      },
+      "signature": "Cove",
+      "signatureSlot": "E",
+      "signatureDurationSec": 19.25,
+      "signatureRecharge": "free; 30s",
+      "ultimate": "Reckoning",
+      "ultimatePoints": 7,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Storm Surge",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Nearsight",
+            "Slow"
+          ],
+          "durationSec": 2,
+          "windupSec": 0.6,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.8,
+            "radiusM": 6,
+            "windupSec": 0.6,
+            "nearsightSec": 2,
+            "slowSec": 2,
+            "lineOfSightRequired": false,
+            "audioOnEnemyHit": true,
+            "hitsHarbor": true,
+            "activatesOn": "floor, then explodes after windup"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "High Tide",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "wall",
+            "Slow"
+          ],
+          "durationSec": 15,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "sphereSpeedMps": 25,
+            "steerDegPerSec": 180,
+            "maxLengthM": 60,
+            "wallHeightM": 8,
+            "durationSec": 15,
+            "slowPercent": 30,
+            "slowSec": 0.6,
+            "fallSec": 1.5,
+            "steerRequiresFireHeldAtCast": true,
+            "altFireStopsEarly": true,
+            "passesThroughTerrain": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Cove",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "30s",
+          "effect": [
+            "smoke",
+            "bullet block"
+          ],
+          "durationSec": 19.25,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "cooldownSec": 30,
+            "rangeM": 80,
+            "orbSpeedMps": 64,
+            "deploySec": 1,
+            "radiusM": 4.6,
+            "durationSec": 19.25,
+            "shieldWindupSec": 0.8,
+            "shieldHp": 680,
+            "shieldBlocksBullets": true,
+            "shieldBlocksAbilities": false,
+            "shieldBreakEndsSmoke": true,
+            "targeting": "hold fire farther, alt-fire closer, reload toggles view",
+            "keyNote": "listed on E because the rework moved it into the signature slot"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Reckoning",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "7 ult points",
+          "effect": [
+            "Nearsight",
+            "Slow"
+          ],
+          "durationSec": 2,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "ultPoints": 7,
+            "chunks": 5,
+            "chunkWidthM": 5.6,
+            "widthM": {
+              "value": 21,
+              "estimate": true
+            },
+            "startsAheadM": {
+              "value": 8,
+              "estimate": true
+            },
+            "speedMps": 8,
+            "travelM": {
+              "value": 34,
+              "estimate": true
+            },
+            "nearsightSec": 3,
+            "slowSec": 2,
+            "recastHoldSec": 7,
+            "chunkClimbM": 1.1,
+            "chunkDropM": 8,
+            "hitsHarbor": true,
+            "passesThroughTerrain": true
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Miks",
+      "role": "controller",
+      "live": true,
+      "keys": {
+        "C": "M-pulse",
+        "Q": "Harmonize",
+        "E": "Waveform",
+        "X": "Bassquake"
+      },
+      "signature": "Waveform",
+      "signatureSlot": "E",
+      "signatureDurationSec": 16.75,
+      "signatureRecharge": "1 free, +100, max 2; 40s",
+      "ultimate": "Bassquake",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "M-pulse",
+          "kind": "basic",
+          "costCredits": 250,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "Concuss",
+            "heal"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": "heal mode heals enemies inside too",
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.71,
+            "health": 50,
+            "radiusM": 5.5,
+            "firstPulseAfterSec": 1,
+            "laterPulses": 3,
+            "pulseIntervalSec": 2,
+            "concussSecMax": 2,
+            "concussFalloff": "toward the edge",
+            "healHpPerSec": 6.67,
+            "healPerPulse": 20,
+            "destructible": true,
+            "landsOn": "floor then disappears",
+            "modeToggle": "alt-fire before throwing"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Harmonize",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought; refreshes on kills",
+          "effect": [
+            "Combat Stim",
+            "movement speed"
+          ],
+          "durationSec": 8,
+          "windupSec": 0.1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "castSec": 0.1,
+            "durationSec": 8,
+            "refreshOnKills": true,
+            "fireRate": 1.1,
+            "reloadTime": 0.9,
+            "drawTime": 0.9,
+            "spreadRecovery": 1.1,
+            "moveSpeed": 1.1,
+            "altFire": "Miks only",
+            "throughSmokes": true,
+            "throughWalls": false,
+            "note": "Miks was not in the 11.08 stim note"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Waveform",
+          "kind": "signature",
+          "costCredits": 100,
+          "maxCharges": 2,
+          "recharge": "1 free plus bought; 40s",
+          "effect": [
+            "smoke"
+          ],
+          "durationSec": 16.75,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "equipSec": 0.7,
+            "rangeM": {
+              "value": 55.5,
+              "estimate": true
+            },
+            "windupSec": 1,
+            "radiusM": {
+              "value": 4.72,
+              "estimate": true
+            },
+            "durationSec": {
+              "value": 16.75,
+              "estimate": true
+            },
+            "warningAtSec": 14.75,
+            "clearVisionInside": true,
+            "mapCentredOn": "Miks",
+            "fireSetsSpots": true,
+            "altFireSpawns": true
+          },
+          "source": "estimate"
+        },
+        {
+          "slot": "X",
+          "name": "Bassquake",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points",
+          "effect": [
+            "knockback",
+            "Deafen",
+            "Slow"
+          ],
+          "durationSec": 8,
+          "windupSec": 1.6,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "ultPoints": 8,
+            "channelSec": 1.6,
+            "coneDeg": 60,
+            "lengthM": 40,
+            "knockbackM": {
+              "value": 5,
+              "estimate": true
+            },
+            "deafenSec": 8,
+            "slowSec": 8
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Omen",
+      "role": "controller",
+      "live": true,
+      "keys": {
+        "C": "Shrouded Step",
+        "Q": "Paranoia",
+        "E": "Dark Cover",
+        "X": "From the Shadows"
+      },
+      "signature": "Dark Cover",
+      "signatureSlot": "E",
+      "signatureDurationSec": 15,
+      "signatureRecharge": "1 free, +150, max 2; 40s",
+      "ultimate": "From the Shadows",
+      "ultimatePoints": 7,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Shrouded Step",
+          "kind": "basic",
+          "costCredits": 100,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "teleport"
+          ],
+          "durationSec": null,
+          "windupSec": 0.7,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "rangeM": 15,
+            "windupSec": 0.7,
+            "arrivalAfterWindupSec": {
+              "value": 0.5,
+              "estimate": true
+            },
+            "totalSec": {
+              "value": 1.2,
+              "estimate": true
+            },
+            "arrivalSoundRadiusM": 12.5,
+            "interruptedBy": [
+              "ZERO/point",
+              "Annihilation"
+            ]
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Paranoia",
+          "kind": "basic",
+          "costCredits": 250,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Nearsight",
+            "Deafen"
+          ],
+          "durationSec": 2,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 1.1,
+            "speedMps": 20,
+            "travelM": 25,
+            "radiusM": 4.3,
+            "nearsightVisionM": 7.5,
+            "deafenSec": 2,
+            "nearsightSec": 2,
+            "passesThroughWalls": true,
+            "nearsightNote": "11.08 set this nearsight from 5m to 7m. Wiki game files say 7.5m vision."
+          },
+          "source": "secondary"
+        },
+        {
+          "slot": "E",
+          "name": "Dark Cover",
+          "kind": "signature",
+          "costCredits": 150,
+          "maxCharges": 2,
+          "recharge": "1 free plus bought; 40s",
+          "effect": [
+            "smoke"
+          ],
+          "durationSec": 15,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "rechargeSec": 40,
+            "rangeM": 80,
+            "orbSpeedMps": 64,
+            "deploySec": 1,
+            "radiusM": 4.1,
+            "durationSec": 15,
+            "warningAtSec": 13.5,
+            "sinksToNearestFloor": true,
+            "throughWalls": true,
+            "rechargeSecVerified": "11.08"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "From the Shadows",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "7 ult points",
+          "effect": [
+            "teleport"
+          ],
+          "durationSec": 4,
+          "windupSec": 1.5,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 7,
+            "windupSec": 1.5,
+            "shadeSec": 2.5,
+            "totalSec": 4,
+            "enemyMinimapsObscured": true,
+            "shadeRooted": true,
+            "shadeVisible": true,
+            "shotOrSuppressSendsBack": true,
+            "recastCancels": true
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Viper",
+      "role": "controller",
+      "live": true,
+      "keys": {
+        "C": "Snake Bite",
+        "Q": "Poison Cloud",
+        "E": "Toxic Screen",
+        "X": "Viper's Pit"
+      },
+      "signature": "Toxic Screen",
+      "signatureSlot": "E",
+      "signatureDurationSec": null,
+      "signatureRecharge": "free; shares fuel with Poison Cloud",
+      "ultimate": "Viper's Pit",
+      "ultimatePoints": 9,
+      "abilities": [
+        {
+          "slot": "passive",
+          "name": "Fuel and Toxin",
+          "kind": "passive",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "Decay"
+          ],
+          "durationSec": 1.5,
+          "windupSec": null,
+          "damage": "10 Decay on first contact, then 10 HP/s while inside",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "fuelMax": 100,
+            "drainOnePerSec": 8.33,
+            "drainBothPerSec": 12.5,
+            "regenPerSec": 3.33,
+            "reactivateAt": 30,
+            "initialDecay": 10,
+            "decayPerSec": 10,
+            "lingerSec": 1.5,
+            "recoverHpPerSec": 25,
+            "pitWikiStaleInitialDecay": 30,
+            "useInitialDecay": 10,
+            "affects": "enemies only"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "C",
+          "name": "Snake Bite",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "damage",
+            "Vulnerable"
+          ],
+          "durationSec": 6.5,
+          "windupSec": null,
+          "damage": "1 per tick at 12.5 ticks/s; about 76 to 79 total; about 152 to 158 with Vulnerable",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "equipSec": 0.8,
+            "radiusM": 4.5,
+            "durationSec": 6.5,
+            "damagePerTick": 1,
+            "ticksPerSec": 12.5,
+            "damageTotalMin": 76,
+            "damageTotalMax": 79,
+            "vulnerableTotalMin": 152,
+            "vulnerableTotalMax": 158,
+            "vulnerableLingerSec": 2,
+            "objectDamageMultiplier": 0.5,
+            "detonatesOn": "floor",
+            "spreadsOutward": true,
+            "vulnerableMeans": "double damage"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Poison Cloud",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought; fuel toggle",
+          "effect": [
+            "smoke",
+            "Decay"
+          ],
+          "durationSec": null,
+          "windupSec": 0.75,
+          "damage": "Viper toxin while active",
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "decayAffects": "enemies only",
+            "windupSec": 0.75,
+            "formSec": 1,
+            "radiusM": 4.5,
+            "reactivateLockSec": 5,
+            "minOnSec": 2,
+            "buyPhasePickupM": 4,
+            "altFire": "underhand",
+            "burnsFuel": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Toxic Screen",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "fuel toggle",
+          "effect": [
+            "wall",
+            "Decay"
+          ],
+          "durationSec": null,
+          "windupSec": 0.5,
+          "damage": "Viper toxin while active",
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "decayAffects": "enemies only",
+            "emitters": 30,
+            "emitterSpacingM": 2,
+            "lengthM": 60,
+            "heightM": {
+              "value": 4,
+              "estimate": true
+            },
+            "windupSec": 0.5,
+            "formSec": {
+              "value": 1.55,
+              "estimate": true
+            },
+            "reactivateLockSec": 5,
+            "minOnSec": 2,
+            "throughWalls": true,
+            "burnsFuel": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Viper's Pit",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "9 ult points",
+          "effect": [
+            "smoke",
+            "Nearsight",
+            "Decay"
+          ],
+          "durationSec": null,
+          "windupSec": 1,
+          "damage": "toxin Decay; initial contact 10, not the stale wiki 30",
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "ultPoints": 9,
+            "channelSec": 1,
+            "expansionSec": 5,
+            "radiusM": {
+              "value": 9,
+              "estimate": true
+            },
+            "visionInsideM": 8.1,
+            "leaveLastsSec": 8,
+            "integrityRegenPerSec": 0.04,
+            "collapseSec": 3.25,
+            "viperSeesOutlines": true,
+            "enemyMinimapsObscured": true,
+            "holdKeyEndsEarly": true,
+            "decayAffects": "enemies only",
+            "nearsightAffects": "everyone inside"
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Iso",
+      "role": "duelist",
+      "live": true,
+      "keys": {
+        "C": "Contingency",
+        "Q": "Undercut",
+        "E": "Double Tap",
+        "X": "Kill Contract"
+      },
+      "signature": "Double Tap",
+      "signatureSlot": "E",
+      "signatureDurationSec": 12,
+      "signatureRecharge": "free, one per round; not a 2-kill recharge",
+      "ultimate": "Kill Contract",
+      "ultimatePoints": 7,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Contingency",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "wall"
+          ],
+          "durationSec": 5.4,
+          "windupSec": 0.4,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "equipSec": 0.8,
+            "spawnAheadM": 5,
+            "formSec": 0.4,
+            "travelM": 27.5,
+            "altFireTravelM": 13.75,
+            "altFireSpeed": "half",
+            "durationSec": 5.4,
+            "fullSizeSec": 4.6,
+            "blocksBullets": true,
+            "abilitiesPassThrough": true,
+            "followsTerrain": true,
+            "destructible": false
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Undercut",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Vulnerable",
+            "Suppress"
+          ],
+          "durationSec": 4,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.8,
+            "speedMps": 22.5,
+            "travelSec": 1.55,
+            "travelM": 34.9,
+            "radiusM": 3,
+            "vulnerableSec": 4,
+            "suppressSec": 4,
+            "throughWalls": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Double Tap",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "one per round",
+          "effect": [
+            "shield",
+            "reload speed"
+          ],
+          "durationSec": 12,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "windupSec": 1,
+            "flowStateSec": 12,
+            "reloadSpeed": 1.25,
+            "orbSec": 3,
+            "shieldAbsorbs": "one instance of damage",
+            "shieldIgnores": "Spike blast",
+            "enemiesCanShootOrb": true,
+            "shieldBreakSlow": "brief",
+            "instantReequip": "13.01"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Kill Contract",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "7 ult points",
+          "effect": [
+            "Suppress",
+            "arena"
+          ],
+          "durationSec": 13,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 7,
+            "equipSec": 1.1,
+            "columnLengthM": 36,
+            "columnWidthM": 15,
+            "captureSec": {
+              "value": 0.9,
+              "estimate": true
+            },
+            "transportSec": 0.5,
+            "duelSec": 13,
+            "exitAfterKillSec": 2,
+            "bothGet": "full HP, shields, ammo",
+            "bothSuppressed": true,
+            "contingencyWallsInFront": true,
+            "neitherDies": "both die",
+            "winnerHealth": "original health"
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Jett",
+      "role": "duelist",
+      "live": true,
+      "keys": {
+        "C": "Cloudburst",
+        "Q": "Updraft",
+        "E": "Tailwind",
+        "X": "Blade Storm"
+      },
+      "signature": "Tailwind",
+      "signatureSlot": "E",
+      "signatureDurationSec": 7.5,
+      "signatureRecharge": "2 kills",
+      "ultimate": "Blade Storm",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "passive",
+          "name": "Drift",
+          "kind": "passive",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "glide"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "fallSpeed": null,
+            "fallDamage": false,
+            "weaponsUsable": true,
+            "abilitiesUsable": true,
+            "cast": "hold jump while falling"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "C",
+          "name": "Cloudburst",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "smoke"
+          ],
+          "durationSec": 2.5,
+          "windupSec": 0.6,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "unequipSec": 0.25,
+            "maxAirSec": 2,
+            "radiusM": 3.35,
+            "durationSec": 2.5,
+            "deploySec": 0.6,
+            "popsOn": "impact or after 2s",
+            "holdKeyCurves": true,
+            "holdFireSteers": true
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "Q",
+          "name": "Updraft",
+          "kind": "basic",
+          "costCredits": 150,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "launch"
+          ],
+          "durationSec": 0.6,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "durationSec": 0.6,
+            "heightM": {
+              "value": 5,
+              "estimate": true
+            },
+            "staysUnderFallDamageHeight": true
+          },
+          "source": "estimate"
+        },
+        {
+          "slot": "E",
+          "name": "Tailwind",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "2 kills",
+          "effect": [
+            "dash"
+          ],
+          "durationSec": 7.5,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "windupSec": 1,
+            "dashWindowSec": 7.5,
+            "dashSec": 0.45,
+            "dashDistanceM": {
+              "value": 11,
+              "estimate": true
+            },
+            "unequipSec": 0.2,
+            "direction": "movement, or forward if still",
+            "concussDashDistance": "half",
+            "windupAndWindowVerified": "7.04"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "X",
+          "name": "Blade Storm",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": 5,
+          "recharge": "8 ult points; single-throw kill restocks all",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": null,
+          "windupSec": 1.02,
+          "damage": "50 body / 150 head (x3) / 42 leg (x0.85)",
+          "teamDamage": "none",
+          "hitsAllies": false,
+          "stats": {
+            "ultPoints": 8,
+            "windupSec": 1.02,
+            "knives": 5,
+            "body": 50,
+            "head": 150,
+            "headMultiplier": 3,
+            "leg": 42,
+            "legMultiplier": 0.85,
+            "throwsPerSec": {
+              "value": 6,
+              "estimate": true
+            },
+            "burstHeadMultiplier": 2,
+            "burstFalloffFromM": 12,
+            "burstMinDamage": "about 30 to 35",
+            "burstIntervalSec": 0.45,
+            "altFireRestocks": false,
+            "accurateWhileMovingOrAirborne": true,
+            "friendlyFire": false
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Neon",
+      "role": "duelist",
+      "live": true,
+      "keys": {
+        "C": "Fast Lane",
+        "Q": "Relay Bolt",
+        "E": "High Gear",
+        "X": "Overdrive"
+      },
+      "signature": "High Gear",
+      "signatureSlot": "E",
+      "signatureDurationSec": 16,
+      "signatureRecharge": "energy battery; slide recharges on 2 kills",
+      "ultimate": "Overdrive",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "passive",
+          "name": "Energy",
+          "kind": "passive",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "resource"
+          ],
+          "durationSec": 16,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "max": 100,
+            "drainPerSec": 6.25,
+            "sprintSec": 16,
+            "regenPerSec": 1.67,
+            "refillSec": 60,
+            "reactivateAt": 2,
+            "warningBelow": 20,
+            "killsRefillOnlyDuringOverdrive": true,
+            "killsRefillPatch": "12.09",
+            "batteryDrainAndRefillVerified": "11.08"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "C",
+          "name": "Fast Lane",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "wall"
+          ],
+          "durationSec": 4,
+          "windupSec": 0.4,
+          "damage": "none since 4.08",
+          "teamDamage": "none",
+          "hitsAllies": null,
+          "stats": {
+            "deploySec": 0.4,
+            "wallGapM": 3.5,
+            "forwardM": 45,
+            "behindM": 1.5,
+            "durationSec": 4,
+            "dissolveSec": 2,
+            "dissolveFrom": "Neon's end",
+            "damageRemovedPatch": "4.08"
+          },
+          "source": "secondary"
+        },
+        {
+          "slot": "Q",
+          "name": "Relay Bolt",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Concuss"
+          ],
+          "durationSec": 2.5,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "flightSec": 5,
+            "bounces": 1,
+            "impactRadiusM": 5,
+            "windupSec": 1,
+            "concussSec": 2.5,
+            "throughFloors": true
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "E",
+          "name": "High Gear",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "sprint uses energy; slide is 2 kills",
+          "effect": [
+            "sprint",
+            "slide"
+          ],
+          "durationSec": 16,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "moveSpeed": 1.35,
+            "moveSpeedMps": 9.11,
+            "slideSec": 0.6,
+            "slideDistanceM": {
+              "value": 7,
+              "estimate": true
+            },
+            "slideCharges": 1,
+            "instantReequipAfterSlide": true,
+            "canShootWhileSprinting": false,
+            "slideEndsSprint": true,
+            "slideDirections": [
+              "forward",
+              "sideways"
+            ],
+            "extraAirSpeedOnJump": false
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Overdrive",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points; lasts until energy ends",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": null,
+          "windupSec": 1,
+          "damage": "18 from 0 to 20m, falling to 10 at 43m+; head x3; leg x0.85. The 20m and 43m falloff distances are wiki estimates.",
+          "teamDamage": "none",
+          "hitsAllies": false,
+          "stats": {
+            "ultPoints": 8,
+            "windupSec": 1,
+            "damageNear": 18,
+            "nearRangeM": {
+              "value": 20,
+              "estimate": true
+            },
+            "damageFar": 10,
+            "farFromM": {
+              "value": 43,
+              "estimate": true
+            },
+            "falloffNote": "wiki marks the 20m / 43m falloff as estimated",
+            "friendlyFire": false,
+            "headMultiplier": 3,
+            "legMultiplier": 0.85,
+            "shotsPerSec": 20,
+            "mag": 40,
+            "minToFire": 10,
+            "reloadFirstSec": 0.5,
+            "reloadThenPer": 0.05,
+            "airborneSpreadDeg": 7,
+            "hitscan": true,
+            "infiniteRange": true,
+            "piercesAgents": true,
+            "piercesWalls": false,
+            "killsRefillEnergy": true
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Phoenix",
+      "role": "duelist",
+      "live": true,
+      "keys": {
+        "C": "Blaze",
+        "Q": "Hot Hands",
+        "E": "Curveball",
+        "X": "Run it Back"
+      },
+      "signature": "Curveball",
+      "signatureSlot": "E",
+      "signatureDurationSec": 1.5,
+      "signatureRecharge": "1 free, +250, max 2; also 2 kills",
+      "ultimate": "Run it Back",
+      "ultimatePoints": 7,
+      "abilities": [
+        {
+          "slot": "passive",
+          "name": "Heating Up",
+          "kind": "passive",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "heal"
+          ],
+          "durationSec": 8,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": "his own fire heals him instead of hurting him",
+          "hitsAllies": null,
+          "stats": {
+            "healEverySec": 0.16,
+            "healHp": 1,
+            "durationSec": 8,
+            "healTotal": 50,
+            "appliesTo": [
+              "Blaze",
+              "Hot Hands"
+            ]
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "C",
+          "name": "Blaze",
+          "kind": "basic",
+          "costCredits": 150,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "wall",
+            "damage",
+            "heal self"
+          ],
+          "durationSec": 8,
+          "windupSec": null,
+          "damage": "30 damage/s; 225 to 240 total",
+          "teamDamage": "reduced to allies",
+          "hitsAllies": null,
+          "stats": {
+            "equipSec": 0.8,
+            "lengthM": {
+              "value": 21,
+              "estimate": true
+            },
+            "durationSec": 8,
+            "dps": 30,
+            "damageTotalMin": 225,
+            "damageTotalMax": 240,
+            "objectDamageMultiplier": 0.5,
+            "blocksVision": true,
+            "throughTerrain": true,
+            "holdFireSteers": true,
+            "healsPhoenix": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Hot Hands",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "damage",
+            "heal self"
+          ],
+          "durationSec": 4,
+          "windupSec": null,
+          "damage": "60 damage/s; up to 240",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "equipSec": 0.8,
+            "maxAirSec": 1.5,
+            "radiusM": {
+              "value": 4.5,
+              "estimate": true
+            },
+            "durationSec": 4,
+            "dps": 60,
+            "damageMax": 240,
+            "altFire": "underhand",
+            "detonatesOn": "floor",
+            "spreadsOutward": true,
+            "healsPhoenix": true
+          },
+          "source": "estimate"
+        },
+        {
+          "slot": "E",
+          "name": "Curveball",
+          "kind": "signature",
+          "costCredits": 250,
+          "maxCharges": 2,
+          "recharge": "1 free plus bought; 2 kills",
+          "effect": [
+            "flash"
+          ],
+          "durationSec": 1.5,
+          "windupSec": 0.6,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.8,
+            "windupSec": 0.6,
+            "flashSec": 1.5,
+            "reequip": "instant",
+            "fire": "curve left",
+            "altFire": "curve right",
+            "requiresLineOfSight": true
+          },
+          "source": "secondary"
+        },
+        {
+          "slot": "X",
+          "name": "Run it Back",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "7 ult points",
+          "effect": [
+            "respawn"
+          ],
+          "durationSec": 10,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 7,
+            "ultPointsVerified": "13.02",
+            "durationSec": 10,
+            "castSec": 1,
+            "respawnSec": 2.4,
+            "dissipateSec": 1,
+            "respawnAnimSec": 1.4,
+            "hp": "full",
+            "armor": "up to the armor he had at cast",
+            "weapons": "reloaded",
+            "trigger": "death or timer"
+          },
+          "source": "verified"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Raze",
+      "role": "duelist",
+      "live": true,
+      "keys": {
+        "C": "Boom Bot",
+        "Q": "Blast Pack",
+        "E": "Paint Shells",
+        "X": "Showstopper"
+      },
+      "signature": "Paint Shells",
+      "signatureSlot": "E",
+      "signatureDurationSec": null,
+      "signatureRecharge": "2 kills",
+      "ultimate": "Showstopper",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Boom Bot",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": 5,
+          "windupSec": 0.6,
+          "damage": "30 to 80 (2m inner / 6m outer)",
+          "teamDamage": "none",
+          "hitsAllies": false,
+          "stats": {
+            "equipSec": 1.1,
+            "health": 60,
+            "durationSec": 5,
+            "detectConeM": 15,
+            "explodeWithinM": 2.5,
+            "explodeAfterSec": 0.6,
+            "damageMin": 30,
+            "damageMax": 80,
+            "innerRadiusM": 2,
+            "outerRadiusM": 6,
+            "objectDamageMultiplier": 2.5,
+            "canBeConcussed": "12.02",
+            "damagesRaze": false
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Blast Pack",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "damage",
+            "launch"
+          ],
+          "durationSec": 5,
+          "windupSec": 1.5,
+          "damage": "20 to 50 (2m / 5m) only if armed",
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "health": 20,
+            "armSec": 1.5,
+            "damageMin": 20,
+            "damageMax": 50,
+            "innerRadiusM": 2,
+            "outerRadiusM": 5,
+            "autoDetonateSec": 5,
+            "objectDamageMultiplier": 2.25,
+            "launchesRaze": true,
+            "slowsReduceLaunch": true,
+            "slowsReduceLaunchVerified": "11.08"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Paint Shells",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "2 kills",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": "1 to 55 each; submunitions deal the full grenade damage",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "equipSec": 0.8,
+            "fuseSec": 2.25,
+            "submunitions": 4,
+            "submunitionFuseSec": {
+              "value": 0.67,
+              "estimate": true
+            },
+            "damageMin": 1,
+            "damageMax": 55,
+            "innerRadiusM": 2.5,
+            "outerRadiusM": [
+              5.5,
+              5.25
+            ],
+            "altFire": "underhand"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Showstopper",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": 1,
+          "recharge": "8 ult points",
+          "effect": [
+            "damage",
+            "knockback"
+          ],
+          "durationSec": 10,
+          "windupSec": null,
+          "damage": "30 to 150 (4m / 7m)",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 8,
+            "equipSec": 1.4,
+            "timeToFireSec": 10,
+            "rockets": 1,
+            "damageMin": 30,
+            "damageMax": 150,
+            "innerRadiusM": 4,
+            "outerRadiusM": 7,
+            "objectDamageMultiplier": 10,
+            "knocksRazeBack": true,
+            "canSwitchAndReequip": true
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Reyna",
+      "role": "duelist",
+      "live": true,
+      "keys": {
+        "C": "Leer",
+        "Q": "Devour",
+        "E": "Dismiss",
+        "X": "Empress"
+      },
+      "signature": "Devour / Dismiss",
+      "signatureSlot": "Q",
+      "signatureDurationSec": null,
+      "signatureRecharge": "2 bought charges shared by Devour and Dismiss; spends a Soul Orb",
+      "ultimate": "Empress",
+      "ultimatePoints": 7,
+      "abilities": [
+        {
+          "slot": "passive",
+          "name": "Soul Harvest",
+          "kind": "passive",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "orb"
+          ],
+          "durationSec": 3,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "damageWindowSec": 3,
+            "orbSec": 3,
+            "dropsOnlyIfSheHasCharges": true,
+            "picks": "earliest orb she can reach without terrain in the way"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "C",
+          "name": "Leer",
+          "kind": "basic",
+          "costCredits": 250,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "Nearsight"
+          ],
+          "durationSec": 1.6,
+          "windupSec": 0.4,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "equipSec": 0.77,
+            "health": 60,
+            "travelM": 10,
+            "throughWalls": true,
+            "arriveSec": {
+              "value": 0.55,
+              "estimate": true
+            },
+            "windupOnArrivalSec": 0.4,
+            "nearsightSec": 1.6,
+            "visionRadiusM": 6,
+            "requiresLookAtPupil": true,
+            "enemyWarningInLineOfSight": true,
+            "healthVerified": "11.08 reduced to 60",
+            "visionNote": "11.08 set nearsight from 5m to 7m. Wiki game files say 6m."
+          },
+          "source": "secondary"
+        },
+        {
+          "slot": "Q",
+          "name": "Devour",
+          "kind": "signature",
+          "costCredits": 200,
+          "maxCharges": 2,
+          "recharge": "shared with Dismiss; needs an orb",
+          "effect": [
+            "heal"
+          ],
+          "durationSec": 3,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "healHp": 50,
+            "healSec": 3,
+            "healSecDuringEmpress": 2.5,
+            "cap": 150,
+            "overhealDecayAfterSec": 10,
+            "terrainBreaksTether": true,
+            "duringEmpress": "automatic, no orb, overheal permanent"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Dismiss",
+          "kind": "signature",
+          "costCredits": 200,
+          "maxCharges": 2,
+          "recharge": "shared with Devour; needs an orb",
+          "effect": [
+            "intangible"
+          ],
+          "durationSec": 1.5,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "intangibleSec": 1.5,
+            "topSpeedMps": 12,
+            "unequipSec": 0.6,
+            "immuneToDamage": true,
+            "canShoot": false,
+            "recastEndsEarly": true,
+            "duringEmpressInvisible": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Empress",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "7 ult points",
+          "effect": [
+            "Combat Stim",
+            "highlight"
+          ],
+          "durationSec": null,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 7,
+            "ultPointsSheetDate": "12.02, that page was not opened here",
+            "windupSec": 1,
+            "fireRate": 1.1,
+            "reloadTime": 0.9,
+            "drawTime": 0.9,
+            "spreadRecovery": 1.1,
+            "lastsUntil": "death or round end",
+            "enemiesInView": "highlighted red",
+            "devourAndDismissCharges": "unlimited"
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Waylay",
+      "role": "duelist",
+      "live": true,
+      "keys": {
+        "C": "Saturate",
+        "Q": "Lightspeed",
+        "E": "Refract",
+        "X": "Convergent Paths"
+      },
+      "signature": "Refract",
+      "signatureSlot": "E",
+      "signatureDurationSec": 8,
+      "signatureRecharge": "2 kills",
+      "ultimate": "Convergent Paths",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Saturate",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Hinder"
+          ],
+          "durationSec": 3,
+          "windupSec": 0.6,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": null,
+            "equipNote": "not measured since 12.06",
+            "maxAirSec": 1,
+            "windupSec": 0.6,
+            "radiusM": 6,
+            "hinderSec": 3,
+            "requiresLineOfSight": true,
+            "hinderAffects": [
+              "movement",
+              "fire rate",
+              "recovery",
+              "equip",
+              "reload"
+            ],
+            "hinderMultipliers": null,
+            "sticksTo": "floor"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Lightspeed",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "dash"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "equipSec": 0.8,
+            "dashes": 2,
+            "dashSec": 0.45,
+            "dashDistanceM": {
+              "value": 9,
+              "estimate": true
+            },
+            "firstDashCanGoUp": true,
+            "laterDashesCanGoUp": false,
+            "altFireDashes": 1,
+            "fallDamageAfter": false
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Refract",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "2 kills",
+          "effect": [
+            "teleport",
+            "intangible",
+            "Nearsight"
+          ],
+          "durationSec": 8,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "windupSec": 1,
+            "windowSec": 8,
+            "returnSecUnder2_5m": 0.35,
+            "returnSecOver50m": 2,
+            "blindOnArrivalSec": 0.2,
+            "intangibleWhileTraveling": true,
+            "nearsightedWhileTraveling": true,
+            "pathsAroundTerrain": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Convergent Paths",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points",
+          "effect": [
+            "Hinder",
+            "movement speed"
+          ],
+          "durationSec": 6,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "ultPoints": 8,
+            "equipSec": 0.7,
+            "windupSec": 1,
+            "lengthM": 36,
+            "widthM": 13.5,
+            "startsAheadM": 3,
+            "hinderSec": 6,
+            "waylaySpeed": 1.1,
+            "waylaySpeedSec": 7,
+            "locksAimWhileCasting": true,
+            "slowsWaylayWhileCasting": true,
+            "hitsWaylay": false
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Yoru",
+      "role": "duelist",
+      "live": true,
+      "keys": {
+        "C": "Fakeout",
+        "Q": "Blindside",
+        "E": "Gatecrash",
+        "X": "Dimensional Drift"
+      },
+      "signature": "Gatecrash",
+      "signatureSlot": "E",
+      "signatureDurationSec": 20,
+      "signatureRecharge": "1 free, +150, max 2; also 2 kills",
+      "ultimate": "Dimensional Drift",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Fakeout",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "decoy",
+            "flash"
+          ],
+          "durationSec": 10,
+          "windupSec": 0.6,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.8,
+            "cloneSec": 10,
+            "flashWindupSec": 0.6,
+            "flashSec": 2,
+            "holdsLastWeapon": true,
+            "altFire": "still clone to activate later",
+            "enemyShot": "turns and flashes in a cone",
+            "otherDamage": "destroys it"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Blindside",
+          "kind": "basic",
+          "costCredits": 250,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "flash"
+          ],
+          "durationSec": 1.5,
+          "windupSec": 0.6,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.8,
+            "maxAirSec": {
+              "value": 2,
+              "estimate": true
+            },
+            "windupSec": 0.6,
+            "flashSec": 1.5,
+            "bounces": 1,
+            "requiresLineOfSight": true,
+            "chargesCutIn": "12.05"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Gatecrash",
+          "kind": "signature",
+          "costCredits": 150,
+          "maxCharges": 2,
+          "recharge": "1 free plus bought; 2 kills",
+          "effect": [
+            "teleport",
+            "decoy"
+          ],
+          "durationSec": 20,
+          "windupSec": 0.5,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "health": 20,
+            "tetherSec": 20,
+            "tetherSecSource": "13.01",
+            "enemySpotRadiusM": 4,
+            "teleportSec": 1.2,
+            "teleportWindupSec": 0.5,
+            "arrivalSec": 0.7,
+            "teleportSoundRadiusM": 42.5,
+            "fakeDecalSec": 30,
+            "destroyAlertsTeam": true,
+            "altFire": "still tether"
+          },
+          "source": "secondary"
+        },
+        {
+          "slot": "X",
+          "name": "Dimensional Drift",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points",
+          "effect": [
+            "intangible",
+            "invisible"
+          ],
+          "durationSec": 10,
+          "windupSec": 0.4,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 8,
+            "castDelaySec": 0.4,
+            "durationSec": 10,
+            "footstepRadiusM": 15,
+            "canShoot": false,
+            "immuneToEnemies": true,
+            "canUse": [
+              "Gatecrash",
+              "reactivate placed Fakeouts"
+            ],
+            "cannotUse": [
+              "Blindside",
+              "new Fakeouts"
+            ],
+            "recastExitsEarly": true
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Breach",
+      "role": "initiator",
+      "live": true,
+      "keys": {
+        "C": "Aftershock",
+        "Q": "Flashpoint",
+        "E": "Fault Line",
+        "X": "Rolling Thunder"
+      },
+      "signature": "Fault Line",
+      "signatureSlot": "E",
+      "signatureDurationSec": 2.5,
+      "signatureRecharge": "50s",
+      "ultimate": "Rolling Thunder",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Aftershock",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": null,
+          "windupSec": 2.2,
+          "damage": "2 bursts of 80, 0.6s apart, 160 total, no falloff",
+          "teamDamage": "damages allies",
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.9,
+            "rangeM": 35,
+            "cylinderLengthM": 10,
+            "radiusM": 3,
+            "windupSec": 2.2,
+            "bursts": 2,
+            "damagePerBurst": 80,
+            "burstIntervalSec": 0.6,
+            "damageTotal": 160,
+            "falloff": false,
+            "damagesObjects": true,
+            "throughWalls": true,
+            "ticksAndDamageVerified": "7.04"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "Q",
+          "name": "Flashpoint",
+          "kind": "basic",
+          "costCredits": 250,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "flash"
+          ],
+          "durationSec": 2.25,
+          "windupSec": 0.5,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 1.1,
+            "rangeM": 35,
+            "wallDepthM": 10,
+            "windupSec": 0.5,
+            "blindSec": 2.25,
+            "travelSpeed": 2400,
+            "travelSpeedPatch": "12.00",
+            "requiresLooking": true,
+            "blindSecVerified": "11.08"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "E",
+          "name": "Fault Line",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "50s",
+          "effect": [
+            "Concuss"
+          ],
+          "durationSec": 2.5,
+          "windupSec": 1.1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.8,
+            "chargeSec": 1,
+            "lengthMinM": 8,
+            "lengthMaxM": 56,
+            "widthM": 8,
+            "startsAheadM": 8,
+            "windupSec": 1.1,
+            "concussSec": 2.5,
+            "cooldownSec": 50,
+            "throughWalls": true
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "X",
+          "name": "Rolling Thunder",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points",
+          "effect": [
+            "Concuss",
+            "knockup"
+          ],
+          "durationSec": 4,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "ultPoints": 8,
+            "equipSec": 1.1,
+            "channelSec": 0.6,
+            "lengthM": 32,
+            "widthM": 18,
+            "startsAheadM": 8,
+            "blasts": 8,
+            "blastIntervalSec": 0.255,
+            "concussSec": 4,
+            "knockupM": {
+              "value": 7,
+              "estimate": true
+            },
+            "throughWalls": true,
+            "widthAndConcussVerified": "11.08"
+          },
+          "source": "verified"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Fade",
+      "role": "initiator",
+      "live": true,
+      "keys": {
+        "C": "Prowler",
+        "Q": "Seize",
+        "E": "Haunt",
+        "X": "Nightfall"
+      },
+      "signature": "Haunt",
+      "signatureSlot": "E",
+      "signatureDurationSec": 1.5,
+      "signatureRecharge": "50s",
+      "ultimate": "Nightfall",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "passive",
+          "name": "Terror Trail",
+          "kind": "passive",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "trail"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "hauntTrailSec": 12,
+            "nightfallTrailSec": 8,
+            "teleportsBreakTrail": true,
+            "dimensionalDriftClearsTrail": true,
+            "followers": [
+              "Fade's team",
+              "Prowlers"
+            ]
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "C",
+          "name": "Prowler",
+          "kind": "basic",
+          "costCredits": 250,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "Nearsight"
+          ],
+          "durationSec": 2.75,
+          "windupSec": 0.6,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "equipSec": 1.1,
+            "health": 60,
+            "searchSec": 2.5,
+            "spotAgentM": 15,
+            "spotTrailM": 10,
+            "speedBaseMps": 10,
+            "speedChaseMps": 12,
+            "speedTrailMps": 15,
+            "biteWithinM": 2.5,
+            "biteAfterSec": 0.6,
+            "nearsightSec": 2.75,
+            "visionRadiusM": 7,
+            "holdFireSteers": true
+          },
+          "source": "secondary"
+        },
+        {
+          "slot": "Q",
+          "name": "Seize",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Tether",
+            "Deafen",
+            "Decay"
+          ],
+          "durationSec": 4.5,
+          "windupSec": 0.7,
+          "damage": "75 Decay restored over 5s",
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "maxAirSec": 1.5,
+            "recastDropsEarly": true,
+            "windupSec": 0.7,
+            "radiusM": 6.58,
+            "zoneSec": 4.5,
+            "decay": 75,
+            "decayRestoreSec": 5,
+            "cannotLeaveZone": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Haunt",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "50s",
+          "effect": [
+            "reveal"
+          ],
+          "durationSec": 1.5,
+          "windupSec": 0.825,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "health": 1,
+            "maxAirSec": 1.5,
+            "windupSec": 0.825,
+            "revealRadiusM": 30,
+            "revealSec": 1.5,
+            "trailSec": 12,
+            "cooldownSec": 50,
+            "enemiesCanDestroy": true,
+            "requiresLineOfSight": true
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "X",
+          "name": "Nightfall",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points",
+          "effect": [
+            "Mark",
+            "Deafen",
+            "Decay"
+          ],
+          "durationSec": 8,
+          "windupSec": {
+            "value": 0.6,
+            "estimate": true
+          },
+          "damage": "75 Decay",
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "ultPoints": 8,
+            "equipSec": 0.7,
+            "lengthM": 40,
+            "widthM": 20,
+            "windupSec": {
+              "value": 0.6,
+              "estimate": true
+            },
+            "ticks": 10,
+            "tickIntervalSec": 0.355,
+            "markSec": 8,
+            "deafenSec": 8,
+            "decay": 75,
+            "decayWikiStatTable": 80,
+            "decaySource": "Riot US 11.08 note says 75; wiki stat table says 80",
+            "throughWalls": true,
+            "screechOnHit": true
+          },
+          "source": "verified"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Gekko",
+      "role": "initiator",
+      "live": true,
+      "keys": {
+        "C": "Mosh Pit",
+        "Q": "Wingman",
+        "E": "Dizzy",
+        "X": "Thrash"
+      },
+      "signature": "Dizzy",
+      "signatureSlot": "E",
+      "signatureDurationSec": 2,
+      "signatureRecharge": "reclaim globule; ability returns after 15s",
+      "ultimate": "Thrash",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "passive",
+          "name": "Globules",
+          "kind": "passive",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "reclaim"
+          ],
+          "durationSec": 20,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "globuleSec": 20,
+            "reclaimChannelSec": 1.5,
+            "reuseAfterSec": 15,
+            "reuseAfterVerified": "13.00 from 20s",
+            "creatures": [
+              "Dizzy",
+              "Wingman",
+              "Thrash"
+            ],
+            "moshPitReclaimableSince": "12.03"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "C",
+          "name": "Mosh Pit",
+          "kind": "basic",
+          "costCredits": 250,
+          "maxCharges": 1,
+          "recharge": "bought; reclaimable",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": 3,
+          "windupSec": null,
+          "damage": "30 total over 3s, then 3 ticks of 50 inner (150) or 25 outer (75)",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "equipSec": 0.9,
+            "innerRadiusM": 5.5,
+            "outerRadiusM": 6.2,
+            "poolDamage": 30,
+            "poolSec": 3,
+            "explodeTicks": 3,
+            "innerTick": 50,
+            "innerTotal": 150,
+            "outerTick": 25,
+            "outerTotal": 75,
+            "preExplosionDpsAdded": "7.04 added 10 damage per second before the explosion"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Wingman",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought; reclaimable",
+          "effect": [
+            "Concuss",
+            "plant",
+            "defuse"
+          ],
+          "durationSec": 2.5,
+          "windupSec": 0.6,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "health": 60,
+            "speedMps": 6.3,
+            "searchSec": 5,
+            "detectM": 15,
+            "coneDeg": 65,
+            "concussWithinM": 6,
+            "concussAfterSec": 0.6,
+            "concussSec": 2.5,
+            "altFire": "plant or defuse the Spike",
+            "canBeConcussed": "12.02",
+            "healthAndConcussVerified": "11.08"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "E",
+          "name": "Dizzy",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "reclaim",
+          "effect": [
+            "flash"
+          ],
+          "durationSec": 2,
+          "windupSec": 0.35,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "health": 20,
+            "activationSec": {
+              "value": 0.65,
+              "estimate": true
+            },
+            "targetRangeM": 45,
+            "blindWindupSec": 0.35,
+            "splashRadiusM": 2.5,
+            "blindSec": 2,
+            "blindFullSec": 1,
+            "blindFadeSec": 1,
+            "blindsMinimap": true,
+            "enemiesCanShootPlasma": true,
+            "requiresLineOfSight": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Thrash",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points; reclaimable once",
+          "effect": [
+            "Detain"
+          ],
+          "durationSec": 6,
+          "windupSec": 0.6,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "ultPoints": 8,
+            "health": 180,
+            "deploySec": 0.6,
+            "speedMps": 11.22,
+            "durationSec": 6,
+            "visionM": {
+              "value": 20,
+              "estimate": true
+            },
+            "lungeM": {
+              "value": 13,
+              "estimate": true
+            },
+            "lungeSec": 0.8,
+            "radiusM": 5,
+            "detainSec": 6,
+            "visionReturnSec": 1.5,
+            "healthVerified": "11.08 from 200"
+          },
+          "source": "verified"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "KAY/O",
+      "role": "initiator",
+      "live": true,
+      "keys": {
+        "C": "FRAG/ment",
+        "Q": "FLASH/drive",
+        "E": "ZERO/point",
+        "X": "NULL/cmd"
+      },
+      "signature": "ZERO/point",
+      "signatureSlot": "E",
+      "signatureDurationSec": 8,
+      "signatureRecharge": "50s",
+      "ultimate": "NULL/cmd",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "FRAG/ment",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": null,
+          "windupSec": 0.5,
+          "damage": "4 pulses, 25 to 60 each, 100 to 240 total",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "equipSec": 0.7,
+            "windupSec": 0.5,
+            "innerRadiusM": 1,
+            "outerRadiusM": 4,
+            "pulses": 4,
+            "pulseIntervalSec": 1,
+            "damageMin": 25,
+            "damageMax": 60,
+            "damageTotalMin": 100,
+            "damageTotalMax": 240,
+            "altFire": "underhand"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "FLASH/drive",
+          "kind": "basic",
+          "costCredits": 250,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "flash"
+          ],
+          "durationSec": 2.25,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.8,
+            "fuseFireSec": 1.6,
+            "fuseAltSec": 1,
+            "fuseAfterBounceSec": 0.8,
+            "telegraphSec": 0.3,
+            "blindSec": 2.25,
+            "requiresLooking": true,
+            "underhandMaxVerified": "11.08",
+            "overhandDuration": "not in that 11.08 bullet"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "E",
+          "name": "ZERO/point",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "50s",
+          "effect": [
+            "Suppress",
+            "reveal"
+          ],
+          "durationSec": 8,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "equipSec": 0.8,
+            "windupSec": 1,
+            "radiusM": 15,
+            "suppressSec": 8,
+            "cooldownSec": 50,
+            "throughWalls": true,
+            "reveal": "that they were hit"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "NULL/cmd",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points",
+          "effect": [
+            "Suppress",
+            "Combat Stim",
+            "downed"
+          ],
+          "durationSec": 12,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 8,
+            "windupSec": 1,
+            "overloadSec": 12,
+            "pulses": 5,
+            "pulseIntervalSec": 3,
+            "radiusM": 42.5,
+            "suppressSec": 4,
+            "stim": "+10%",
+            "downedHp": 850,
+            "downedSec": 15,
+            "stabilizeSec": 1.5,
+            "reviveSec": 1.55,
+            "reviveHpMax": 100,
+            "reviveScalesWithDownedHp": true,
+            "stimMatchVerified": "11.08"
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Skye",
+      "role": "initiator",
+      "live": true,
+      "keys": {
+        "C": "Regrowth",
+        "Q": "Trailblazer",
+        "E": "Guiding Light",
+        "X": "Seekers"
+      },
+      "signature": "Guiding Light",
+      "signatureSlot": "E",
+      "signatureDurationSec": 2.25,
+      "signatureRecharge": "1 free, +250, max 2; 50s",
+      "ultimate": "Seekers",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Regrowth",
+          "kind": "basic",
+          "costCredits": 150,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "heal"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "equipSec": 0.5,
+            "radiusM": 18,
+            "poolHp": 100,
+            "healHpPerSec": 20,
+            "healsSkye": false,
+            "requiresLineOfSight": true,
+            "stopsWhen": "pool empty or key released"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Trailblazer",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Concuss",
+            "damage"
+          ],
+          "durationSec": 6,
+          "windupSec": null,
+          "damage": "30",
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "health": 80,
+            "deploySec": 0.18,
+            "durationSec": 6,
+            "visionM": 22.5,
+            "leapM": {
+              "value": 12,
+              "estimate": true
+            },
+            "explosionRadiusM": 3.5,
+            "damage": 30,
+            "concussEdgeSec": 2.5,
+            "concussCentreSec": 4,
+            "healthVerified": "7.04 from 100"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Guiding Light",
+          "kind": "signature",
+          "costCredits": 250,
+          "maxCharges": 2,
+          "recharge": "1 free plus bought; 50s",
+          "effect": [
+            "flash"
+          ],
+          "durationSec": 2.25,
+          "windupSec": 0.3,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "cooldownSec": 50,
+            "wikiInfoboxStaleCooldownSec": 60,
+            "flightSec": 2,
+            "speedMps": 18,
+            "activationSec": 0.3,
+            "flashMinSec": 1,
+            "flashMaxSec": 2.25,
+            "flashScalesWithFlight": true,
+            "teamToldIfBlinded": true,
+            "flightCapVerified": "7.04 from 2.5s"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "X",
+          "name": "Seekers",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": 3,
+          "recharge": "8 ult points",
+          "effect": [
+            "Nearsight",
+            "Slow"
+          ],
+          "durationSec": 3,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "ultPoints": 8,
+            "seekers": 3,
+            "healthEach": 120,
+            "lifeSec": 15,
+            "nearsightSec": 3,
+            "visionRadiusM": 7.5,
+            "slowPercent": 60,
+            "slowSec": 5,
+            "targeting": "one per enemy, closest first",
+            "canBeConcussed": "12.02",
+            "healthAndPointsVerified": "7.04",
+            "visionNote": "11.08 said 7m; wiki game files say 7.5m"
+          },
+          "source": "secondary"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Sova",
+      "role": "initiator",
+      "live": true,
+      "keys": {
+        "C": "Owl Drone",
+        "Q": "Shock Bolt",
+        "E": "Recon Bolt",
+        "X": "Hunter's Fury"
+      },
+      "signature": "Recon Bolt",
+      "signatureSlot": "E",
+      "signatureDurationSec": null,
+      "signatureRecharge": "50s",
+      "ultimate": "Hunter's Fury",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Owl Drone",
+          "kind": "basic",
+          "costCredits": 400,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "reveal"
+          ],
+          "durationSec": 7,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "health": 100,
+            "durationSec": 7,
+            "dartCooldownSec": 5,
+            "pings": 2,
+            "firstPingAfterHitSec": 1.6,
+            "secondPingAfterSec": 1.2,
+            "enemyAudioLoopWhenSpotted": "11.00"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Shock Bolt",
+          "kind": "basic",
+          "costCredits": 150,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": null,
+          "windupSec": 0.4,
+          "damage": "1 to 75",
+          "teamDamage": "damages allies and Sova",
+          "hitsAllies": true,
+          "stats": {
+            "bounces": 2,
+            "chargeStepsSec": [
+              0.333,
+              0.667,
+              1
+            ],
+            "windupSec": 0.4,
+            "innerRadiusM": 1.5,
+            "outerRadiusM": 4,
+            "damageMin": 1,
+            "damageMax": 75,
+            "damagesSova": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Recon Bolt",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "50s",
+          "effect": [
+            "reveal"
+          ],
+          "durationSec": 0.75,
+          "windupSec": {
+            "value": 0.667,
+            "estimate": true
+          },
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "health": 20,
+            "windupSec": {
+              "value": 0.667,
+              "estimate": true
+            },
+            "radiusM": 30,
+            "pulses": 2,
+            "pulseIntervalSec": 1.6,
+            "revealSec": 0.75,
+            "cooldownSec": 50,
+            "enemiesCanShoot": true,
+            "bounces": 2,
+            "chargeStepsSec": [
+              0.333,
+              0.667,
+              1
+            ],
+            "scansVerified": "7.04 reduced 3 to 2",
+            "soundLouder": "11.00"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "X",
+          "name": "Hunter's Fury",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": 3,
+          "recharge": "8 ult points",
+          "effect": [
+            "damage",
+            "reveal"
+          ],
+          "durationSec": 6,
+          "windupSec": 1,
+          "damage": "80 per shot",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 8,
+            "shots": 3,
+            "windowSec": 6,
+            "windupEachSec": 1,
+            "beamLengthM": 66,
+            "beamRadiusM": 1.76,
+            "damage": 80,
+            "revealSec": 1,
+            "knockbackOnSovaM": 1.5,
+            "throughWalls": true
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Tejo",
+      "role": "initiator",
+      "live": true,
+      "keys": {
+        "C": "Stealth Drone",
+        "Q": "Special Delivery",
+        "E": "Guided Salvo",
+        "X": "Armageddon"
+      },
+      "signature": "Guided Salvo",
+      "signatureSlot": "E",
+      "signatureDurationSec": null,
+      "signatureRecharge": "1 free, +150, max 2; no recharge",
+      "ultimate": "Armageddon",
+      "ultimatePoints": 9,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Stealth Drone",
+          "kind": "basic",
+          "costCredits": 400,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Suppress",
+            "reveal"
+          ],
+          "durationSec": 6,
+          "windupSec": 0.4,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "health": 42,
+            "durationSec": 6,
+            "visionM": 18,
+            "windupSec": 0.4,
+            "pulseRadiusM": 16,
+            "pulseExpandSec": 0.7,
+            "suppressSec": 8,
+            "hiddenFromEnemies": true,
+            "reveal": "full"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Special Delivery",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Concuss",
+            "damage"
+          ],
+          "durationSec": 2.5,
+          "windupSec": 0.9,
+          "damage": "20 to 35 by distance",
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "maxFlightSec": 3,
+            "windupSec": 0.9,
+            "innerRadiusM": 1.25,
+            "outerRadiusM": 5.25,
+            "damageMin": 20,
+            "damageMax": 35,
+            "concussSec": 2.5,
+            "concussFalloff": false,
+            "instantReequip": true,
+            "altFireBounces": 1
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Guided Salvo",
+          "kind": "signature",
+          "costCredits": 150,
+          "maxCharges": 2,
+          "recharge": "bought; no cooldown recharge",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": null,
+          "windupSec": 1.25,
+          "damage": "65 inner / 50 outer per tick; 195 / 150 total",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "rangeM": 45,
+            "flightHeightM": 2,
+            "windupSec": 1.25,
+            "ticks": 3,
+            "tickIntervalSec": 0.8,
+            "innerDamage": 65,
+            "outerDamage": 50,
+            "innerTotal": 195,
+            "outerTotal": 150,
+            "innerRadiusM": 2.5,
+            "outerRadiusM": 4.5,
+            "targets": "one or two",
+            "pathsAroundTerrain": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Armageddon",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "9 ult points",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": null,
+          "windupSec": 3.08,
+          "damage": "4 ticks of 60 per segment",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 9,
+            "rangeM": 52.5,
+            "windupSec": 3.08,
+            "segments": 16,
+            "segmentLengthM": 2,
+            "lengthM": 32,
+            "widthM": 12,
+            "ticksPerSegment": 4,
+            "damagePerTick": 60,
+            "segmentIntervalSec": 0.25
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Chamber",
+      "role": "sentinel",
+      "live": true,
+      "keys": {
+        "C": "Trademark",
+        "Q": "Headhunter",
+        "E": "Rendezvous",
+        "X": "Tour De Force"
+      },
+      "signature": "Rendezvous",
+      "signatureSlot": "E",
+      "signatureDurationSec": null,
+      "signatureRecharge": "30s; 3s in the buy phase",
+      "ultimate": "Tour De Force",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Trademark",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Slow"
+          ],
+          "durationSec": 4,
+          "windupSec": 0.9,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "health": 20,
+            "placeRangeM": 12,
+            "armSec": 2,
+            "searchRadiusM": 10,
+            "windupSec": 0.9,
+            "slowRadiusM": 6,
+            "slowSec": 4,
+            "recallSec": 0.75,
+            "recallCooldownSec": 30,
+            "rangeLimitFromChamber": "removed 11.04"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Headhunter",
+          "kind": "basic",
+          "costCredits": 100,
+          "maxCharges": 8,
+          "recharge": "bought per bullet; fired bullets are not refunded",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": "159 head / 55 body / 46 leg, no falloff",
+          "teamDamage": "none",
+          "hitsAllies": false,
+          "stats": {
+            "costPerBullet": 100,
+            "maxBullets": 8,
+            "head": 159,
+            "body": 55,
+            "leg": 46,
+            "falloff": false,
+            "shotsPerSec": 4,
+            "adsZoom": 1.5,
+            "wallPenetration": "high"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Rendezvous",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "30s",
+          "effect": [
+            "teleport"
+          ],
+          "durationSec": 1.3,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "placeWithinM": 8.5,
+            "teleportWithinM": 18,
+            "teleportSec": 1.3,
+            "soundRadiusM": 42.5,
+            "cooldownSec": 30,
+            "buyPhaseCooldownSec": 3,
+            "destroyed": "gone for the round"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Tour De Force",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": 5,
+          "recharge": "8 ult points",
+          "effect": [
+            "damage",
+            "Slow"
+          ],
+          "durationSec": 4,
+          "windupSec": 2.3,
+          "damage": "150 body, x1.7 head",
+          "teamDamage": "none",
+          "hitsAllies": false,
+          "stats": {
+            "ultPoints": 8,
+            "summonSec": 2.3,
+            "rounds": 5,
+            "body": 150,
+            "headMultiplier": 1.7,
+            "shotsPerSec": 0.9,
+            "killSlowRadiusM": 6,
+            "killSlowSec": 4,
+            "bodyOneShot": true
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Cypher",
+      "role": "sentinel",
+      "live": true,
+      "keys": {
+        "C": "Trapwire",
+        "Q": "Cyber Cage",
+        "E": "Spycam",
+        "X": "Neural Theft"
+      },
+      "signature": "Spycam",
+      "signatureSlot": "E",
+      "signatureDurationSec": null,
+      "signatureRecharge": "free until destroyed; 60s if destroyed, 15s if recalled",
+      "ultimate": "Neural Theft",
+      "ultimatePoints": 7,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Trapwire",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 2,
+          "recharge": "bought; recall to redeploy",
+          "effect": [
+            "Slow",
+            "reveal",
+            "damage"
+          ],
+          "durationSec": 1.25,
+          "windupSec": 0.7,
+          "damage": "5 on the 4m zap",
+          "teamDamage": "none",
+          "hitsAllies": false,
+          "stats": {
+            "health": 20,
+            "placeRangeM": 20,
+            "wireLengthM": 15,
+            "armSec": 1.5,
+            "windupSec": 0.7,
+            "windupVerified": "13.00",
+            "slowSec": 1.25,
+            "slowStrength": null,
+            "slowStrengthNote": "not listed",
+            "slowSourceTag": "v8.08",
+            "leaveDistanceM": 4,
+            "zapDamage": 5,
+            "rearmSec": 2,
+            "tether": false,
+            "tetherRemoved": "11.08",
+            "slowApplied": "immediately on crossing",
+            "reveal": "when the windup finishes if the wire was not destroyed, and when the player moves 4m away",
+            "deactivateIfCypherDeadOrSuppressed": true
+          },
+          "source": "secondary"
+        },
+        {
+          "slot": "Q",
+          "name": "Cyber Cage",
+          "kind": "basic",
+          "costCredits": 100,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "smoke",
+            "audio cue"
+          ],
+          "durationSec": 7.25,
+          "windupSec": 0.75,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "radiusM": 3.72,
+            "totalSec": 7.25,
+            "formSec": 0.75,
+            "fullSec": 6,
+            "fadeSec": 0.5,
+            "slow": false,
+            "slowRemoved": "v0.50",
+            "soundWhenEnemyCrosses": true,
+            "activation": "recast"
+          },
+          "source": "secondary"
+        },
+        {
+          "slot": "E",
+          "name": "Spycam",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "60s if destroyed, 15s if recalled",
+          "effect": [
+            "reveal"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "health": 1,
+            "placeRangeM": 20,
+            "maxHeightM": 4.5,
+            "idleVisibleM": 8,
+            "activeHeardM": 12,
+            "dartRevealIntervalSec": 2,
+            "dartRemoveSec": 1.85,
+            "dartCooldownSec": 6,
+            "destroyedCooldownSec": 60,
+            "recallCooldownSec": 15
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Neural Theft",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "7 ult points",
+          "effect": [
+            "reveal"
+          ],
+          "durationSec": 4,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 7,
+            "rangeM": 18,
+            "revealAtSec": [
+              2,
+              4
+            ],
+            "target": "dead enemy body",
+            "reveals": "every living enemy"
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Deadlock",
+      "role": "sentinel",
+      "live": true,
+      "keys": {
+        "C": "Barrier Mesh",
+        "Q": "Sonic Sensor",
+        "E": "GravNet",
+        "X": "Annihilation"
+      },
+      "signature": "GravNet",
+      "signatureSlot": "E",
+      "signatureDurationSec": null,
+      "signatureRecharge": "50s",
+      "ultimate": "Annihilation",
+      "ultimatePoints": 7,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Barrier Mesh",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "wall"
+          ],
+          "durationSec": 30,
+          "windupSec": 3,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "centreHp": 680,
+            "centreFortifiedHp": 1200,
+            "smallNodes": 4,
+            "smallHp": 320,
+            "smallFortifiedHp": 480,
+            "fortifySec": 3,
+            "wallLengthM": 10,
+            "durationSec": 30,
+            "decayFromSec": 25,
+            "blocksMovement": true,
+            "blocksBullets": false,
+            "destroyCentreRemoves": true,
+            "costAndFortifiedSmallHpVerified": "11.08"
+          },
+          "source": "secondary"
+        },
+        {
+          "slot": "Q",
+          "name": "Sonic Sensor",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "Concuss"
+          ],
+          "durationSec": 2.5,
+          "windupSec": 0.5,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "health": 20,
+            "placeRangeM": 14,
+            "armSec": 1.75,
+            "areaM": [
+              9,
+              8,
+              2
+            ],
+            "windupSec": 0.5,
+            "concussSec": 2.5,
+            "triggers": [
+              "running",
+              "jumping",
+              "gunfire",
+              "reloading",
+              "planting",
+              "defusing"
+            ],
+            "walkingTriggers": false,
+            "concussVerified": "11.08 from 3.5s"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "E",
+          "name": "GravNet",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "50s",
+          "effect": [
+            "Slow",
+            "forced crouch"
+          ],
+          "durationSec": null,
+          "windupSec": 0.4,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "windupSec": 0.4,
+            "radiusM": 6.5,
+            "slowPercent": 70,
+            "forcedCrouch": true,
+            "removeChannelSec": 1.5,
+            "cooldownSec": 50,
+            "lastsUntilRemoved": true,
+            "cooldownVerified": "13.00"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "X",
+          "name": "Annihilation",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "7 ult points",
+          "effect": [
+            "cocoon"
+          ],
+          "durationSec": 7,
+          "windupSec": null,
+          "damage": "kills the captured enemy after 7s unless the cocoon breaks",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 7,
+            "timeToFireSec": 10,
+            "pulseSpeedMps": 82.5,
+            "rangeM": 40,
+            "bounces": 1,
+            "captureRadiusM": 6.5,
+            "cocoonHp": 600,
+            "killAfterSec": 7
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Killjoy",
+      "role": "sentinel",
+      "live": true,
+      "keys": {
+        "C": "Nanoswarm",
+        "Q": "Alarmbot",
+        "E": "Turret",
+        "X": "Lockdown"
+      },
+      "signature": "Turret",
+      "signatureSlot": "E",
+      "signatureDurationSec": null,
+      "signatureRecharge": "free until destroyed; 60s if destroyed, 20s if recalled",
+      "ultimate": "Lockdown",
+      "ultimatePoints": 9,
+      "abilities": [
+        {
+          "slot": "passive",
+          "name": "Out of range",
+          "kind": "passive",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "deactivate"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "rangeM": 40,
+            "affects": [
+              "Nanoswarm",
+              "Alarmbot",
+              "Turret"
+            ],
+            "reactivationWindupSec": 2,
+            "reentryWindupAdded": "11.08"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "C",
+          "name": "Nanoswarm",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "damage"
+          ],
+          "durationSec": 5,
+          "windupSec": 1,
+          "damage": "45 per second for 5s; 225 total",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "health": 20,
+            "hiddenOnceLanded": true,
+            "enemySpotM": 5.25,
+            "activationSec": 1,
+            "radiusM": 4.5,
+            "dps": 45,
+            "durationSec": 5,
+            "total": 225,
+            "staleWikiTotal": 180,
+            "durationFrom": "13.00, up from 4s"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Alarmbot",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought; 20s after recall",
+          "effect": [
+            "Vulnerable"
+          ],
+          "durationSec": 4,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "health": 20,
+            "placeRangeM": 10,
+            "worksWithinM": 40,
+            "detectM": 5.5,
+            "visibleM": 7,
+            "baseSpeedMps": 22.5,
+            "speedBuff": 0.5,
+            "speedBuffPatch": "13.00",
+            "speedMps": 33.75,
+            "explodeWithinM": 2,
+            "vulnerableSec": 4,
+            "recallCooldownSec": 20,
+            "healthVerified": "11.08 from 50"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "E",
+          "name": "Turret",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "60s if destroyed, 20s if recalled",
+          "effect": [
+            "damage",
+            "Slow"
+          ],
+          "durationSec": null,
+          "windupSec": 0.75,
+          "damage": "3-round bursts of 8 / 6 / 4 per shot at 0-20m / 20-35m / 35m+",
+          "teamDamage": "none",
+          "hitsAllies": false,
+          "stats": {
+            "targetsEnemiesOnly": true,
+            "health": 100,
+            "deploySec": 2.7,
+            "coneDeg": 100,
+            "windupSec": 0.75,
+            "burstDamage": [
+              8,
+              6,
+              4
+            ],
+            "burstRangesM": [
+              "0-20",
+              "20-35",
+              "35+"
+            ],
+            "cycleBeforeBuffSec": 1.25,
+            "fireRateBuff": 0.5,
+            "fireRateBuffPatch": "13.00",
+            "tagSlowPercent": 50,
+            "destroyedCooldownSec": 60,
+            "recallCooldownSec": 20,
+            "destroyCooldownVerified": "11.08 from 45s",
+            "tagSlowVerified": "11.08"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "X",
+          "name": "Lockdown",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "9 ult points",
+          "effect": [
+            "Detain"
+          ],
+          "durationSec": 8,
+          "windupSec": 13,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "ultPoints": 9,
+            "health": 200,
+            "radiusM": 32.5,
+            "windupSec": 13,
+            "detainSec": 8,
+            "detainApplySec": 0.15,
+            "detainApplyPatch": "11.00",
+            "enemiesCanDestroy": true,
+            "pointsVerified": "7.04"
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Sage",
+      "role": "sentinel",
+      "live": true,
+      "keys": {
+        "C": "Barrier Orb",
+        "Q": "Slow Orb",
+        "E": "Healing Orb",
+        "X": "Resurrection"
+      },
+      "signature": "Healing Orb",
+      "signatureSlot": "E",
+      "signatureDurationSec": 5,
+      "signatureRecharge": "45s",
+      "ultimate": "Resurrection",
+      "ultimatePoints": 7,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Barrier Orb",
+          "kind": "basic",
+          "costCredits": 300,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "wall"
+          ],
+          "durationSec": 40,
+          "windupSec": 2,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "placeRangeM": 15,
+            "segments": 4,
+            "segmentLengthM": 2.6,
+            "segmentHeightM": 1.5,
+            "hp": 400,
+            "fortifiedHp": 600,
+            "fortifySec": 2,
+            "durationSec": 40,
+            "decayAfterSec": 35,
+            "altFireRotates": true,
+            "costFortifyAndHpVerified": "11.08"
+          },
+          "source": "verified"
+        },
+        {
+          "slot": "Q",
+          "name": "Slow Orb",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "Slow"
+          ],
+          "durationSec": 7,
+          "windupSec": 0.5,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "windupSec": 0.5,
+            "slowPercent": 50,
+            "slowSec": 7,
+            "shortensDashes": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Healing Orb",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "45s",
+          "effect": [
+            "heal"
+          ],
+          "durationSec": 5,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "cooldownSec": 45,
+            "healHp": 100,
+            "healSec": 5,
+            "healHpPerSec": 20,
+            "fire": "ally in crosshair",
+            "altFire": "Sage",
+            "selfHealFrom": "13.00, up from 50"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Resurrection",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "7 ult points",
+          "effect": [
+            "revive"
+          ],
+          "durationSec": null,
+          "windupSec": 2,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 7,
+            "rangeM": 12,
+            "windupSec": 2,
+            "reviveSec": 1.3,
+            "hp": "full",
+            "armor": "none"
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Veto",
+      "role": "sentinel",
+      "live": true,
+      "keys": {
+        "C": "Crosscut",
+        "Q": "Chokehold",
+        "E": "Interceptor",
+        "X": "Evolution"
+      },
+      "signature": "Interceptor",
+      "signatureSlot": "E",
+      "signatureDurationSec": 9,
+      "signatureRecharge": "45s; 20s if recalled",
+      "ultimate": "Evolution",
+      "ultimatePoints": 7,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Crosscut",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 2,
+          "recharge": "bought; reclaimable in the buy phase",
+          "effect": [
+            "teleport"
+          ],
+          "durationSec": null,
+          "windupSec": 0.75,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "health": 20,
+            "throwM": {
+              "value": 20,
+              "estimate": true
+            },
+            "armSec": 0.75,
+            "usableRangeM": 30,
+            "teleportWindupSec": 1,
+            "arrivalSec": 0.8,
+            "sound": "both ends",
+            "usableRangeAndArmVerified": "13.00 from 24m and 1.5s"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Chokehold",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "Tether",
+            "Deafen",
+            "Decay"
+          ],
+          "durationSec": 4.5,
+          "windupSec": 0.5,
+          "damage": "75 Decay restored over 4.5s",
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "health": 20,
+            "deploySec": 1.5,
+            "windupSec": 0.5,
+            "triggerRadiusM": 6.58,
+            "visibleToEnemiesM": 9,
+            "zoneSec": 4.5,
+            "decay": 75,
+            "decayRestoreSec": 4.5,
+            "enemiesCanDestroyBeforeTrigger": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Interceptor",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "45s; 20s if recalled",
+          "effect": [
+            "destroy utility",
+            "damage"
+          ],
+          "durationSec": 9,
+          "windupSec": 0.5,
+          "damage": "100 per tick, 8 ticks/s",
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "cooldownSec": 45,
+            "recallCooldownSec": 20,
+            "health": 20,
+            "placeForwardM": 7,
+            "windupSec": 0.5,
+            "radiusM": 18,
+            "activeSec": 9,
+            "damagePerTick": 100,
+            "ticksPerSec": 8,
+            "retargetSec": 0.2,
+            "doesNotAffect": [
+              "Astra utility",
+              "Breach utility",
+              "Omen utility",
+              "smokes",
+              "most ultimates"
+            ],
+            "recallCooldownVerified": "13.00 from 30s"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Evolution",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "7 ult points",
+          "effect": [
+            "Combat Stim",
+            "heal",
+            "debuff immunity"
+          ],
+          "durationSec": null,
+          "windupSec": 1,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "ultPoints": 7,
+            "windupSec": 1,
+            "stim": "+10%",
+            "healHpPerSec": 40,
+            "immuneToDebuffs": true,
+            "lastsUntil": "death or round end",
+            "stimNote": "Veto was not in the 11.08 stim list that was opened"
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Vyse",
+      "role": "sentinel",
+      "live": true,
+      "keys": {
+        "C": "Razorvine",
+        "Q": "Shear",
+        "E": "Arc Rose",
+        "X": "Steel Garden"
+      },
+      "signature": "Arc Rose",
+      "signatureSlot": "E",
+      "signatureDurationSec": 2,
+      "signatureRecharge": "free; 20s if recalled, 60s if destroyed",
+      "ultimate": "Steel Garden",
+      "ultimatePoints": 8,
+      "abilities": [
+        {
+          "slot": "C",
+          "name": "Razorvine",
+          "kind": "basic",
+          "costCredits": 150,
+          "maxCharges": 2,
+          "recharge": "bought",
+          "effect": [
+            "Slow",
+            "damage"
+          ],
+          "durationSec": 6,
+          "windupSec": 0.2,
+          "damage": "10 per 1.25m moved",
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "health": 20,
+            "detectM": 3.5,
+            "windupSec": 0.2,
+            "radiusM": 6.25,
+            "slowPercent": 15,
+            "damagePerDistance": 10,
+            "damageDistanceM": 1.25,
+            "durationSec": 6
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Shear",
+          "kind": "basic",
+          "costCredits": 200,
+          "maxCharges": 1,
+          "recharge": "bought",
+          "effect": [
+            "wall"
+          ],
+          "durationSec": 6,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "lengthMinM": 1,
+            "lengthMaxM": 12,
+            "heightM": {
+              "value": 2.5,
+              "estimate": true
+            },
+            "placeRangeM": 15,
+            "armSec": 2,
+            "detectM": 3.5,
+            "durationSec": 6,
+            "windup": "may be stale, so not stored",
+            "trigger": "enemy enters then leaves the zone",
+            "entryCue": "11.08"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Arc Rose",
+          "kind": "signature",
+          "costCredits": 0,
+          "maxCharges": 1,
+          "recharge": "20s if recalled, 60s if destroyed",
+          "effect": [
+            "flash"
+          ],
+          "durationSec": 2,
+          "windupSec": 0.5,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": true,
+          "stats": {
+            "health": 20,
+            "placeRangeM": 20,
+            "throughWallM": 10,
+            "visibleM": 10,
+            "windupSec": 0.5,
+            "flashSec": 2,
+            "recallRangeM": 32.5,
+            "recallCooldownSec": 20,
+            "destroyedCooldownSec": 60,
+            "destructibleOnceWindupStarts": true,
+            "requiresSeen": true
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Steel Garden",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "8 ult points",
+          "effect": [
+            "weapon jam"
+          ],
+          "durationSec": 8,
+          "windupSec": 4.4,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": false,
+          "stats": {
+            "ultPoints": 8,
+            "windupSec": 4.4,
+            "radiusM": 28,
+            "jamSec": 8,
+            "jammed": "primary weapons",
+            "stillUsable": "sidearms"
+          },
+          "source": "sheet"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Hush",
+      "role": "duelist",
+      "live": false,
+      "keys": {
+        "C": "Flow",
+        "Q": "Flashbulb",
+        "E": "Displacement",
+        "X": "Suspension"
+      },
+      "signature": "Displacement",
+      "signatureSlot": "E",
+      "signatureDurationSec": null,
+      "signatureRecharge": "2 kills",
+      "ultimate": "Suspension",
+      "ultimatePoints": null,
+      "abilities": [
+        {
+          "slot": "passive",
+          "name": "Telekinesis",
+          "kind": "passive",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "interact"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "range": "increased",
+            "canPickUp": [
+              "weapons",
+              "Spike"
+            ],
+            "canUseSwitches": true,
+            "costs": null,
+            "note": "announced for 27 Oct 2026; costs, charges, and ult points unpublished"
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "C",
+          "name": "Flow",
+          "kind": "basic",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "dash"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "anchor": "instant",
+            "delay": "short",
+            "air": "levitates briefly first",
+            "costCredits": null,
+            "maxCharges": null
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "Q",
+          "name": "Flashbulb",
+          "kind": "basic",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "flash"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "cast": "throw or prep, then redirect toward the crosshair",
+            "detonates": "on a surface or after a delay",
+            "costCredits": null
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "E",
+          "name": "Displacement",
+          "kind": "signature",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": "2 kills",
+          "effect": [
+            "pull",
+            "Concuss"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "cast": "throw or prep, then redirect",
+            "explodes": "on impact or after a delay",
+            "pull": "toward centre",
+            "concussWhen": "pulled into a surface or another player",
+            "costCredits": null,
+            "maxCharges": null
+          },
+          "source": "sheet"
+        },
+        {
+          "slot": "X",
+          "name": "Suspension",
+          "kind": "ultimate",
+          "costCredits": null,
+          "maxCharges": null,
+          "recharge": null,
+          "effect": [
+            "levitate"
+          ],
+          "durationSec": null,
+          "windupSec": null,
+          "damage": null,
+          "teamDamage": null,
+          "hitsAllies": null,
+          "stats": {
+            "cast": "sent forward and steered with the crosshair",
+            "detonate": "reactivate or fire again",
+            "ultPoints": null
+          },
+          "source": "sheet"
+        }
+      ]
+    }
+  ]
+}
