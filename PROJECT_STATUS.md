@@ -1,16 +1,8 @@
 # Project status
 
-Updated: 21 October 2026. Milestone 1 is implemented. Git is initialized. No commit has been made.
+Updated: 21 October 2026. Milestone 1 is implemented.
 
 Agent records for patch 13.08 are in `agent-reference.json`. Each ability stores the sheet's duration, effect, damage, team damage, windup, and remaining stats. That file is a reference, not the sim catalog.
-
-## Inspection before this milestone
-
-The workspace contained only this file. There was no package manifest, source tree, test runner, or git history. There was no application code to reuse.
-
-`node` and `npm` are not on the system PATH. The checks below were run with a portable Node.js 24.18.1. A normal terminal in this folder will not find `npm` until Node.js is installed on the PATH.
-
-The folder is under OneDrive and its name contains a space. Install and the production build completed there. If file watching later fails, move the project off OneDrive before adding features.
 
 ## Stack
 
@@ -95,10 +87,10 @@ Unimplemented ability stats are omitted rather than copied in as if they were ac
 
 | Agent | Role tag | Live ability | Other abilities |
 | --- | --- | --- | --- |
-| Brimstone | Controller, secondary, wiki page read this session | Sky Smoke, signature, complete | Stim Beacon, Incendiary, Orbital Strike are placeholders |
-| KAY/O | Initiator, secondary, wiki page read this session | none | FLASH/DRIVE is a basic flash placeholder. ZERO/point is the signature placeholder. FRAG/ment and NULL/cmd are placeholders |
-| Jett | Duelist, secondary. The Jett page was not re-fetched this session | none | Cloudburst is a basic smoke placeholder and does not grant smoke coverage. Tailwind is the signature entry placeholder. Updraft is not treated as entry. Blade Storm is a placeholder |
-| Cypher | Sentinel, secondary. The Cypher page was not re-fetched this session | none | Trapwire is a basic flank-watch placeholder. Spycam is the signature placeholder. Cyber Cage and Neural Theft are placeholders |
+| Brimstone | Controller, secondary, wiki page | Sky Smoke, signature, complete | Stim Beacon, Incendiary, Orbital Strike are placeholders |
+| KAY/O | Initiator, secondary, wiki page | none | FLASH/DRIVE is a basic flash placeholder. ZERO/point is the signature placeholder. FRAG/ment and NULL/cmd are placeholders |
+| Jett | Duelist, secondary | none | Cloudburst is a basic smoke placeholder and does not grant smoke coverage. Tailwind is the signature entry placeholder. Updraft is not treated as entry. Blade Storm is a placeholder |
+| Cypher | Sentinel, secondary | none | Trapwire is a basic flank-watch placeholder. Spycam is the signature placeholder. Cyber Cage and Neural Theft are placeholders |
 
 Slot labels for the unimplemented kits come from the abilities wiki table and are secondary. Sova and every unlisted agent are absent from the catalog.
 
@@ -157,7 +149,7 @@ The sheet's author then corrected the five remaining conflicts. Those lines now 
 - Nightfall decay is stored as 75 from Riot's US 11.08 note, with the wiki stat table's 80 named beside it. Duration 8s and width 20m stay in both copies.
 - Nearsight radii are per ability: Prowler 7m, Paranoia 7.5m, Leer 6m, Seekers 7.5m, with the 11.08 "5m to 7m" note kept as the patch text.
 - Gravity Well uses Riot's word Fragile for 2.5s and records that the wiki calls the same debuff Vulnerable.
-- Trapwire no longer says 50% or tether. The 4m distance and 5 damage are on the wiki page fetched in this review. Reveal is not only on the zap: the 11.08 history says the wire reveals when the windup finishes if it was not destroyed, or when the player moves 4m away. Crossing applies the slow immediately.
+- Trapwire no longer says 50% or tether. The 4m distance and 5 damage are on the wiki page. Reveal is not only on the zap: the 11.08 history says the wire reveals when the windup finishes if it was not destroyed, or when the player moves 4m away. Crossing applies the slow immediately.
 - Duelist two-kill recharge covers Tailwind, Paint Shells, Neon's slide, Refract, Curveball, Gatecrash, and Hush Displacement. Double Tap, Reyna's orb spend, and Neon's sprint battery are the exceptions.
 
 Still secondary, and not copied into the catalog:
@@ -177,7 +169,6 @@ A live smoke or cage blocks the look a flash needs, and that block ends when the
 - Jett's Tailwind page and Cypher's Trapwire and Cyber Cage pages were opened for the revised sheet. Their roles were not re-fetched as separate pages.
 - Uniqueness and team size are secondary, not client-verified.
 - Drill Hall is 20 m wide, so the secondary 4.15 m smoke covers a large part of the doorway. That is the recorded radius on this small schematic.
-- `npm` is not on PATH in this environment.
 
 ## Roadmap
 

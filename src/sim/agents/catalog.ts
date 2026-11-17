@@ -24,13 +24,13 @@ const KAYO_ROLE: Provenance = {
 const JETT_ROLE: Provenance = {
   kind: "secondary",
   source: "https://wiki.playvalorant.com/en-us/Jett",
-  note: "Public roster lists Jett as a Duelist. That page was not re-fetched in this session. Coverage does not grant capabilities from this label.",
+  note: "Public roster lists Jett as a Duelist. Coverage does not grant capabilities from this label.",
 };
 
 const CYPHER_ROLE: Provenance = {
   kind: "secondary",
   source: "https://wiki.playvalorant.com/en-us/Cypher",
-  note: "Public roster lists Cypher as a Sentinel. That page was not re-fetched in this session. Coverage does not grant capabilities from this label.",
+  note: "Public roster lists Cypher as a Sentinel. Coverage does not grant capabilities from this label.",
 };
 
 function listed(input: {
