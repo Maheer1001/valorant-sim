@@ -175,15 +175,42 @@ describe("live round UI", () => {
     expect(screen.getByLabelText("Plan status")).toHaveTextContent(/length 32 m/);
   });
 
-  it("changes Fault Line charge length with the mouse wheel while armed", async () => {
+  it("arms Fault Line with E and changes length via wheel (clamped, preview grows)", async () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
-    await user.click(screen.getByRole("button", { name: "Cast Fault Line" }));
-    fireEvent.wheel(board(), { deltaY: -100 });
-    expect(screen.getByLabelText("Fault Line charge length")).toHaveValue("21");
-    fireEvent.wheel(board(), { deltaY: 100 });
-    expect(screen.getByLabelText("Fault Line charge length")).toHaveValue("20");
+    await user.keyboard("e");
+    expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Armed Fault Line/);
+    fireEvent.mouseMove(board(), { clientX: 150, clientY: 60 });
+    const slider = screen.getByLabelText("Fault Line charge length");
+    expect(slider).toHaveValue("20");
+    const extent = (el: Element) => {
+      const pts = (el.getAttribute("points") ?? "")
+        .trim()
+        .split(/\s+/)
+        .map((pair) => {
+          const [x, y] = pair.split(",").map(Number);
+          return { x: x ?? 0, y: y ?? 0 };
+        });
+      const xs = pts.map((p) => p.x);
+      const ys = pts.map((p) => p.y);
+      return Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+    };
+    const before = extent(screen.getByTestId("fault-line-preview"));
+    await act(async () => {
+      fireEvent.wheel(board(), { deltaY: -100 });
+    });
+    expect(slider).toHaveValue("21");
+    const after = extent(screen.getByTestId("fault-line-preview"));
+    expect(after).toBeGreaterThan(before);
+    await act(async () => {
+      for (let i = 0; i < 80; i += 1) fireEvent.wheel(board(), { deltaY: -100 });
+    });
+    expect(slider).toHaveValue("56");
+    await act(async () => {
+      for (let i = 0; i < 80; i += 1) fireEvent.wheel(board(), { deltaY: 100 });
+    });
+    expect(slider).toHaveValue("8");
   });
 
   it("refuses an out-of-range map target with a message", async () => {
@@ -277,13 +304,29 @@ describe("live round UI", () => {
     expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Append waypoint/);
   });
 
-  it("hides a defender behind the wall in attack fog", async () => {
+  it("hides defenders behind the wall in attack fog", async () => {
     const user = userEvent.setup();
     render(<App />);
     expect(screen.queryByRole("button", { name: "Select Jett" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Select KAY/O" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Select KAY/O" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Showing attack view" }));
     expect(screen.getByRole("button", { name: "Select Jett" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Select KAY/O" })).toBeInTheDocument();
+  });
+
+  it("keeps the default drill quiet for the first 15 seconds at 1x", () => {
+    const scenario = createPlayableDrill(1);
+    const opened = openLiveRound(scenario, SHIPPED_CATALOG, STANDARD_RULESET, {
+      decide: defenseHoldDecide,
+    });
+    if (!isLiveRound(opened)) throw new Error(opened.message);
+    const steps = Math.ceil(15_000 / STANDARD_RULESET.simStepMs);
+    stepLive(opened, steps);
+    expect(opened.world.timeMs).toBeGreaterThanOrEqual(15_000);
+    // Withheld auto-fire attempts may log; no resolved shots or damage.
+    expect(opened.events.filter((event) => event.type === "shot")).toEqual([]);
+    expect(opened.events.filter((event) => event.type === "ability-damage")).toEqual([]);
+    expect(opened.world.agents.every((agent) => agent.alive && agent.hp === 100)).toBe(true);
   });
 
   it("round-trips a replay export and load to the same sim time", async () => {

@@ -36,7 +36,7 @@ import { yawDegFromPoints } from "./coords.ts";
 
 export type PreviewPrimitive =
   | { kind: "polyline"; points: Point[]; faint?: boolean; stroke?: string }
-  | { kind: "polygon"; points: Point[]; fill?: string }
+  | { kind: "polygon"; points: Point[]; fill?: string; testId?: string }
   | { kind: "circle"; center: Point; radiusMm: number; dashed?: boolean; fill?: boolean }
   | { kind: "line"; from: Point; to: Point }
   | { kind: "dots"; points: Point[] }
@@ -73,6 +73,12 @@ export function routeTravelMs(
   return { points, travelMs };
 }
 
+/** ETA label text, or null when there is no remaining travel (skip "ETA 0.0s"). */
+export function etaLabelForTravelMs(travelMs: number): string | null {
+  if (travelMs <= 0) return null;
+  return `ETA ${(travelMs / 1000).toFixed(1)}s`;
+}
+
 export function movementPreview(input: {
   from: Point;
   waypoints: readonly Point[];
@@ -91,9 +97,11 @@ export function movementPreview(input: {
     { kind: "polyline", points, faint: input.faint ?? false },
   ];
   if (!input.faint) {
-    const tip = points[points.length - 1]!;
-    const text = input.label ?? `ETA ${(travelMs / 1000).toFixed(1)}s`;
-    primitives.push({ kind: "label", at: { xMm: tip.xMm + 200, yMm: tip.yMm - 200 }, text });
+    const text = input.label ?? etaLabelForTravelMs(travelMs);
+    if (text) {
+      const tip = points[points.length - 1]!;
+      primitives.push({ kind: "label", at: { xMm: tip.xMm + 200, yMm: tip.yMm - 200 }, text });
+    }
   }
   return primitives;
 }
@@ -165,7 +173,7 @@ export function abilityPreview(input: {
       return {
         primitives: [
           aimLine,
-          { kind: "polygon", points: polygon },
+          { kind: "polygon", points: polygon, testId: "fault-line-preview" },
           {
             kind: "label",
             at: { xMm: input.aim.xMm + 200, yMm: input.aim.yMm - 200 },

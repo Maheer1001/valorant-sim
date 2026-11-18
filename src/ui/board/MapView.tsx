@@ -68,6 +68,7 @@ function renderPrimitive(primitive: PreviewPrimitive, key: string) {
     return (
       <polygon
         key={key}
+        data-testid={primitive.testId}
         points={points}
         fill={primitive.fill ?? "#7eb6ff"}
         fillOpacity="0.16"
@@ -270,6 +271,7 @@ export function MapView({
     <svg
       ref={svgRef}
       viewBox={`0 0 ${map.widthMm} ${map.heightMm}`}
+      preserveAspectRatio="xMidYMid meet"
       role="img"
       aria-label={map.name}
       tabIndex={0}

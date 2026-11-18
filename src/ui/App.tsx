@@ -543,8 +543,7 @@ export function App() {
       <header className="masthead">
         <h1>Tactical Simulation Lab</h1>
         <p>
-          Live Drill Hall · Catalog {SHIPPED_CATALOG.version}. Starts paused — Space to run. Hotkeys 1–5,
-          C/Q/E/X, H hold, right-click move.
+          Live · {SHIPPED_CATALOG.version} · Space pause · 1-5 select · C/Q/E/X cast · H hold · RMB move
         </p>
       </header>
 

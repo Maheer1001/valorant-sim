@@ -353,7 +353,11 @@ React holds `LiveRound` in a **ref** plus a **version** counter. Pure `src/ui/li
 
 ## Fast controls — Stage (c) (18 November 2026)
 
-Board-first layout (≥70% width): top bar (timer, pause, speed, fog, replay), bottom attacker HUD (C/Q/E/X), collapsible Setup drawer (draft, coverage, scenario/replay JSON, drill options, full log, Buy). Kill-feed overlay (last 6). Multi-select (click / 1–5 / Shift / drag-box); formation-preserving group move; Shift+right-click appends waypoints (UI builds full `move-route` lists — **no new engine append command**). Hotkeys arm abilities with cursor previews from `src/ui/board/previews.ts` (shared sim geometry constants). Fault Line wheel adjusts charge length. Unused `timeline/Transport.tsx` and `EventList.tsx` removed.
+Board-first layout (≥70% width): top bar (timer, pause, speed, fog, replay), bottom attacker HUD (C/Q/E/X), collapsible Setup drawer (draft, coverage, scenario/replay JSON, drill options, full log, Buy). Kill-feed overlay (last 6). Multi-select (click / 1-5 / Shift / drag-box); formation-preserving group move; Shift+right-click appends waypoints (UI builds full `move-route` lists — **no new engine append command**). Hotkeys arm abilities with cursor previews from `src/ui/board/previews.ts` (shared sim geometry constants). Fault Line wheel adjusts charge length. Unused `timeline/Transport.tsx` and `EventList.tsx` removed.
+
+### Stage (c1) polish (18 November 2026)
+
+No document scroll at 1366x768 (flex board height, compact HUD row, thin header, SVG letterbox). ETA labels omitted when travel is zero. Default drill defenders moved out of LOS so the first 15 s at 1x has no resolved shots. Fault Line wheel UI test covers E-arm, clamp, and preview growth.
 
 Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 
@@ -364,14 +368,14 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 - Real opponent (hold stub + decide hook only)
 - Retiring the window API (Stage e)
 
-### Checks (Live Stage c — `npm run check`, 18 November 2026)
+### Checks (Live Stage c1 — `npm run check`, 18 November 2026)
 
 | Step | Result |
 | --- | --- |
 | lint | Pass. ESLint completed with no findings. |
 | typecheck | Pass. `tsc --noEmit` completed with no errors. |
-| test | Pass. Vitest 5.0.5, 22 files, 124 tests. |
-| build | Pass. Vite 8.3.4 produced `dist/` in 344 ms (60 modules). |
+| test | Pass. Vitest 5.0.5, 22 files, 126 tests. |
+| build | Pass. Vite 8.3.4 produced `dist/` in 309 ms (60 modules). |
 
 ## Next task
 

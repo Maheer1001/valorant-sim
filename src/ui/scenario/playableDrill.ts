@@ -40,11 +40,11 @@ export function createPlayableDrill(
     defense: {
       side: "defense",
       members: [
-        // Behind the divider — hidden from attack fog until someone crosses the doorway line.
-        createInstance(jett, "defense", { xMm: 11000, yMm: 2000 }, "jett-defense", "entry", {
+        // Deep right room, wall-blocked from both attack spawns (doorway y 4800-7200).
+        createInstance(jett, "defense", { xMm: 16000, yMm: 1000 }, "jett-defense", "entry", {
           facingDeg: 180,
         }),
-        createInstance(kayo, "defense", { xMm: 11000, yMm: 7000 }, "kayo-defense", null, {
+        createInstance(kayo, "defense", { xMm: 16000, yMm: 11000 }, "kayo-defense", null, {
           facingDeg: 180,
         }),
       ],

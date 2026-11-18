@@ -18,7 +18,9 @@ import { STANDARD_RULESET } from "../../src/rules/ruleset.ts";
 import {
   abilityPreview,
   clampFaultLengthM,
+  etaLabelForTravelMs,
   formationDestinations,
+  movementPreview,
   routeTravelMs,
 } from "../../src/ui/board/previews.ts";
 
@@ -30,6 +32,26 @@ describe("board previews", () => {
     expect(clampFaultLengthM(2)).toBe(8);
     expect(clampFaultLengthM(80)).toBe(56);
     expect(clampFaultLengthM(20.4)).toBe(20);
+  });
+
+  it("omits ETA labels when travel distance is zero", () => {
+    expect(etaLabelForTravelMs(0)).toBeNull();
+    expect(etaLabelForTravelMs(-1)).toBeNull();
+    expect(etaLabelForTravelMs(1500)).toBe("ETA 1.5s");
+    const idle = movementPreview({
+      from: origin,
+      waypoints: [origin],
+      walls: DRILL_HALL.walls,
+      walkSpeedMmPerSec: 3500,
+    });
+    expect(idle.some((item) => item.kind === "label")).toBe(false);
+    const moving = movementPreview({
+      from: origin,
+      waypoints: [aim],
+      walls: DRILL_HALL.walls,
+      walkSpeedMmPerSec: 3500,
+    });
+    expect(moving.some((item) => item.kind === "label" && item.text.startsWith("ETA "))).toBe(true);
   });
 
   it("formation destinations keep offsets from the centroid", () => {
