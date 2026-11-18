@@ -1,0 +1,490 @@
+{
+  "id": "brimstone-orbital",
+  "events": [
+    {
+      "type": "shot-withheld",
+      "timeMs": 0,
+      "sequence": 1,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "cast-accepted",
+      "timeMs": 0,
+      "sequence": 2,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "target": {
+        "xMm": 8000,
+        "yMm": 2000
+      },
+      "chargesRemaining": -1
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 0,
+      "sequence": 3,
+      "agentId": "jett-defense",
+      "targetInstanceId": "jett-defense",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 1000,
+      "sequence": 4,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 1000,
+      "sequence": 5,
+      "agentId": "jett-defense",
+      "targetInstanceId": "jett-defense",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 2000,
+      "sequence": 6,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 2000,
+      "sequence": 7,
+      "agentId": "jett-defense",
+      "targetInstanceId": "jett-defense",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "orbital-activated",
+      "timeMs": 2000,
+      "sequence": 8,
+      "agentId": "brimstone-attack",
+      "zoneId": "orbital-8",
+      "at": {
+        "xMm": 8000,
+        "yMm": 2000
+      }
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2000,
+      "sequence": 9,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": [
+        {
+          "targetInstanceId": "jett-defense",
+          "damage": 20,
+          "targetHpAfter": 80
+        }
+      ]
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2150,
+      "sequence": 10,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": [
+        {
+          "targetInstanceId": "jett-defense",
+          "damage": 20,
+          "targetHpAfter": 60
+        }
+      ]
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2300,
+      "sequence": 11,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": [
+        {
+          "targetInstanceId": "jett-defense",
+          "damage": 20,
+          "targetHpAfter": 40
+        }
+      ]
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2450,
+      "sequence": 12,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": [
+        {
+          "targetInstanceId": "jett-defense",
+          "damage": 20,
+          "targetHpAfter": 20
+        }
+      ]
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2600,
+      "sequence": 13,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": [
+        {
+          "targetInstanceId": "jett-defense",
+          "damage": 20,
+          "targetHpAfter": 0
+        }
+      ]
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2750,
+      "sequence": 14,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2900,
+      "sequence": 15,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 3000,
+      "sequence": 36,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3050,
+      "sequence": 16,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3200,
+      "sequence": 17,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3350,
+      "sequence": 18,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3500,
+      "sequence": 19,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3650,
+      "sequence": 20,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3800,
+      "sequence": 21,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3950,
+      "sequence": 22,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 4000,
+      "sequence": 37,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4100,
+      "sequence": 23,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4250,
+      "sequence": 24,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4400,
+      "sequence": 25,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4550,
+      "sequence": 26,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4700,
+      "sequence": 27,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4850,
+      "sequence": 28,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "orbital-8",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 5000,
+      "sequence": 38,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "orbital-shrink",
+      "timeMs": 5150,
+      "sequence": 29,
+      "agentId": "brimstone-attack",
+      "zoneId": "orbital-8",
+      "radiusMm": 7200
+    },
+    {
+      "type": "orbital-shrink",
+      "timeMs": 5300,
+      "sequence": 30,
+      "agentId": "brimstone-attack",
+      "zoneId": "orbital-8",
+      "radiusMm": 5400
+    },
+    {
+      "type": "orbital-shrink",
+      "timeMs": 5450,
+      "sequence": 31,
+      "agentId": "brimstone-attack",
+      "zoneId": "orbital-8",
+      "radiusMm": 3600
+    },
+    {
+      "type": "orbital-shrink",
+      "timeMs": 5600,
+      "sequence": 32,
+      "agentId": "brimstone-attack",
+      "zoneId": "orbital-8",
+      "radiusMm": 1800
+    },
+    {
+      "type": "orbital-shrink",
+      "timeMs": 5750,
+      "sequence": 33,
+      "agentId": "brimstone-attack",
+      "zoneId": "orbital-8",
+      "radiusMm": 0
+    },
+    {
+      "type": "zone-expired",
+      "timeMs": 5750,
+      "sequence": 34,
+      "agentId": "brimstone-attack",
+      "zoneId": "orbital-8"
+    },
+    {
+      "type": "smoke-expired",
+      "timeMs": 5750,
+      "sequence": 35,
+      "agentId": "brimstone-attack",
+      "smokeId": "orbital-vision-8"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 6000,
+      "sequence": 39,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 7000,
+      "sequence": 40,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 8000,
+      "sequence": 41,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 9000,
+      "sequence": 42,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 10000,
+      "sequence": 43,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 11000,
+      "sequence": 44,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    }
+  ],
+  "finalState": {
+    "seed": 21,
+    "windowIndex": 4,
+    "timeMs": 12000,
+    "agents": [
+      {
+        "instanceId": "brimstone-attack",
+        "definitionId": "brimstone",
+        "side": "attack",
+        "xMm": 3000,
+        "yMm": 2000,
+        "hp": 100,
+        "alive": true,
+        "facingDeg": 0,
+        "credits": 800,
+        "charges": {
+          "stim-beacon": 1,
+          "incendiary": 1,
+          "sky-smoke": 3
+        },
+        "cooldownReadyAtMs": {},
+        "ultimatePoints": 0,
+        "statuses": []
+      },
+      {
+        "instanceId": "jett-defense",
+        "definitionId": "jett",
+        "side": "defense",
+        "xMm": 8000,
+        "yMm": 2000,
+        "hp": 0,
+        "alive": false,
+        "facingDeg": 180,
+        "credits": 800,
+        "charges": {},
+        "cooldownReadyAtMs": {},
+        "ultimatePoints": 0,
+        "statuses": []
+      }
+    ],
+    "smokes": [
+      {
+        "id": "orbital-vision-8",
+        "ownerInstanceId": "brimstone-attack",
+        "abilityId": "orbital-strike",
+        "xMm": 8000,
+        "yMm": 2000,
+        "radiusMm": 0,
+        "activeFromMs": 2000,
+        "expiresAtMs": 5750
+      }
+    ],
+    "devices": [],
+    "zones": [],
+    "mapId": "drill-hall",
+    "rulesetId": "standard-competitive",
+    "catalogVersion": "m2-stage1-brimstone-2026-11-17"
+  }
+}

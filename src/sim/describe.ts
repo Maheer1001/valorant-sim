@@ -48,6 +48,8 @@ export function describeEvent(event: SimEvent): string {
       return `${prefix} · ${event.abilityId} damage tick (${event.hits.length} hit${event.hits.length === 1 ? "" : "s"})`;
     case "zone-expired":
       return `${prefix} · Zone ended (${event.zoneId})`;
+    case "round-ended":
+      return `${prefix} · Round ended (${event.result.kind})`;
     default: {
       const unreachable: never = event;
       return unreachable;

@@ -9,9 +9,24 @@ export type Ruleset = {
   teamSizeProvenance: Provenance;
   uniqueness: UniquenessScope;
   uniquenessProvenance: Provenance;
-  /** Planning window length in integer milliseconds. */
+  /**
+   * Planning window length in integer milliseconds.
+   * Kept for the resolveWindow compatibility shim only.
+   */
   windowMs: number;
   windowMsProvenance: Provenance;
+  /** Fixed simulation step for the live runner. */
+  simStepMs: number;
+  simStepMsProvenance: Provenance;
+  /** Live round length before timeout (defense wins until spike exists). */
+  roundDurationMs: number;
+  roundDurationMsProvenance: Provenance;
+  /** Pre-round buy/plan countdown. Unused until the pre-round UI stage. */
+  buyPhaseMs: number;
+  buyPhaseMsProvenance: Provenance;
+  /** How often an injectable opponent decide() may run in sim time. */
+  decisionIntervalMs: number;
+  decisionIntervalMsProvenance: Provenance;
   /** Straight-line walk speed for window move orders, millimeters per second. */
   walkSpeedMmPerSec: number;
   walkSpeedProvenance: Provenance;
@@ -56,7 +71,31 @@ const WIKI_GAMEPLAY = "https://wiki.playvalorant.com/en-us/VALORANT";
 export const WINDOW_MS_PROVENANCE: Provenance = {
   kind: "assumed",
   source: "milestone-2",
-  note: "Interactive rounds plan in fixed 3000 ms windows. This is a lab turn length, not a Valorant timer.",
+  note: "Interactive rounds plan in fixed 3000 ms windows. This is a lab turn length, not a Valorant timer. Retained for the resolveWindow shim.",
+};
+
+export const SIM_STEP_MS_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "live-round-plan",
+  note: "Live sim advances in 50 ms steps. Wall-clock frame timing only changes how many steps run per frame.",
+};
+
+export const ROUND_DURATION_MS_PROVENANCE: Provenance = {
+  kind: "owner",
+  source: "project-owner",
+  note: "Owner-specified 100 s live round timer. Not a measured Valorant round length. Defense wins on timeout until spike plant exists.",
+};
+
+export const BUY_PHASE_MS_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "live-round-plan",
+  note: "Assumed 30 s pre-round buy/plan countdown. Unused until the pre-round stage. Not a verified Valorant buy length.",
+};
+
+export const DECISION_INTERVAL_MS_PROVENANCE: Provenance = {
+  kind: "assumed",
+  source: "live-round-plan",
+  note: "Assumed 500 ms opponent decision cadence. Not a Valorant timer.",
 };
 
 export const WALK_SPEED_PROVENANCE: Provenance = {
@@ -150,6 +189,14 @@ export const STANDARD_RULESET: Ruleset = {
   },
   windowMs: 3000,
   windowMsProvenance: WINDOW_MS_PROVENANCE,
+  simStepMs: 50,
+  simStepMsProvenance: SIM_STEP_MS_PROVENANCE,
+  roundDurationMs: 100_000,
+  roundDurationMsProvenance: ROUND_DURATION_MS_PROVENANCE,
+  buyPhaseMs: 30_000,
+  buyPhaseMsProvenance: BUY_PHASE_MS_PROVENANCE,
+  decisionIntervalMs: 500,
+  decisionIntervalMsProvenance: DECISION_INTERVAL_MS_PROVENANCE,
   walkSpeedMmPerSec: 3500,
   walkSpeedProvenance: WALK_SPEED_PROVENANCE,
   autoFireIntervalMs: 1000,

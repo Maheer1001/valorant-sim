@@ -1,0 +1,178 @@
+{
+  "id": "auto-fire-seed-1-windows-3",
+  "events": [
+    {
+      "type": "shot",
+      "timeMs": 0,
+      "sequence": 1,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "jett-defense",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 4833,
+      "draw": 5930,
+      "hit": false,
+      "damage": 0,
+      "targetHpAfter": 100
+    },
+    {
+      "type": "shot",
+      "timeMs": 0,
+      "sequence": 2,
+      "agentId": "jett-defense",
+      "targetInstanceId": "brimstone-attack",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 4833,
+      "draw": 1181,
+      "hit": true,
+      "damage": 40,
+      "targetHpAfter": 60
+    },
+    {
+      "type": "shot",
+      "timeMs": 1000,
+      "sequence": 3,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "jett-defense",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 4833,
+      "draw": 7502,
+      "hit": false,
+      "damage": 0,
+      "targetHpAfter": 100
+    },
+    {
+      "type": "shot",
+      "timeMs": 1000,
+      "sequence": 4,
+      "agentId": "jett-defense",
+      "targetInstanceId": "brimstone-attack",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 4833,
+      "draw": 2097,
+      "hit": true,
+      "damage": 40,
+      "targetHpAfter": 20
+    },
+    {
+      "type": "shot",
+      "timeMs": 2000,
+      "sequence": 5,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "jett-defense",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 4833,
+      "draw": 422,
+      "hit": true,
+      "damage": 40,
+      "targetHpAfter": 60
+    },
+    {
+      "type": "shot",
+      "timeMs": 2000,
+      "sequence": 6,
+      "agentId": "jett-defense",
+      "targetInstanceId": "brimstone-attack",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 4833,
+      "draw": 4374,
+      "hit": true,
+      "damage": 40,
+      "targetHpAfter": 0
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 3000,
+      "sequence": 7,
+      "agentId": "jett-defense",
+      "targetInstanceId": "jett-defense",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 4000,
+      "sequence": 8,
+      "agentId": "jett-defense",
+      "targetInstanceId": "jett-defense",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 5000,
+      "sequence": 9,
+      "agentId": "jett-defense",
+      "targetInstanceId": "jett-defense",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 6000,
+      "sequence": 10,
+      "agentId": "jett-defense",
+      "targetInstanceId": "jett-defense",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 7000,
+      "sequence": 11,
+      "agentId": "jett-defense",
+      "targetInstanceId": "jett-defense",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 8000,
+      "sequence": 12,
+      "agentId": "jett-defense",
+      "targetInstanceId": "jett-defense",
+      "reason": "no-line-of-sight"
+    }
+  ],
+  "finalState": {
+    "seed": 1,
+    "windowIndex": 3,
+    "timeMs": 9000,
+    "agents": [
+      {
+        "instanceId": "brimstone-attack",
+        "definitionId": "brimstone",
+        "side": "attack",
+        "xMm": 3000,
+        "yMm": 6000,
+        "hp": 0,
+        "alive": false,
+        "facingDeg": 0,
+        "credits": 800,
+        "charges": {
+          "stim-beacon": 1,
+          "incendiary": 1,
+          "sky-smoke": 3
+        },
+        "cooldownReadyAtMs": {},
+        "ultimatePoints": 1,
+        "statuses": []
+      },
+      {
+        "instanceId": "jett-defense",
+        "definitionId": "jett",
+        "side": "defense",
+        "xMm": 11000,
+        "yMm": 6000,
+        "hp": 60,
+        "alive": true,
+        "facingDeg": 0,
+        "credits": 800,
+        "charges": {},
+        "cooldownReadyAtMs": {},
+        "ultimatePoints": 1,
+        "statuses": []
+      }
+    ],
+    "smokes": [],
+    "devices": [],
+    "zones": [],
+    "mapId": "drill-hall",
+    "rulesetId": "standard-competitive",
+    "catalogVersion": "m2-stage1-brimstone-2026-11-17"
+  }
+}

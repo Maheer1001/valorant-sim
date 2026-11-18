@@ -1,0 +1,214 @@
+{
+  "id": "breach-aftershock",
+  "events": [
+    {
+      "type": "shot",
+      "timeMs": 0,
+      "sequence": 1,
+      "agentId": "breach-attack",
+      "targetInstanceId": "jett-defense",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 5833,
+      "draw": 7055,
+      "hit": false,
+      "damage": 0,
+      "targetHpAfter": 100
+    },
+    {
+      "type": "cast-accepted",
+      "timeMs": 0,
+      "sequence": 2,
+      "agentId": "breach-attack",
+      "abilityId": "aftershock",
+      "target": {
+        "xMm": 7000,
+        "yMm": 6000
+      },
+      "chargesRemaining": 0
+    },
+    {
+      "type": "shot",
+      "timeMs": 0,
+      "sequence": 3,
+      "agentId": "jett-defense",
+      "targetInstanceId": "breach-attack",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 5833,
+      "draw": 745,
+      "hit": true,
+      "damage": 40,
+      "targetHpAfter": 60
+    },
+    {
+      "type": "shot",
+      "timeMs": 1000,
+      "sequence": 4,
+      "agentId": "breach-attack",
+      "targetInstanceId": "jett-defense",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 5833,
+      "draw": 6336,
+      "hit": false,
+      "damage": 0,
+      "targetHpAfter": 100
+    },
+    {
+      "type": "shot",
+      "timeMs": 1000,
+      "sequence": 5,
+      "agentId": "jett-defense",
+      "targetInstanceId": "breach-attack",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 5833,
+      "draw": 7627,
+      "hit": false,
+      "damage": 0,
+      "targetHpAfter": 60
+    },
+    {
+      "type": "shot",
+      "timeMs": 2000,
+      "sequence": 6,
+      "agentId": "breach-attack",
+      "targetInstanceId": "jett-defense",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 5833,
+      "draw": 5723,
+      "hit": true,
+      "damage": 40,
+      "targetHpAfter": 60
+    },
+    {
+      "type": "shot",
+      "timeMs": 2000,
+      "sequence": 7,
+      "agentId": "jett-defense",
+      "targetInstanceId": "breach-attack",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 5833,
+      "draw": 2986,
+      "hit": true,
+      "damage": 40,
+      "targetHpAfter": 20
+    },
+    {
+      "type": "ability-damage",
+      "timeMs": 2200,
+      "sequence": 8,
+      "agentId": "breach-attack",
+      "abilityId": "aftershock",
+      "burstIndex": 0,
+      "hits": [
+        {
+          "targetInstanceId": "jett-defense",
+          "damage": 80,
+          "targetHpAfter": 0
+        }
+      ]
+    },
+    {
+      "type": "ability-damage",
+      "timeMs": 2800,
+      "sequence": 9,
+      "agentId": "breach-attack",
+      "abilityId": "aftershock",
+      "burstIndex": 1,
+      "hits": []
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 3000,
+      "sequence": 10,
+      "agentId": "breach-attack",
+      "targetInstanceId": "breach-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 4000,
+      "sequence": 11,
+      "agentId": "breach-attack",
+      "targetInstanceId": "breach-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 5000,
+      "sequence": 12,
+      "agentId": "breach-attack",
+      "targetInstanceId": "breach-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 6000,
+      "sequence": 13,
+      "agentId": "breach-attack",
+      "targetInstanceId": "breach-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 7000,
+      "sequence": 14,
+      "agentId": "breach-attack",
+      "targetInstanceId": "breach-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 8000,
+      "sequence": 15,
+      "agentId": "breach-attack",
+      "targetInstanceId": "breach-attack",
+      "reason": "no-line-of-sight"
+    }
+  ],
+  "finalState": {
+    "seed": 11,
+    "windowIndex": 3,
+    "timeMs": 9000,
+    "agents": [
+      {
+        "instanceId": "breach-attack",
+        "definitionId": "breach",
+        "side": "attack",
+        "xMm": 6000,
+        "yMm": 6000,
+        "hp": 20,
+        "alive": true,
+        "facingDeg": 0,
+        "credits": 800,
+        "charges": {
+          "aftershock": 0,
+          "flashpoint": 2,
+          "fault-line": 1
+        },
+        "cooldownReadyAtMs": {},
+        "ultimatePoints": 1,
+        "statuses": []
+      },
+      {
+        "instanceId": "jett-defense",
+        "definitionId": "jett",
+        "side": "defense",
+        "xMm": 11000,
+        "yMm": 6000,
+        "hp": 0,
+        "alive": false,
+        "facingDeg": 180,
+        "credits": 800,
+        "charges": {},
+        "cooldownReadyAtMs": {},
+        "ultimatePoints": 1,
+        "statuses": []
+      }
+    ],
+    "smokes": [],
+    "devices": [],
+    "zones": [],
+    "mapId": "drill-hall",
+    "rulesetId": "standard-competitive",
+    "catalogVersion": "m2-stage1-brimstone-2026-11-17"
+  }
+}

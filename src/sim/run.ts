@@ -71,6 +71,12 @@ export type World = {
   zones: DamageZone[];
 };
 
+/** Outcome of a live round (defined here so `SimEvent` needs no import cycle; re-exported by live-round.ts). */
+export type RoundResult =
+  | { kind: "attack-eliminated" }
+  | { kind: "defense-eliminated" }
+  | { kind: "timeout"; winner: "defense" };
+
 export type SimEvent = {
   timeMs: number;
   sequence: number;
@@ -138,6 +144,7 @@ export type SimEvent = {
       hits: { targetInstanceId: string; damage: number; targetHpAfter: number }[];
     }
   | { type: "zone-expired"; zoneId: string }
+  | { type: "round-ended"; result: RoundResult }
 );
 
 export type RunSuccess = {

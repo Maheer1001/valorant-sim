@@ -4,14 +4,15 @@ import { RIFLE_A } from "./combat/assumed-rifle.ts";
 import { compareQueueKeys, EventQueue, type QueueItem } from "./clock.ts";
 import { compositionViolation } from "./composition/team.ts";
 import { hasStatus, STATUS_BLIND } from "./effects/status.ts";
+import { viewWorld } from "./fog.ts";
 import { getMap } from "./map/drill-hall.ts";
 import { hasLineOfSight } from "./map/line-of-sight.ts";
+import { drainJobsUntil } from "./live-round.ts";
 import { forkSeed, resumeStream } from "./rng.ts";
 import type { Scenario } from "./scenario/types.ts";
 import type { Point, RejectionCode, Side } from "./types.ts";
 import { STANDARD_RULESET, type Ruleset } from "../rules/ruleset.ts";
 import {
-  applyJob,
   autoFireIntervalFor,
   createWorld,
   findAgent,
@@ -21,6 +22,8 @@ import {
   type SimEvent,
   type World,
 } from "./run.ts";
+
+export { viewWorld } from "./fog.ts";
 
 export type WindowOrder =
   | { kind: "hold"; instanceId: string }
@@ -178,6 +181,13 @@ export function submitPlan(round: Round, side: Side, orders: readonly WindowOrde
   };
 }
 
+/**
+ * Compatibility shim: apply both window plans as jobs at window start, then
+ * advance with `simStepMs` drains via `drainJobsUntil` (same shared job drain as
+ * the live runner). Auto-engage is still pre-batched for `[windowStart, windowEnd)`
+ * so existing windowed tests and characterization fixtures stay bit-identical.
+ * Live `stepLive` uses standing orders + last-fire scheduling instead.
+ */
 export function resolveWindow(round: Round): ResolveResult {
   if (round.pending.attack === null || round.pending.defense === null) {
     return {
@@ -194,6 +204,7 @@ export function resolveWindow(round: Round): ResolveResult {
 
   const windowStart = round.state.timeMs;
   const windowEnd = windowStart + round.ruleset.windowMs;
+  const stepMs = round.ruleset.simStepMs;
   const windowStartSnapshot = truthWorld(round.state);
   const world: World = truthWorld(round.state);
   const combat = resumeStream(round.combatState);
@@ -294,34 +305,23 @@ export function resolveWindow(round: Round): ResolveResult {
 
   const events: SimEvent[] = [];
   const frames: World[] = [];
-
-  while (queue.length > 0) {
-    const next = queue.peek();
-    if (!next || next.timeMs > windowEnd) break;
-    const item = queue.pop();
-    if (!item) break;
-    const applied = applyJob(
-      item.payload,
-      item.timeMs,
-      item.sequence,
+  let cursor = windowStart;
+  while (cursor < windowEnd) {
+    cursor = Math.min(cursor + stepMs, windowEnd);
+    sequence = drainJobsUntil(
+      queue,
       world,
+      cursor,
       round.catalog,
       map.walls,
       combat,
       round.ruleset,
+      sequence,
+      events,
+      (_event, snapped) => {
+        frames.push(structuredClone(snapped));
+      },
     );
-    world.timeMs = item.timeMs;
-    events.push(applied.event);
-    frames.push(structuredClone(world));
-    for (const followup of applied.followups) {
-      queue.push({
-        timeMs: followup.atMs,
-        sequence,
-        agentId: followup.agentId,
-        payload: followup.job,
-      });
-      sequence += 1;
-    }
   }
 
   const remaining = drainQueue(queue);
@@ -359,39 +359,6 @@ export function resolveWindow(round: Round): ResolveResult {
 /** Fogged world for one side: own agents plus enemies currently in line of sight. */
 export function view(round: Round, side: Side): World {
   return viewWorld(round.state.mapId, truthWorld(round.state), side);
-}
-
-/** Fog-of-war filter over an arbitrary world snapshot (for timeline stepping). */
-export function viewWorld(mapId: string, world: World, side: Side): World {
-  const map = getMap(mapId);
-  const walls = map?.walls ?? [];
-  const own = world.agents.filter((agent) => agent.side === side);
-  const enemies = world.agents.filter((agent) => agent.side !== side);
-  const visibleEnemies = enemies.filter((enemy) =>
-    own.some((ally) => {
-      if (!ally.alive || !enemy.alive) return false;
-      if (hasStatus(ally, STATUS_BLIND, world.timeMs)) return false;
-      return hasLineOfSight(
-        { xMm: ally.xMm, yMm: ally.yMm },
-        { xMm: enemy.xMm, yMm: enemy.yMm },
-        walls,
-        world.smokes,
-        world.timeMs,
-      );
-    }),
-  );
-  const devices = world.devices.filter((device) => {
-    if (device.side === side) return true;
-    // enemiesSeeRadius false → hide enemy Stim Beacon radius from this side's fog view.
-    return device.enemiesSeeRadius;
-  });
-  return {
-    timeMs: world.timeMs,
-    agents: [...own, ...visibleEnemies],
-    smokes: structuredClone(world.smokes),
-    devices: structuredClone(devices),
-    zones: structuredClone(world.zones.filter((zone) => zone.side === side || zone.blocksVision)),
-  };
 }
 
 export function truthWorld(state: RoundState): World {

@@ -1,6 +1,6 @@
 # Project status
 
-Updated: 17 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Interactive cast UI is playable** in the browser (plan a window, Resolve, watch overlays + event log).
+Updated: 18 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Interactive cast UI is playable**. **Live round engine Stage (a)** is in: clock, standing orders, order log, round result, `resolveWindow` shim. Live UI / pre-round / spike / real opponent are not done.
 
 Agent records for patch 13.10 are in `agent-reference.json`. That file is a reference, not the sim catalog. Breach and Brimstone catalog numbers are guarded against drift by `tests/sim/breach.test.ts` and `tests/sim/brimstone.test.ts`.
 
@@ -91,7 +91,11 @@ Standard ruleset id: `standard-competitive`.
 | Team size 5 | `teamSize` | secondary. Wiki gameplay summary says ten players are split into two teams. Not confirmed in the live client. |
 | Agent uniqueness | `per-team` | secondary. The same page says one of each agent can be selected on each team, and that the other team's locks stay hidden until the first buy phase. That is not a cross-team ban. Not confirmed in the live client, so it is not verified. |
 | `per-match` and `none` | selectable on a ruleset | available for later modes and tests. They are not the standard ruleset. |
-| Planning window 3000 ms | `windowMs` | assumed. Lab turn length for simultaneous plans. Not a Valorant timer. |
+| Planning window 3000 ms | `windowMs` | assumed. Retained for the `resolveWindow` shim only. |
+| Sim step 50 ms | `simStepMs` | assumed. Live runner fixed step; wall-clock only changes steps per frame. |
+| Round duration 100000 ms | `roundDurationMs` | owner. Live round timer; defense wins on timeout until spike exists. |
+| Buy phase 30000 ms | `buyPhaseMs` | assumed. Unused until pre-round UI. |
+| Decision interval 500 ms | `decisionIntervalMs` | assumed. Injectable opponent cadence. |
 | Walk speed 3500 mm/s | `walkSpeedMmPerSec` | assumed. Matches the milestone-1 drill script. Not a measured Valorant walk speed. |
 | Auto-fire interval 1000 ms | `autoFireIntervalMs` | assumed. Agents without a shoot order auto-engage the nearest visible enemy with Rifle A on this interval. Not a Valorant fire rate. |
 | Starting credits 800 | `startingCredits` | assumed. Drill buyCharge stub only. Not a live buy phase. |
@@ -331,6 +335,29 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 14. Learning records keyed by agent, sequence, map, side, economy band, and both composition ids. Radiant and VCT read that store under the same rules.
 15. Replay judgments and batch comparison.
 
+## Live round engine — Stage (a) (18 November 2026)
+
+API in `src/sim/live-round.ts`: `openLiveRound`, `issueOrders`, `stepLive`, `replayOrderLog`, `viewLive`, `drainJobsUntil`. Standing orders (`hold` / `move-route`), append-only order log, fixed `simStepMs`, round result (`attack-eliminated` | `defense-eliminated` | `timeout`), injectable `LiveDecideFn` on fogged `view` only. Pause = host skips `stepLive`.
+
+`resolveWindow` is a **compatibility shim** over stepped `drainJobsUntil` with the old window enqueue (including pre-batched auto-engage). Characterization fixtures: `tests/fixtures/characterization/`. Migration notes: [`docs/live-round-migration.md`](docs/live-round-migration.md). Plan: [`docs/live-round-plan.md`](docs/live-round-plan.md).
+
+### Not done yet
+
+- Live UI (smooth motion, pause/speed controls, fewer clicks, previews)
+- Pre-round buy / plan screen (`buyPhaseMs` unused)
+- Spike plant / defuse
+- Real opponent (hold stub + decide hook only)
+- Retiring the window API (Stage e)
+
+### Checks (Live Stage a — `npm run check`, 18 November 2026)
+
+| Step | Result |
+| --- | --- |
+| lint | Pass. ESLint completed with no findings. |
+| typecheck | Pass. `tsc --noEmit` completed with no errors. |
+| test | Pass. Vitest 5.0.5, 19 files, 94 tests. |
+| build | Pass. Vite 8.3.4 produced `dist/` in 362 ms (56 modules). |
+
 ## Next task
 
-Plans written (not implemented): [`docs/live-round-plan.md`](docs/live-round-plan.md) (replace 3 s windows with pauseable live rounds) and [`docs/stage-3-plan.md`](docs/stage-3-plan.md) (Raze + `projectile.homing`). Implementation choice is the owner's call. Keep sim free of React.
+Live round Stage (b): live UI with smooth movement, pause and speed — or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.
