@@ -365,21 +365,16 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 
 Pure `src/sim/preround.ts`: `PreRoundPlan`, `validatePlan`, `startLiveFromPreRound`. `LiveRound.planSteps` fire only via `issueOrders` inside `stepLive` (D1-D5 in [`docs/stage-d-plan.md`](docs/stage-d-plan.md)). Replay file version 2 (still reads v1). Window shim untouched. No pre-round UI yet.
 
+### Stage (d1) fix — plan cast cancel (18 November 2026)
+
+Order batches and log entries carry `origin: "plan" | "live"`. Only live casts/moves cancel untriggered plan steps (D4). Plan-fired casts do not cancel sibling steps for the same ability. Blocked-early messages pass through `issueOrders` options. Old replay logs without `origin` default to `"live"`. Waypoint next-step fire lag documented in [`docs/stage-d-plan.md`](docs/stage-d-plan.md).
+
 ### Not done yet
 
 - Pre-round buy / plan **UI** (`buyPhaseMs` host countdown)
 - Spike plant / defuse
 - Real opponent (hold stub + decide hook only)
 - Retiring the window API (Stage e)
-
-### Checks (Live Stage c1 — `npm run check`, 18 November 2026)
-
-| Step | Result |
-| --- | --- |
-| lint | Pass. ESLint completed with no findings. |
-| typecheck | Pass. `tsc --noEmit` completed with no errors. |
-| test | Pass. Vitest 5.0.5, 22 files, 126 tests. |
-| build | Pass. Vite 8.3.4 produced `dist/` in 309 ms (60 modules). |
 
 ### Checks (Live Stage d1 — `npm run check`, 18 November 2026)
 
@@ -389,6 +384,15 @@ Pure `src/sim/preround.ts`: `PreRoundPlan`, `validatePlan`, `startLiveFromPreRou
 | typecheck | Pass. `tsc --noEmit` completed with no errors. |
 | test | Pass. Vitest 5.0.5, 23 files, 141 tests. |
 | build | Pass. Vite 8.3.4 produced `dist/` in 281 ms (60 modules). |
+
+### Checks (Live Stage d1 fix — `npm run check`, 18 November 2026)
+
+| Step | Result |
+| --- | --- |
+| lint | Pass. ESLint completed with no findings. |
+| typecheck | Pass. `tsc --noEmit` completed with no errors. |
+| test | Pass. Vitest 5.0.5, 23 files, 145 tests. |
+| build | Pass. Vite 8.3.4 produced `dist/` in 336 ms (60 modules). |
 
 ## Next task
 

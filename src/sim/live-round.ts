@@ -77,18 +77,32 @@ export type AgentCommand =
     }
   | { kind: "shoot"; instanceId: string; targetInstanceId: string };
 
+/** Where an order batch came from. Missing on old logs; treat as "live". */
+export type OrderOrigin = "plan" | "live";
+
 export type OrderLogEntry = {
   simTimeMs: number;
   side: Side;
   commands: AgentCommand[];
   result: "accepted" | RejectionCode;
   message?: string;
+  /** Omitted in version-1-era logs; replay defaults to "live". */
+  origin?: OrderOrigin;
 };
 
 /** Opponent hook. Receives fogged data only (never truth). */
 export type LiveDecideFn = (side: Side, foggedWorld: World) => AgentCommand[];
 
-export type PendingBatch = { side: Side; commands: AgentCommand[] };
+export type PendingBatch = {
+  side: Side;
+  commands: AgentCommand[];
+  origin: OrderOrigin;
+};
+
+export type IssueOrdersOptions = {
+  origin?: OrderOrigin;
+  message?: string;
+};
 
 export type PlanStepStatus = "armed" | "fired" | "cancelled" | "not-reached" | "rejected";
 
@@ -224,31 +238,57 @@ export function flushPendingBatches(round: LiveRound): void {
  * Validate and log a batch for one side. The whole batch is rejected if any
  * command fails (nothing changes except the log). Accepted batches apply at the
  * next step boundary. Stamped with the current (possibly frozen) sim time.
+ * `origin` defaults to "live" (player / decide hook). Plan fires pass "plan".
  */
-export function issueOrders(round: LiveRound, side: Side, commands: readonly AgentCommand[]): IssueResult {
+export function issueOrders(
+  round: LiveRound,
+  side: Side,
+  commands: readonly AgentCommand[],
+  options: IssueOrdersOptions = {},
+): IssueResult {
   const cloned = commands.map(cloneCommand);
   const simTimeMs = round.world.timeMs;
+  const origin: OrderOrigin = options.origin ?? "live";
   if (round.phase === "ended") {
     const message = "The round has ended.";
-    round.orderLog.push({ simTimeMs, side, commands: cloned, result: "invalid-order", message });
+    round.orderLog.push({
+      simTimeMs,
+      side,
+      commands: cloned,
+      result: "invalid-order",
+      message,
+      origin,
+    });
     return { ok: false, round, code: "invalid-order", message };
   }
   for (let index = 0; index < cloned.length; index += 1) {
     const command = cloned[index]!;
     const verdict = validateCommand(round, side, command);
     if (!verdict.ok) {
-      round.orderLog.push({
+      const entry: OrderLogEntry = {
         simTimeMs,
         side,
         commands: cloned,
         result: verdict.code,
-        message: verdict.message,
-      });
+        message: options.message ?? verdict.message,
+        origin,
+      };
+      round.orderLog.push(entry);
       return { ok: false, round, code: verdict.code, message: verdict.message, orderIndex: index };
     }
   }
-  round.orderLog.push({ simTimeMs, side, commands: cloned, result: "accepted" });
-  round.pendingBatch.push({ side, commands: cloned.map(cloneCommand) });
+  const accepted: OrderLogEntry = {
+    simTimeMs,
+    side,
+    commands: cloned,
+    result: "accepted",
+    origin,
+  };
+  if (options.message !== undefined) {
+    accepted.message = options.message;
+  }
+  round.orderLog.push(accepted);
+  round.pendingBatch.push({ side, commands: cloned.map(cloneCommand), origin });
   return { ok: true, round };
 }
 
@@ -381,16 +421,16 @@ function fireDuePlanSteps(round: LiveRound, atTimeMs: number): void {
     if (step.chargeValue !== undefined) command.chargeValue = step.chargeValue;
     if (step.mapTarget !== undefined) command.mapTarget = { ...step.mapTarget };
 
-    const issued = issueOrders(round, "attack", [command]);
+    const issued = issueOrders(round, "attack", [command], {
+      origin: "plan",
+      message:
+        step.fireReason === "blocked-early"
+          ? "Plan cast fired after route blocked by wall."
+          : undefined,
+    });
     step.due = false;
     if (issued.ok) {
       step.status = "fired";
-      if (step.fireReason === "blocked-early") {
-        const last = round.orderLog[round.orderLog.length - 1];
-        if (last) {
-          last.message = "Plan cast fired after route blocked by wall.";
-        }
-      }
     } else {
       step.status = "rejected";
     }
@@ -492,13 +532,17 @@ function applyPendingBatch(round: LiveRound, walls: readonly Segment[]): void {
         if (agent.alive) {
           round.standing[agent.instanceId] = { kind: "hold" };
           round.shootOverride[agent.instanceId] = undefined;
-          cancelWaypointPlans(round, agent.instanceId);
+          if (batch.origin === "live") {
+            cancelWaypointPlans(round, agent.instanceId);
+          }
         }
         continue;
       }
       if (command.kind === "move-route") {
         if (!agent.alive) continue;
-        cancelWaypointPlans(round, agent.instanceId);
+        if (batch.origin === "live") {
+          cancelWaypointPlans(round, agent.instanceId);
+        }
         round.standing[agent.instanceId] = startSegment(
           round,
           agent,
@@ -510,7 +554,10 @@ function applyPendingBatch(round: LiveRound, walls: readonly Segment[]): void {
         continue;
       }
       if (command.kind === "cast") {
-        cancelAbilityPlans(round, agent.instanceId, command.abilityId);
+        // D4: only live (player / decide) casts cancel untriggered plan steps.
+        if (batch.origin === "live") {
+          cancelAbilityPlans(round, agent.instanceId, command.abilityId);
+        }
         enqueue(round, now, agent.instanceId, {
           type: "cast",
           instanceId: agent.instanceId,
@@ -756,7 +803,10 @@ export function replayOrderLog(
     while (round.phase === "live" && round.world.timeMs < entry.simTimeMs) {
       stepLive(round, 1);
     }
-    const issued = issueOrders(round, entry.side, entry.commands);
+    const issued = issueOrders(round, entry.side, entry.commands, {
+      origin: entry.origin ?? "live",
+      message: entry.message,
+    });
     const result = issued.ok ? "accepted" : issued.code;
     if (result !== entry.result) {
       return {

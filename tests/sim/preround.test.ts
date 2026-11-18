@@ -194,6 +194,7 @@ describe("startLiveFromPreRound", () => {
           },
         ],
         result: "accepted",
+        origin: "live",
       },
     ]);
     const liveBrim = withBuy.world.agents.find((a) => a.instanceId === "brimstone-attack")!;
@@ -373,6 +374,26 @@ describe("startLiveFromPreRound", () => {
                 target: { xMm: 6000, yMm: 5000 },
                 aimYawDeg: 0,
               },
+              {
+                id: "timed-flash",
+                abilityId: "flashpoint",
+                trigger: { kind: "at-time", timeMs: 8000 },
+                target: { xMm: 6000, yMm: 5000 },
+                aimYawDeg: 0,
+              },
+            ],
+          },
+          {
+            instanceId: "brimstone-attack",
+            route: [],
+            abilities: [
+              {
+                id: "brim-smoke",
+                abilityId: "sky-smoke",
+                trigger: { kind: "at-time", timeMs: 9000 },
+                target: { xMm: 7000, yMm: 7000 },
+                mapTarget: { xMm: 7000, yMm: 7000 },
+              },
             ],
           },
         ],
@@ -384,6 +405,8 @@ describe("startLiveFromPreRound", () => {
     stepLive(round, 1);
     expect(round.planSteps.find((s) => s.id === "wp")?.status).toBe("cancelled");
     expect(round.planSteps.find((s) => s.id === "timed-as")?.status).toBe("armed");
+    expect(round.planSteps.find((s) => s.id === "timed-flash")?.status).toBe("armed");
+    expect(round.planSteps.find((s) => s.id === "brim-smoke")?.status).toBe("armed");
 
     expect(issueOrders(round, "attack", [
       {
@@ -396,6 +419,194 @@ describe("startLiveFromPreRound", () => {
     ]).ok).toBe(true);
     stepLive(round, 1);
     expect(round.planSteps.find((s) => s.id === "timed-as")?.status).toBe("cancelled");
+    expect(round.planSteps.find((s) => s.id === "timed-flash")?.status).toBe("armed");
+    expect(round.planSteps.find((s) => s.id === "brim-smoke")?.status).toBe("armed");
+  });
+
+  it("fires two at-time steps of the same ability when charges allow", () => {
+    const scenario = createPlayableDrill(12);
+    const round = mustStart(
+      scenario,
+      basePlan({
+        agents: [
+          {
+            instanceId: "breach-attack",
+            route: [],
+            abilities: [
+              {
+                id: "f1",
+                abilityId: "flashpoint",
+                trigger: { kind: "at-time", timeMs: 500 },
+                target: { xMm: 6000, yMm: 5000 },
+                aimYawDeg: 0,
+              },
+              {
+                id: "f2",
+                abilityId: "flashpoint",
+                trigger: { kind: "at-time", timeMs: 5000 },
+                target: { xMm: 6000, yMm: 5000 },
+                aimYawDeg: 0,
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    stepLive(round, 120);
+    expect(round.planSteps.map((s) => s.status)).toEqual(["fired", "fired"]);
+    expect(round.orderLog.filter((e) => e.origin === "plan" && e.result === "accepted")).toHaveLength(2);
+  });
+
+  it("rejects over-subscribed charges at queue time and rejects a third cast at fire after live charge loss", () => {
+    const scenario = createPlayableDrill(13);
+    expect(
+      validatePlan(
+        scenario,
+        basePlan({
+          agents: [
+            {
+              instanceId: "breach-attack",
+              route: [],
+              abilities: [
+                {
+                  id: "a1",
+                  abilityId: "flashpoint",
+                  trigger: { kind: "at-time", timeMs: 0 },
+                  target: { xMm: 5000, yMm: 5000 },
+                  aimYawDeg: 0,
+                },
+                {
+                  id: "a2",
+                  abilityId: "flashpoint",
+                  trigger: { kind: "at-time", timeMs: 1000 },
+                  target: { xMm: 5000, yMm: 5000 },
+                  aimYawDeg: 0,
+                },
+                {
+                  id: "a3",
+                  abilityId: "flashpoint",
+                  trigger: { kind: "at-time", timeMs: 2000 },
+                  target: { xMm: 5000, yMm: 5000 },
+                  aimYawDeg: 0,
+                },
+              ],
+            },
+          ],
+        }),
+      ),
+    ).toEqual({
+      ok: false,
+      code: "insufficient-charges",
+      message: "No charges left for this ability.",
+    });
+
+    const round = mustStart(
+      scenario,
+      basePlan({
+        agents: [
+          {
+            instanceId: "brimstone-attack",
+            route: [],
+            abilities: [
+              {
+                id: "s1",
+                abilityId: "sky-smoke",
+                trigger: { kind: "at-time", timeMs: 500 },
+                target: { xMm: 7000, yMm: 7000 },
+                mapTarget: { xMm: 7000, yMm: 7000 },
+              },
+              {
+                id: "s2",
+                abilityId: "sky-smoke",
+                trigger: { kind: "at-time", timeMs: 1500 },
+                target: { xMm: 7200, yMm: 7000 },
+                mapTarget: { xMm: 7200, yMm: 7000 },
+              },
+              {
+                id: "s3",
+                abilityId: "sky-smoke",
+                trigger: { kind: "at-time", timeMs: 2500 },
+                target: { xMm: 7400, yMm: 7000 },
+                mapTarget: { xMm: 7400, yMm: 7000 },
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    // Force the over-subscribed live state: lose one charge without a live cast cancel.
+    const brim = round.world.agents.find((a) => a.instanceId === "brimstone-attack")!;
+    expect(brim.charges["sky-smoke"]).toBe(3);
+    brim.charges["sky-smoke"] = 2;
+
+    stepLive(round, 60);
+    expect(round.planSteps.map((s) => s.status)).toEqual(["fired", "fired", "rejected"]);
+    const rejected = round.orderLog.filter(
+      (e) => e.origin === "plan" && e.result === "insufficient-charges",
+    );
+    expect(rejected).toHaveLength(1);
+    expect(rejected[0]?.commands[0]).toMatchObject({ kind: "cast", abilityId: "sky-smoke" });
+  });
+
+  it("live cast of ability A at t>0 cancels remaining armed A steps only (D4)", () => {
+    const scenario = createPlayableDrill(14);
+    const round = mustStart(
+      scenario,
+      basePlan({
+        agents: [
+          {
+            instanceId: "breach-attack",
+            route: [],
+            abilities: [
+              {
+                id: "flash-late",
+                abilityId: "flashpoint",
+                trigger: { kind: "at-time", timeMs: 5000 },
+                target: { xMm: 6000, yMm: 5000 },
+                aimYawDeg: 0,
+              },
+              {
+                id: "as-late",
+                abilityId: "aftershock",
+                trigger: { kind: "at-time", timeMs: 5000 },
+                target: { xMm: 6000, yMm: 5000 },
+                aimYawDeg: 0,
+              },
+            ],
+          },
+          {
+            instanceId: "brimstone-attack",
+            route: [],
+            abilities: [
+              {
+                id: "brim-late",
+                abilityId: "sky-smoke",
+                trigger: { kind: "at-time", timeMs: 5000 },
+                target: { xMm: 7000, yMm: 7000 },
+                mapTarget: { xMm: 7000, yMm: 7000 },
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    stepLive(round, 2);
+    expect(round.world.timeMs).toBeGreaterThan(0);
+    expect(
+      issueOrders(round, "attack", [
+        {
+          kind: "cast",
+          instanceId: "breach-attack",
+          abilityId: "flashpoint",
+          target: { xMm: 6000, yMm: 5000 },
+          aimYawDeg: 0,
+        },
+      ]).ok,
+    ).toBe(true);
+    stepLive(round, 1);
+    expect(round.planSteps.find((s) => s.id === "flash-late")?.status).toBe("cancelled");
+    expect(round.planSteps.find((s) => s.id === "as-late")?.status).toBe("armed");
+    expect(round.planSteps.find((s) => s.id === "brim-late")?.status).toBe("armed");
   });
 
   it("is deterministic for the same plan and seed", () => {
@@ -429,6 +640,74 @@ describe("startLiveFromPreRound", () => {
 });
 
 describe("replay v2 round trip (D1)", () => {
+  it("replays plan-origin casts without re-running plan steps", () => {
+    const scenario = createPlayableDrill(15);
+    const plan = basePlan({
+      agents: [
+        {
+          instanceId: "breach-attack",
+          route: [],
+          abilities: [
+            {
+              id: "p1",
+              abilityId: "flashpoint",
+              trigger: { kind: "at-time", timeMs: 500 },
+              target: { xMm: 6000, yMm: 5000 },
+              aimYawDeg: 0,
+            },
+            {
+              id: "p2",
+              abilityId: "flashpoint",
+              trigger: { kind: "at-time", timeMs: 5000 },
+              target: { xMm: 6000, yMm: 5000 },
+              aimYawDeg: 0,
+            },
+          ],
+        },
+      ],
+    });
+    const live = mustStart(scenario, plan);
+    stepLive(live, 120);
+    expect(live.planSteps.map((s) => s.status)).toEqual(["fired", "fired"]);
+    expect(live.orderLog.some((e) => e.origin === "plan")).toBe(true);
+
+    const parsed = parseReplay(
+      serializeReplay({
+        version: REPLAY_FILE_VERSION,
+        scenario: live.scenario,
+        seed: live.seed,
+        orderLog: structuredClone(live.orderLog),
+        simTimeMs: live.world.timeMs,
+        preRoundPlan: plan,
+      }),
+    );
+    const replayed = replayOrderLog(parsed.scenario, parsed.orderLog, parsed.simTimeMs);
+    expect(isLiveRound(replayed)).toBe(true);
+    if (!isLiveRound(replayed)) return;
+    expect(replayed.planSteps).toEqual([]);
+    expect(replayed.orderLog).toEqual(live.orderLog);
+    expect(
+      replayed.world.agents.map((a) => ({
+        id: a.instanceId,
+        x: a.xMm,
+        y: a.yMm,
+        hp: a.hp,
+        charges: a.charges,
+      })),
+    ).toEqual(
+      live.world.agents.map((a) => ({
+        id: a.instanceId,
+        x: a.xMm,
+        y: a.yMm,
+        hp: a.hp,
+        charges: a.charges,
+      })),
+    );
+    expect(replayed.orderLog.filter((e) => e.origin === "plan").map((e) => e.result)).toEqual(
+      live.orderLog.filter((e) => e.origin === "plan").map((e) => e.result),
+    );
+  });
+
   it("replays orderLog only and deep-equals world state", () => {
     const scenario = createPlayableDrill(10);
     const brim = scenario.attack.members.find((m) => m.instanceId === "brimstone-attack")!;

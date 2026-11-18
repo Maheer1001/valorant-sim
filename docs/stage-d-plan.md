@@ -340,3 +340,11 @@ Implemented in `src/sim/preround.ts` + `planSteps` on `LiveRound` (no pre-round 
 | D3 | Queue-time soft reserve of charges and ult; over-queue uses existing rejection codes/messages. Fire-time validation still runs. |
 | D4 | Live move cancels that agent's untriggered `at-waypoint` steps; live cast of A cancels untriggered plan steps for A. Status stays `cancelled` for UI. |
 | D5 | After `startLiveFromPreRound`, `timeMs === 0` and nothing has fired. `at-time` 0 fires on the first `stepLive`. |
+
+### Waypoint fire timing (intentional)
+
+An `at-waypoint` step is marked due when the standing segment for that waypoint completes (arrival or wall block) during `advanceStanding`. It is issued at the **start of the next** `stepLive` (with `origin: "plan"`). That is up to one `simStepMs` after the arrival/block event. This lag matches live `issueOrders` applying at the next step boundary and is intentional.
+
+### Plan vs live cast cancel
+
+Only batches with `origin: "live"` cancel untriggered plan steps (D4). Plan-fired casts use `origin: "plan"` and do not cancel sibling plan steps for the same ability. Order log entries record `origin` for replay; missing `origin` on old logs means `"live"`.
