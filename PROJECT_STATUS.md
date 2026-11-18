@@ -283,6 +283,10 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 
 **Orbital Strike damage note (Part A):** a defender who stays inside for the full activation (including shrink) takes **400** total (20 × 20 ticks), inside the 400–500 reference band. No engine change.
 
+### Open questions
+
+- **Orbital Strike total damage:** the engine deals exactly **400** (20 ticks × 20 during `activeSec`; no ticks during shrink). The sheet lists `damageTotalMin` / `damageTotalMax` as **400 / 500** and does not say what produces the upper end. No engine change; do not guess.
+
 ### Checks (Cast UI — `npm run check`, 17 November 2026)
 
 | Step | Result |
@@ -329,4 +333,4 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 
 ## Next task
 
-Richer draft / composition reporting, or the next executable kits beyond Breach + Brimstone. Keep sim free of React.
+Plans written (not implemented): [`docs/live-round-plan.md`](docs/live-round-plan.md) (replace 3 s windows with pauseable live rounds) and [`docs/stage-3-plan.md`](docs/stage-3-plan.md) (Raze + `projectile.homing`). Implementation choice is the owner's call. Keep sim free of React.
