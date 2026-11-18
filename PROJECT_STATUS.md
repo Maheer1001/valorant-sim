@@ -1,6 +1,6 @@
 # Project status
 
-Updated: 17 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits in the Drill Hall interactive round (turn layer, deterministic). Cast aim / map-target UI is not in this part.
+Updated: 17 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Interactive cast UI is playable** in the browser (plan a window, Resolve, watch overlays + event log).
 
 Agent records for patch 13.10 are in `agent-reference.json`. That file is a reference, not the sim catalog. Breach and Brimstone catalog numbers are guarded against drift by `tests/sim/breach.test.ts` and `tests/sim/brimstone.test.ts`.
 
@@ -20,7 +20,12 @@ src/
   ui/
     App.tsx
     board/MapView.tsx
+    board/coords.ts
     draft/DraftPanel.tsx
+    orders/AgentPanel.tsx
+    orders/abilityUi.ts
+    orders/rejectionMessages.ts
+    scenario/playableDrill.ts
     timeline/Transport.tsx
     timeline/EventList.tsx
   sim/
@@ -258,17 +263,46 @@ Shared plumbing: agent `facingDeg`, `statuses`, `ultimatePoints`, `cooldownReady
 | test | Pass. Vitest 5.0.5, 15 files, 65 tests. |
 | build | Pass. Vite 8.3.4 produced `dist/` in 267 ms (49 modules). |
 
+## Interactive cast UI (17 November 2026)
+
+React-only playable Drill Hall round. Default attack = Breach + Brimstone; defense = KAY/O + Jett via `defenseHoldPlan`. Draft panel and scenario import/export still work.
+
+**Order builder (per selected attacker):** Move (board click), Hold, Cast — only complete owned abilities. Aimed casts (Aftershock, Flashpoint, Fault Line, Rolling Thunder, Incendiary, Stim Beacon) set `aimYawDeg` from agent→click with an aim line. Map-targeted casts (Sky Smoke, Orbital Strike) show cast-range ring + ability-radius preview; out-of-range clicks show a plain-language message. Fault Line has an 8–56 m charge-length slider → `chargeValue`. Cast buttons show charges, ult `x/8`, Fault Line cooldown remaining; disabled with tooltip when charges / cooldown / ult would reject.
+
+**Board overlays** (from fogged or truth snapshot): smokes, incendiary zones (live radius), Orbital circle + shrink, Stim Beacon radius for own team only, facing arrows, status badges with seconds left, HP bars, ult points. Fog toggle: `view('attack')` default, truth for debug.
+
+**Agent panel:** HP, facing, credits, charges, ult, signature cooldown, statuses; Buy per buyable ability → `buyCharge` with rejection text.
+
+**Drill option (assumed):** starting ult points per agent (default 0) to test ultimates.
+
+**Plan errors:** every typed rejection code maps to plain language (`src/ui/orders/rejectionMessages.ts`). Event log humanizes flash, concuss, damage tick, zone start, ult spend, kill.
+
+**Coords:** pure helpers in `src/ui/board/coords.ts` (svg↔mm, yaw, point-in-range) with unit tests. No sim logic duplicated in the UI.
+
+Manual checklist: [`docs/playtest.md`](docs/playtest.md).
+
+**Orbital Strike damage note (Part A):** a defender who stays inside for the full activation (including shrink) takes **400** total (20 × 20 ticks), inside the 400–500 reference band. No engine change.
+
+### Checks (Cast UI — `npm run check`, 17 November 2026)
+
+| Step | Result |
+| --- | --- |
+| lint | Pass. ESLint completed with no findings. |
+| typecheck | Pass. `tsc --noEmit` completed with no errors. |
+| test | Pass. Vitest 5.0.5, 17 files, 78 tests. |
+| build | Pass. Vite 8.3.4 produced `dist/` in 207 ms (54 modules). |
+
 ## Known limitations
 
 - One original map. Five catalog agents. Executable: full Breach + full Brimstone. Jett / KAY/O / Cypher stay placeholders.
-- No cast aim / map-click UI yet; orders need `aimYawDeg` / `chargeValue` / `mapTarget` in tests / API.
 - Combat Stim reload, draw, and spread recovery are stored on the status only — no reload/draw/spread sim yet.
 - Flashpoint `travelSpeed` 2400 unit unknown — flight timing is an assumed stub.
 - Rolling Thunder vertical knockup (estimate 7 m) is not modeled.
 - Incendiary / Orbital ally damage fraction unpublished — no friendly fire.
-- Minimal `buyCharge` only — no shop UI.
-- Ult orbs, plant, and defuse points are out of scope (TODO on the ledger).
+- `buyCharge` is a minimal stub with a per-ability Buy button — not a full shop / buy phase.
+- Ult orbs, plant, and defuse points are out of scope (TODO on the ledger). Starting ult in the UI is a **drill option, assumed**, not live economy.
 - Defense is a hold stub. No opponent choice, tendency update, or difficulty preset.
+- Drill Hall is smaller than Sky Smoke 55 m / Orbital 60 m cast ranges, so out-of-range map clicks cannot occur on this map; the UI still guards with `pointInRange` + message (covered by unit tests).
 - No IndexedDB. Persistence is versioned JSON text.
 - Uniqueness and team size are secondary, not client-verified.
 - Planning window, walk speed, auto-fire interval, and the assumed/design tables above are lab values.
@@ -280,18 +314,19 @@ Shared plumbing: agent `facingDeg`, `statuses`, `ultimatePoints`, `cooldownReady
 1. **Done.** Drill, catalog, live smoke, both-team draft, coverage, JSON scenario.
 2. **Done.** Interactive planning windows, fog-of-war view, defense hold stub, auto-engage, hp/death.
 3. **Done.** Stage 1 per [`docs/stage-1-plan.md`](docs/stage-1-plan.md): Breach + Brimstone fully executable. Primitives docs: [`docs/effect-primitives.md`](docs/effect-primitives.md).
-4. Richer draft report: map fit, synergies, counter-composition, and which plans a composition can support. Suitability stays separate from any win claim.
-5. More complete kits and Sova recon. Each new ability flips its own status.
-6. Versioned weapons and armor. Replace Rifle A only where a primary source exists.
-7. Beliefs. Smokes, and later trips and recon, limit what a decision context may contain. Wire `view(side)` into `DecisionContext`.
-8. Spike plant and defuse, including post-plant utility that exists.
-9. Economy, ability purchases, and signature replenishment.
-10. Halves, side switch, overtime.
-11. Planner. Steps name the agent, resources, timing, dependencies, and fallbacks. Beginner and Intermediate presets.
-12. Feasible plans change with the draft, deaths, and spent utility.
-13. Learning records keyed by agent, sequence, map, side, economy band, and both composition ids. Radiant and VCT read that store under the same rules.
-14. Replay judgments and batch comparison.
+4. **Done.** Interactive cast UI: aim / map-target / Fault Line charge, overlays, agent panel, event log, playtest doc.
+5. Richer draft report: map fit, synergies, counter-composition, and which plans a composition can support. Suitability stays separate from any win claim.
+6. More complete kits and Sova recon. Each new ability flips its own status.
+7. Versioned weapons and armor. Replace Rifle A only where a primary source exists.
+8. Beliefs. Smokes, and later trips and recon, limit what a decision context may contain. Wire `view(side)` into `DecisionContext`.
+9. Spike plant and defuse, including post-plant utility that exists.
+10. Economy, ability purchases, and signature replenishment.
+11. Halves, side switch, overtime.
+12. Planner. Steps name the agent, resources, timing, dependencies, and fallbacks. Beginner and Intermediate presets.
+13. Feasible plans change with the draft, deaths, and spent utility.
+14. Learning records keyed by agent, sequence, map, side, economy band, and both composition ids. Radiant and VCT read that store under the same rules.
+15. Replay judgments and batch comparison.
 
 ## Next task
 
-Cast UI: map-click for Sky Smoke / Orbital / Stim placement, aim control for Breach cones and Incendiary throws, charge slider for Fault Line. Keep sim free of React.
+Richer draft / composition reporting, or the next executable kits beyond Breach + Brimstone. Keep sim free of React.

@@ -149,6 +149,39 @@ button:disabled { cursor: default; opacity: 0.55; }
   font-size: 13px;
 }
 
+.agent-panel {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #2a323b;
+}
+
+.agent-stats {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+  color: #9aa6b2;
+  font-size: 13px;
+}
+
+.agent-stats li {
+  padding: 2px 0;
+}
+
+.fault-slider,
+.drill-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+  color: #9aa6b2;
+  font-size: 13px;
+}
+
+.fault-slider input,
+.drill-option input {
+  max-width: 280px;
+}
+
 @media (max-width: 900px) {
   .app { grid-template-columns: 1fr; }
   .draft { grid-column: 1; grid-row: auto; }

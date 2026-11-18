@@ -8,6 +8,8 @@ import {
 } from "../../src/sim/agents/abilities/brimstone.ts";
 import {
   applyIncendiaryDetonate,
+  applyOrbitalActivate,
+  applyOrbitalShrink,
   applyZoneExpire,
   applyZoneTick,
   resolveIncendiaryPath,
@@ -352,13 +354,58 @@ describe("Brimstone stage-1 kit", () => {
   });
 
   it("runs Orbital windup, ticks, shrink, LOS block, and no allied damage", () => {
+    // Pure orbital damage for a defender who stays inside through active + shrink jobs.
+    const burn = createWorld(
+      brimScenario(70, {
+        ultPoints: 8,
+        brimAt: { xMm: 3000, yMm: 2000 },
+        enemyAt: { xMm: 8000, yMm: 2000 },
+        enemyHp: 500,
+        allyAt: { xMm: 8200, yMm: 2000 },
+      }),
+    );
+    const activated = applyOrbitalActivate(
+      { type: "orbital-activate", instanceId: "brimstone-attack", at: { xMm: 8000, yMm: 2000 } },
+      0,
+      1,
+      burn,
+    );
+    expect(activated.event.type).toBe("orbital-activated");
+    let world = activated.world;
+    const enemyStart = world.agents.find((agent) => agent.instanceId === "jett-defense")!.hp;
+    const allyStart = world.agents.find((agent) => agent.instanceId === "kayo-attack")!.hp;
+    let tickCount = 0;
+    let sawShrink = false;
+    for (const followup of activated.followups) {
+      const job = followup.job;
+      if (job.type === "zone-tick") {
+        const tick = applyZoneTick(job, followup.atMs, 2, world);
+        world = tick.world;
+        if (tick.event.type === "zone-damage") tickCount += 1;
+      } else if (job.type === "orbital-shrink") {
+        sawShrink = true;
+        world = applyOrbitalShrink(job, followup.atMs, 3, world).world;
+      } else if (job.type === "zone-expire") {
+        world = applyZoneExpire(job, followup.atMs, 4, world).world;
+      }
+    }
+    expect(sawShrink).toBe(true);
+    expect(tickCount).toBe(20);
+    const dealt =
+      enemyStart - world.agents.find((agent) => agent.instanceId === "jett-defense")!.hp;
+    // Reference damageTotalMin/Max 400–500. Engine: 20 × 20 during activeSec; shrink has no damage ticks.
+    expect(dealt).toBeGreaterThanOrEqual(400);
+    expect(dealt).toBeLessThanOrEqual(500);
+    expect(dealt).toBe(400);
+    expect(world.agents.find((agent) => agent.instanceId === "kayo-attack")!.hp).toBe(allyStart);
+
     let round = mustOpen(
       brimScenario(7, {
         ultPoints: 8,
-        brimAt: { xMm: 3000, yMm: 6000 },
-        enemyAt: { xMm: 8000, yMm: 6000 },
+        brimAt: { xMm: 3000, yMm: 2000 },
+        enemyAt: { xMm: 11000, yMm: 2000 },
         enemyHp: 500,
-        allyAt: { xMm: 8200, yMm: 6000 },
+        allyAt: { xMm: 3200, yMm: 2000 },
       }),
     );
     round = mustSubmit(round, "attack", [
@@ -366,39 +413,22 @@ describe("Brimstone stage-1 kit", () => {
         kind: "cast",
         instanceId: "brimstone-attack",
         abilityId: ORBITAL_STRIKE_ID,
-        target: DRILL_HALL_DOORWAY,
-        mapTarget: DRILL_HALL_DOORWAY,
+        target: { xMm: 5000, yMm: 2000 },
+        mapTarget: { xMm: 5000, yMm: 2000 },
       },
     ]);
     round = mustSubmit(round, "defense", holdDefense(round));
     const castWindow = resolveWindow(round);
     expect(castWindow.ok).toBe(true);
     if (!castWindow.ok) return;
-    // Windup 2 s — may activate in the first 3 s window or the next.
     round = castWindow.round;
-    let activated = castWindow.events.some((event) => event.type === "orbital-activated");
-    if (!activated) {
+    let sawActivate = castWindow.events.some((event) => event.type === "orbital-activated");
+    if (!sawActivate) {
       round = advanceHold(round);
-      activated = round.lastWindowEvents.some((event) => event.type === "orbital-activated");
+      sawActivate = round.lastWindowEvents.some((event) => event.type === "orbital-activated");
     }
-    expect(activated).toBe(true);
-    const allyHp = round.state.agents.find((agent) => agent.instanceId === "kayo-attack")!.hp;
-    const ticks = round.lastWindowEvents.filter((event) => event.type === "zone-damage");
-    expect(ticks.length).toBeGreaterThan(0);
-    // LOS blocked by orbital vision volume at doorway.
-    const smoke = round.state.smokes.find((item) => item.abilityId === ORBITAL_STRIKE_ID);
-    expect(smoke).toBeDefined();
-    // Advance through active + shrink; shrink jobs may land in any later window.
-    let sawShrink = round.lastWindowEvents.some((event) => event.type === "orbital-shrink");
-    for (let i = 0; i < 4; i += 1) {
-      round = advanceHold(round);
-      if (round.lastWindowEvents.some((event) => event.type === "orbital-shrink")) sawShrink = true;
-    }
-    expect(sawShrink).toBe(true);
-    expect(round.state.agents.find((agent) => agent.instanceId === "kayo-attack")!.hp).toBe(allyHp);
-    // 20 ticks × 20 = 400 during activeSec if enemy stays in — may span windows.
-    const enemy = round.state.agents.find((agent) => agent.instanceId === "jett-defense")!;
-    expect(enemy.hp).toBeLessThan(500);
+    expect(sawActivate).toBe(true);
+    expect(round.state.smokes.some((item) => item.abilityId === ORBITAL_STRIKE_ID)).toBe(true);
   });
 
   it("keeps Sky Smoke scripted scenarios working via mapTarget routing", () => {
