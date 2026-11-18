@@ -1,6 +1,6 @@
 :root {
   color: #e7ecf1;
-  background: #14171c;
+  background: #0e1116;
   font-family: "Segoe UI", sans-serif;
   line-height: 1.4;
 }
@@ -31,58 +31,55 @@ input[type="number"] {
 button { cursor: pointer; }
 button:disabled { cursor: default; opacity: 0.55; }
 
-.app {
-  display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr);
-  gap: 16px;
-  padding: 16px;
+.app-live {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 100vh;
+  padding: 8px 10px 12px;
 }
 
-.masthead,
-.board,
-.timeline,
-.draft {
+.masthead {
   background: #1c2128;
   border: 1px solid #3a4450;
   border-radius: 6px;
-  padding: 12px;
+  padding: 8px 12px;
 }
 
-.masthead { grid-column: 1 / -1; }
-.masthead h1 { margin: 0 0 4px; font-size: 22px; }
+.masthead h1 { margin: 0 0 2px; font-size: 18px; }
 .masthead p,
-.footnote { margin: 0; color: #9aa6b2; }
+.footnote { margin: 0; color: #9aa6b2; font-size: 13px; }
 
-.board h2,
-.timeline h2,
-.draft h2,
-.draft h3 { margin: 0 0 8px; font-size: 16px; }
-
-.board svg {
-  width: 100%;
-  height: auto;
-  background: #10141a;
-  border-radius: 4px;
+.game-stage {
+  display: flex;
+  flex: 1;
+  gap: 0;
+  min-height: 0;
+  position: relative;
 }
 
-/* Interpolation owns motion — do not CSS-transition agent glyphs. */
-.board svg circle,
-.board svg line,
-.board svg text,
-.board svg rect {
-  transition: none;
+.board-shell {
+  flex: 1 1 72%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #1c2128;
+  border: 1px solid #3a4450;
+  border-radius: 6px;
+  padding: 8px;
 }
 
-.live-hud {
+.board-topbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 8px;
 }
 
-.live-hud h2 {
+.board-topbar h2 {
   margin: 0;
+  font-size: 15px;
 }
 
 .timer {
@@ -101,7 +98,6 @@ button:disabled { cursor: default; opacity: 0.55; }
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin-bottom: 8px;
   padding: 8px 10px;
   background: #242b33;
   border: 1px solid #3a4450;
@@ -112,8 +108,203 @@ button:disabled { cursor: default; opacity: 0.55; }
   margin: 0;
 }
 
-.draft { grid-column: 2; grid-row: 2 / span 2; }
-.timeline { grid-column: 1; }
+.board-canvas {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 360px;
+}
+
+.board-svg,
+.board-shell svg {
+  width: 100%;
+  height: auto;
+  max-height: min(62vh, 720px);
+  background: #10141a;
+  border-radius: 4px;
+  display: block;
+  outline: none;
+}
+
+/* Interpolation owns motion — do not CSS-transition agent glyphs. */
+.board-shell svg circle,
+.board-shell svg line,
+.board-shell svg text,
+.board-shell svg rect,
+.board-shell svg path,
+.board-shell svg polygon {
+  transition: none;
+}
+
+.kill-feed {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: min(280px, 40%);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.kill-feed li {
+  margin-bottom: 4px;
+  padding: 4px 8px;
+  background: rgba(16, 20, 26, 0.82);
+  border: 1px solid #3a4450;
+  border-radius: 4px;
+  color: #d5dde6;
+  font-size: 12px;
+  opacity: 0.95;
+  animation: feed-fade 8s linear forwards;
+}
+
+@keyframes feed-fade {
+  0% { opacity: 0.95; }
+  70% { opacity: 0.85; }
+  100% { opacity: 0.25; }
+}
+
+.secondary-orders {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.secondary-orders .message {
+  margin: 0;
+}
+
+.attacker-hud {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.hud-card {
+  background: #151a21;
+  border: 1px solid #3a4450;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.hud-card.selected {
+  border-color: #d28a2e;
+  box-shadow: inset 0 0 0 1px #d28a2e;
+}
+
+.hud-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.hud-index {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: #242b33;
+  font-size: 12px;
+  color: #9aa6b2;
+}
+
+.hud-role {
+  display: block;
+  color: #9aa6b2;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.hud-ult {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: #c9ddd4;
+  font-size: 13px;
+}
+
+.hud-hp {
+  height: 8px;
+  background: #242b33;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.hud-hp-fill {
+  height: 100%;
+  background: #5cb86a;
+}
+
+.hud-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.hud-abilities {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.hud-abilities button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 4px 6px;
+  min-height: 44px;
+  text-align: left;
+}
+
+.hud-abilities button[aria-pressed="true"] {
+  border-color: #d28a2e;
+}
+
+.hud-hotkey {
+  font-size: 11px;
+  color: #9aa6b2;
+}
+
+.hud-ability-name {
+  font-size: 12px;
+}
+
+.hud-ability-meta {
+  font-size: 11px;
+  color: #9aa6b2;
+}
+
+.setup-drawer {
+  flex: 0 0 0;
+  width: 0;
+  overflow: hidden;
+  transition: flex-basis 0.2s ease, width 0.2s ease;
+  background: #1c2128;
+  border: 1px solid #3a4450;
+  border-radius: 6px;
+}
+
+.setup-drawer.open {
+  flex: 0 0 min(360px, 28%);
+  width: min(360px, 28%);
+  overflow: auto;
+}
+
+.setup-drawer-inner {
+  padding: 10px;
+  min-width: 280px;
+}
+
+.drawer-close {
+  margin-bottom: 8px;
+}
 
 .catalog,
 .team-actions,
@@ -125,20 +316,10 @@ button:disabled { cursor: default; opacity: 0.55; }
 }
 
 .catalog button[aria-pressed="true"],
-.team-actions button[aria-pressed="true"] {
+.team-actions button[aria-pressed="true"],
+.secondary-orders button[aria-pressed="true"],
+.board-topbar button[aria-pressed="true"] {
   border-color: #d28a2e;
-}
-
-.queue-list {
-  list-style: none;
-  padding: 0;
-  margin: 8px 0 0;
-  color: #9aa6b2;
-  font-size: 13px;
-}
-
-.queue-list li {
-  padding: 2px 0;
 }
 
 .kit p,
@@ -176,10 +357,6 @@ button:disabled { cursor: default; opacity: 0.55; }
 .event-log li {
   padding: 4px 6px;
   border-top: 1px solid #2a323b;
-}
-
-.event-log li[aria-current="step"] {
-  background: #2a2418;
 }
 
 .file-box {
@@ -224,12 +401,26 @@ button:disabled { cursor: default; opacity: 0.55; }
   font-size: 13px;
 }
 
+.fault-slider.inline {
+  flex-direction: row;
+  align-items: center;
+  margin: 0;
+}
+
 .fault-slider input,
 .drill-option input {
   max-width: 280px;
 }
 
-@media (max-width: 900px) {
-  .app { grid-template-columns: 1fr; }
-  .draft { grid-column: 1; grid-row: auto; }
+@media (max-width: 1100px) {
+  .game-stage {
+    flex-direction: column;
+  }
+  .board-shell {
+    flex-basis: auto;
+  }
+  .setup-drawer.open {
+    flex-basis: auto;
+    width: 100%;
+  }
 }

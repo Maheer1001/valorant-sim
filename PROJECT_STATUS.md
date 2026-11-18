@@ -1,6 +1,6 @@
 # Project status
 
-Updated: 18 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Live round engine Stage (a)** and **live UI Stage (b)** are in: pauseable host loop, smooth motion, immediate orders, round timer, replay download/load. Pre-round buy/plan, Stage (c) fast controls, spike, and a real opponent are not done.
+Updated: 18 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Live round Stages (a)–(c)** are in: pauseable host loop, smooth motion, immediate orders, round timer, replay, board-first layout, multi-select, hotkeys, and ability/path previews. Pre-round buy/plan, spike, and a real opponent are not done.
 
 Agent records for patch 13.10 are in `agent-reference.json`. That file is a reference, not the sim catalog. Breach and Brimstone catalog numbers are guarded against drift by `tests/sim/breach.test.ts` and `tests/sim/brimstone.test.ts`.
 
@@ -21,15 +21,17 @@ src/
     App.tsx
     board/MapView.tsx
     board/coords.ts
+    board/previews.ts
     draft/DraftPanel.tsx
     live/hostLoop.ts
     live/replayFile.ts
+    live/RoundEndBanner.tsx
     orders/AgentPanel.tsx
+    orders/AttackerHud.tsx
     orders/abilityUi.ts
+    orders/hotkeys.ts
     orders/rejectionMessages.ts
     scenario/playableDrill.ts
-    timeline/Transport.tsx
-    timeline/EventList.tsx
   sim/
     rng.ts
     clock.ts
@@ -50,6 +52,7 @@ src/
     agents/abilities/breach-resolve.ts
     agents/abilities/brimstone.ts
     agents/abilities/brimstone-resolve.ts
+    agents/abilities/geometry-constants.ts
     effects/status.ts
     effects/geometry-aoe.ts
     composition/team.ts
@@ -348,25 +351,28 @@ API in `src/sim/live-round.ts`: `openLiveRound`, `issueOrders`, `stepLive`, `rep
 
 React holds `LiveRound` in a **ref** plus a **version** counter. Pure `src/ui/live/hostLoop.ts` converts wall-clock elapsed + speed → step count (cap 10/frame) and interpolation `alpha`. Agents render via `standingPositionAt` (no CSS transitions). Round starts **paused**; Space / Pause / speed buttons / `[` `]`; timer `m:ss` from `roundDurationMs`. Orders (`issueOrders`) apply immediately — no Resolve window queue. Right-click = move. Event log: last 30 live events. Replay JSON download/load via `replayOrderLog`. Fog + Buy + draft/scenario import-export remain.
 
+## Fast controls — Stage (c) (18 November 2026)
+
+Board-first layout (≥70% width): top bar (timer, pause, speed, fog, replay), bottom attacker HUD (C/Q/E/X), collapsible Setup drawer (draft, coverage, scenario/replay JSON, drill options, full log, Buy). Kill-feed overlay (last 6). Multi-select (click / 1–5 / Shift / drag-box); formation-preserving group move; Shift+right-click appends waypoints (UI builds full `move-route` lists — **no new engine append command**). Hotkeys arm abilities with cursor previews from `src/ui/board/previews.ts` (shared sim geometry constants). Fault Line wheel adjusts charge length. Unused `timeline/Transport.tsx` and `EventList.tsx` removed.
+
 Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 
 ### Not done yet
 
-- Stage (c) fewer clicks / previews (Valorant hotkeys, multi-select, path ETA)
 - Pre-round buy / plan screen (`buyPhaseMs` unused)
 - Spike plant / defuse
 - Real opponent (hold stub + decide hook only)
 - Retiring the window API (Stage e)
 
-### Checks (Live Stage b — `npm run check`, 18 November 2026)
+### Checks (Live Stage c — `npm run check`, 18 November 2026)
 
 | Step | Result |
 | --- | --- |
 | lint | Pass. ESLint completed with no findings. |
 | typecheck | Pass. `tsc --noEmit` completed with no errors. |
-| test | Pass. Vitest 5.0.5, 21 files, 105 tests. |
-| build | Pass. Vite 8.3.4 produced `dist/` in 271 ms (55 modules). |
+| test | Pass. Vitest 5.0.5, 22 files, 124 tests. |
+| build | Pass. Vite 8.3.4 produced `dist/` in 344 ms (60 modules). |
 
 ## Next task
 
-Live round Stage (c) fast controls and previews, or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.
+Live round Stage (d) pre-round buy/plan, or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.

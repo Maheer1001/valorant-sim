@@ -1,4 +1,4 @@
-import type { MouseEvent } from "react";
+import { useRef, useState, type MouseEvent, type PointerEvent, type WheelEvent } from "react";
 import { zoneRadiusMm } from "../../sim/agents/abilities/brimstone-resolve.ts";
 import { SHIPPED_CATALOG } from "../../sim/agents/catalog.ts";
 import {
@@ -13,15 +13,7 @@ import type { MapDefinition } from "../../sim/map/drill-hall.ts";
 import type { Point } from "../../sim/types.ts";
 import type { World } from "../../sim/run.ts";
 import { clientToMm, pointFromYawPreview } from "./coords.ts";
-
-export type BoardPreview = {
-  aimFrom?: Point;
-  aimTo?: Point;
-  rangeOrigin?: Point;
-  rangeMm?: number;
-  previewCenter?: Point;
-  previewRadiusMm?: number;
-};
+import type { PreviewPrimitive } from "./previews.ts";
 
 export type AgentDisplay = {
   xMm: number;
@@ -29,56 +21,269 @@ export type AgentDisplay = {
   facingDeg: number;
 };
 
+export type BoardModifiers = {
+  shiftKey: boolean;
+};
+
+function labelLayout(
+  agents: readonly { instanceId: string; xMm: number; yMm: number }[],
+): Record<string, { nameDx: number; nameDy: number; hpDx: number; hpDy: number }> {
+  const sorted = [...agents].sort((a, b) => a.yMm - b.yMm || a.xMm - b.xMm);
+  const layout: Record<string, { nameDx: number; nameDy: number; hpDx: number; hpDy: number }> = {};
+  for (let i = 0; i < sorted.length; i += 1) {
+    let bump = 0;
+    for (let j = 0; j < i; j += 1) {
+      const dx = sorted[i]!.xMm - sorted[j]!.xMm;
+      const dy = sorted[i]!.yMm - sorted[j]!.yMm;
+      if (dx * dx + dy * dy < 900 * 900) bump += 1;
+    }
+    layout[sorted[i]!.instanceId] = {
+      nameDx: bump * 480,
+      nameDy: -620 - bump * 140,
+      hpDx: bump * 480,
+      hpDy: 520 + bump * 140,
+    };
+  }
+  return layout;
+}
+
+function renderPrimitive(primitive: PreviewPrimitive, key: string) {
+  if (primitive.kind === "polyline") {
+    const d = primitive.points.map((p, i) => `${i === 0 ? "M" : "L"}${p.xMm} ${p.yMm}`).join(" ");
+    return (
+      <path
+        key={key}
+        d={d}
+        fill="none"
+        stroke={primitive.stroke ?? (primitive.faint ? "#5a6570" : "#f2f5f8")}
+        strokeWidth={primitive.faint ? 30 : 45}
+        strokeDasharray={primitive.faint ? "120 100" : "160 80"}
+        opacity={primitive.faint ? 0.45 : 0.9}
+        pointerEvents="none"
+      />
+    );
+  }
+  if (primitive.kind === "polygon") {
+    const points = primitive.points.map((p) => `${p.xMm},${p.yMm}`).join(" ");
+    return (
+      <polygon
+        key={key}
+        points={points}
+        fill={primitive.fill ?? "#7eb6ff"}
+        fillOpacity="0.16"
+        stroke="#b8d4ff"
+        strokeWidth="30"
+        pointerEvents="none"
+      />
+    );
+  }
+  if (primitive.kind === "circle") {
+    return (
+      <circle
+        key={key}
+        cx={primitive.center.xMm}
+        cy={primitive.center.yMm}
+        r={primitive.radiusMm}
+        fill={primitive.fill ? "#7eb6ff" : "none"}
+        fillOpacity={primitive.fill ? 0.18 : 0}
+        stroke={primitive.dashed ? "#7eb6ff" : "#b8d4ff"}
+        strokeWidth="30"
+        strokeDasharray={primitive.dashed ? "200 120" : undefined}
+        pointerEvents="none"
+      />
+    );
+  }
+  if (primitive.kind === "line") {
+    return (
+      <line
+        key={key}
+        x1={primitive.from.xMm}
+        y1={primitive.from.yMm}
+        x2={primitive.to.xMm}
+        y2={primitive.to.yMm}
+        stroke="#f2f5f8"
+        strokeWidth="40"
+        strokeDasharray="160 80"
+        pointerEvents="none"
+      />
+    );
+  }
+  if (primitive.kind === "dots") {
+    return (
+      <g key={key} pointerEvents="none">
+        {primitive.points.map((point, index) => (
+          <circle
+            key={`${key}-${index}`}
+            cx={point.xMm}
+            cy={point.yMm}
+            r="160"
+            fill="#f0b27a"
+            fillOpacity="0.85"
+          />
+        ))}
+      </g>
+    );
+  }
+  return (
+    <text
+      key={key}
+      x={primitive.at.xMm}
+      y={primitive.at.yMm}
+      fill="#e7ecf1"
+      fontSize="240"
+      pointerEvents="none"
+    >
+      {primitive.text}
+    </text>
+  );
+}
+
 export function MapView({
   map,
   world,
-  selectedInstanceId = null,
-  preview = null,
+  selectedInstanceIds = [],
+  previewPrimitives = [],
   agentDisplay = null,
   onAgentClick,
   onPointClick,
   onPointRightClick,
   onHoverPoint,
+  onBoxSelect,
+  onWheelPoint,
 }: {
   map: MapDefinition;
   world: World;
-  selectedInstanceId?: string | null;
-  preview?: BoardPreview | null;
-  /** Optional interpolated positions/facing; overlays still use committed `world`. */
+  selectedInstanceIds?: readonly string[];
+  previewPrimitives?: readonly PreviewPrimitive[];
   agentDisplay?: Record<string, AgentDisplay> | null;
-  onAgentClick?: (instanceId: string) => void;
-  onPointClick?: (point: Point) => void;
-  onPointRightClick?: (point: Point) => void;
+  onAgentClick?: (instanceId: string, modifiers: BoardModifiers) => void;
+  onPointClick?: (point: Point, modifiers: BoardModifiers) => void;
+  onPointRightClick?: (point: Point, modifiers: BoardModifiers) => void;
   onHoverPoint?: (point: Point | null) => void;
+  onBoxSelect?: (instanceIds: string[], modifiers: BoardModifiers) => void;
+  onWheelPoint?: (point: Point, deltaY: number) => void;
 }) {
   const smokes = activeSmokes(world.smokes, world.timeMs);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const dragRef = useRef<{
+    startClient: { x: number; y: number };
+    startMm: Point;
+    pointerId: number;
+    moved: boolean;
+    shiftKey: boolean;
+  } | null>(null);
+  const [box, setBox] = useState<{ a: Point; b: Point } | null>(null);
 
-  function pointFromEvent(event: MouseEvent<SVGSVGElement>): Point {
-    const rect = event.currentTarget.getBoundingClientRect();
-    return clientToMm(event.clientX, event.clientY, rect, map.widthMm, map.heightMm);
+  function pointFromClient(clientX: number, clientY: number): Point {
+    const rect = svgRef.current?.getBoundingClientRect() ?? {
+      left: 0,
+      top: 0,
+      width: 1,
+      height: 1,
+    };
+    return clientToMm(clientX, clientY, rect, map.widthMm, map.heightMm);
   }
 
-  function handleSvgClick(event: MouseEvent<SVGSVGElement>) {
-    if (!onPointClick) return;
-    onPointClick(pointFromEvent(event));
+  function pointFromEvent(event: MouseEvent<SVGSVGElement> | PointerEvent<SVGSVGElement> | WheelEvent<SVGSVGElement>): Point {
+    return pointFromClient(event.clientX, event.clientY);
+  }
+
+  function handlePointerDown(event: PointerEvent<SVGSVGElement>) {
+    if (event.button !== 0) return;
+    dragRef.current = {
+      startClient: { x: event.clientX, y: event.clientY },
+      startMm: pointFromEvent(event),
+      pointerId: event.pointerId,
+      moved: false,
+      shiftKey: event.shiftKey,
+    };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  }
+
+  function handlePointerMove(event: PointerEvent<SVGSVGElement>) {
+    onHoverPoint?.(pointFromEvent(event));
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const dx = event.clientX - drag.startClient.x;
+    const dy = event.clientY - drag.startClient.y;
+    if (!drag.moved && dx * dx + dy * dy > 16) {
+      drag.moved = true;
+    }
+    if (drag.moved) {
+      setBox({ a: drag.startMm, b: pointFromEvent(event) });
+    }
+  }
+
+  function agentsInBox(a: Point, b: Point): string[] {
+    const minX = Math.min(a.xMm, b.xMm);
+    const maxX = Math.max(a.xMm, b.xMm);
+    const minY = Math.min(a.yMm, b.yMm);
+    const maxY = Math.max(a.yMm, b.yMm);
+    return world.agents
+      .filter((agent) => {
+        if (agent.side !== "attack" || !agent.alive) return false;
+        const display = agentDisplay?.[agent.instanceId];
+        const xMm = display?.xMm ?? agent.xMm;
+        const yMm = display?.yMm ?? agent.yMm;
+        return xMm >= minX && xMm <= maxX && yMm >= minY && yMm <= maxY;
+      })
+      .map((agent) => agent.instanceId);
+  }
+
+  function handlePointerUp(event: PointerEvent<SVGSVGElement>) {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    dragRef.current = null;
+    setBox(null);
+    const modifiers = { shiftKey: drag.shiftKey || event.shiftKey };
+    if (drag.moved) {
+      const end = pointFromEvent(event);
+      onBoxSelect?.(agentsInBox(drag.startMm, end), modifiers);
+      return;
+    }
+    onPointClick?.(pointFromEvent(event), modifiers);
   }
 
   function handleContextMenu(event: MouseEvent<SVGSVGElement>) {
     if (!onPointRightClick) return;
     event.preventDefault();
-    onPointRightClick(pointFromEvent(event));
+    onPointRightClick(pointFromEvent(event), { shiftKey: event.shiftKey });
   }
+
+  function handleWheel(event: WheelEvent<SVGSVGElement>) {
+    if (!onWheelPoint) return;
+    event.preventDefault();
+    onWheelPoint(pointFromEvent(event), event.deltaY);
+  }
+
+  const displayAgents = world.agents.map((agent) => {
+    const display = agentDisplay?.[agent.instanceId];
+    return {
+      instanceId: agent.instanceId,
+      xMm: display?.xMm ?? agent.xMm,
+      yMm: display?.yMm ?? agent.yMm,
+    };
+  });
+  const labels = labelLayout(displayAgents);
 
   return (
     <svg
+      ref={svgRef}
       viewBox={`0 0 ${map.widthMm} ${map.heightMm}`}
       role="img"
       aria-label={map.name}
       tabIndex={0}
-      onClick={handleSvgClick}
+      className="board-svg"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => {
+        dragRef.current = null;
+        setBox(null);
+      }}
       onContextMenu={handleContextMenu}
-      onMouseMove={(event) => onHoverPoint?.(pointFromEvent(event))}
       onMouseLeave={() => onHoverPoint?.(null)}
+      onWheel={handleWheel}
     >
       <rect x="0" y="0" width={map.widthMm} height={map.heightMm} fill="#10141a" />
       {map.sites.map((site) => (
@@ -149,39 +354,18 @@ export function MapView({
           strokeDasharray="120 80"
         />
       ))}
-      {preview?.rangeOrigin && preview.rangeMm != null ? (
-        <circle
-          cx={preview.rangeOrigin.xMm}
-          cy={preview.rangeOrigin.yMm}
-          r={preview.rangeMm}
-          fill="none"
+      {previewPrimitives.map((primitive, index) => renderPrimitive(primitive, `preview-${index}`))}
+      {box ? (
+        <rect
+          x={Math.min(box.a.xMm, box.b.xMm)}
+          y={Math.min(box.a.yMm, box.b.yMm)}
+          width={Math.abs(box.b.xMm - box.a.xMm)}
+          height={Math.abs(box.b.yMm - box.a.yMm)}
+          fill="#7eb6ff"
+          fillOpacity="0.12"
           stroke="#7eb6ff"
           strokeWidth="40"
-          strokeDasharray="200 120"
-          pointerEvents="none"
-        />
-      ) : null}
-      {preview?.previewCenter && preview.previewRadiusMm != null ? (
-        <circle
-          cx={preview.previewCenter.xMm}
-          cy={preview.previewCenter.yMm}
-          r={preview.previewRadiusMm}
-          fill="#7eb6ff"
-          fillOpacity="0.18"
-          stroke="#b8d4ff"
-          strokeWidth="30"
-          pointerEvents="none"
-        />
-      ) : null}
-      {preview?.aimFrom && preview.aimTo ? (
-        <line
-          x1={preview.aimFrom.xMm}
-          y1={preview.aimFrom.yMm}
-          x2={preview.aimTo.xMm}
-          y2={preview.aimTo.yMm}
-          stroke="#f2f5f8"
-          strokeWidth="40"
-          strokeDasharray="160 80"
+          strokeDasharray="120 80"
           pointerEvents="none"
         />
       ) : null}
@@ -189,7 +373,7 @@ export function MapView({
         const definition = SHIPPED_CATALOG.agents.find((item) => item.id === agent.definitionId);
         const name = definition?.name ?? agent.definitionId;
         const fill = agent.side === "attack" ? "#d28a2e" : "#3d8bfd";
-        const selected = agent.instanceId === selectedInstanceId;
+        const selected = selectedInstanceIds.includes(agent.instanceId);
         const statuses = activeStatuses(agent, world.timeMs);
         const display = agentDisplay?.[agent.instanceId];
         const xMm = display?.xMm ?? agent.xMm;
@@ -198,16 +382,21 @@ export function MapView({
         const tip = pointFromYawPreview({ xMm, yMm }, facingDeg, 500);
         const barWidth = 600;
         const hpRatio = Math.max(0, Math.min(1, agent.hp / 100));
+        const offset = labels[agent.instanceId] ?? { nameDx: 0, nameDy: -620, hpDx: 0, hpDy: 520 };
         return (
           <g
             key={agent.instanceId}
             role={onAgentClick ? "button" : undefined}
             tabIndex={onAgentClick ? 0 : undefined}
             aria-label={`Select ${name}`}
+            onPointerDown={(event) => {
+              if (!onAgentClick) return;
+              event.stopPropagation();
+            }}
             onClick={(event) => {
               if (!onAgentClick) return;
               event.stopPropagation();
-              onAgentClick(agent.instanceId);
+              onAgentClick(agent.instanceId, { shiftKey: event.shiftKey });
             }}
           >
             <circle
@@ -241,14 +430,32 @@ export function MapView({
               height="70"
               fill="#5cb86a"
             />
-            <text x={xMm + 360} y={yMm - 80} fill="#e7ecf1" fontSize="280">
+            <text
+              x={xMm + offset.nameDx}
+              y={yMm + offset.nameDy}
+              fill="#e7ecf1"
+              fontSize="260"
+              textAnchor="middle"
+            >
               {name}
             </text>
-            <text x={xMm + 360} y={yMm + 220} fill="#9aa6b2" fontSize="220">
-              {agent.hp} hp · ult {agent.ultimatePoints}
+            <text
+              x={xMm + offset.hpDx}
+              y={yMm + offset.hpDy}
+              fill="#9aa6b2"
+              fontSize="200"
+              textAnchor="middle"
+            >
+              {agent.hp} hp
             </text>
             {statuses.length > 0 ? (
-              <text x={xMm + 360} y={yMm + 480} fill="#f0b27a" fontSize="200">
+              <text
+                x={xMm + offset.hpDx}
+                y={yMm + offset.hpDy + 260}
+                fill="#f0b27a"
+                fontSize="180"
+                textAnchor="middle"
+              >
                 {statuses
                   .map((status) => {
                     const left = Math.max(0, status.untilMs - world.timeMs);

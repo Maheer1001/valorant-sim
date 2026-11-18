@@ -47,3 +47,43 @@ export function pointInOrientedRect(
   const across = dx * px + dy * py;
   return along >= startAheadMm && along <= startAheadMm + lengthMm && Math.abs(across) <= halfWidthMm;
 }
+
+/** Four corners of an oriented rect (clockwise from near-left). */
+export function orientedRectCorners(
+  origin: Point,
+  yawDeg: number,
+  startAheadMm: number,
+  lengthMm: number,
+  halfWidthMm: number,
+): Point[] {
+  const rad = (normalizeYawDeg(yawDeg) * Math.PI) / 180;
+  const fx = Math.cos(rad);
+  const fy = Math.sin(rad);
+  const px = -fy;
+  const py = fx;
+  const near = startAheadMm;
+  const far = startAheadMm + lengthMm;
+  const corner = (along: number, across: number): Point => ({
+    xMm: Math.round(origin.xMm + fx * along + px * across),
+    yMm: Math.round(origin.yMm + fy * along + py * across),
+  });
+  return [
+    corner(near, -halfWidthMm),
+    corner(near, halfWidthMm),
+    corner(far, halfWidthMm),
+    corner(far, -halfWidthMm),
+  ];
+}
+
+/**
+ * Outline matching `pointInCylinder`: an oriented rectangle of length × 2·radius
+ * (axial projection in [0, length], perpendicular distance ≤ radius).
+ */
+export function cylinderOutline(
+  origin: Point,
+  yawDeg: number,
+  lengthMm: number,
+  radiusMm: number,
+): Point[] {
+  return orientedRectCorners(origin, yawDeg, 0, lengthMm, radiusMm);
+}

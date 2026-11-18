@@ -577,23 +577,25 @@ export function zoneRadiusMm(zone: DamageZone, timeMs: number): number {
 /**
  * Flat-map Incendiary path: floor contacts every spacingMm; first two are bounces,
  * third detonates. Wall hits also consume a bounce (reflect) or detonate if none left.
+ * `contacts` lists bounce points (not including the final detonation point).
  */
 export function resolveIncendiaryPath(
   origin: Point,
   yawDeg: number,
   walls: readonly Segment[],
   spacingMm: number,
-): { point: Point; bounces: number } {
+): { point: Point; bounces: number; contacts: Point[] } {
   let pos = { ...origin };
   let yaw = normalizeYawDeg(yawDeg);
   let bounces = 0;
+  const contacts: Point[] = [];
   const maxBounces = 2;
   for (let contact = 1; contact <= maxBounces + 1; contact += 1) {
     const next = pointFromYaw(pos, yaw, spacingMm);
     const clip = clipSegment(pos, next, walls);
     if (clip.blocked) {
       if (bounces >= maxBounces) {
-        return { point: clip.point, bounces };
+        return { point: clip.point, bounces, contacts };
       }
       bounces += 1;
       // Reflect off axis-aligned wall: if stopped short of next, reverse dominant axis.
@@ -604,19 +606,21 @@ export function resolveIncendiaryPath(
         yaw = normalizeYawDeg(-yaw);
       }
       pos = clip.point;
+      contacts.push({ ...pos });
       if (traveled < 1 && contact > 1) {
-        return { point: pos, bounces };
+        return { point: pos, bounces, contacts };
       }
       continue;
     }
     pos = clip.point;
     if (contact <= maxBounces) {
       bounces += 1;
+      contacts.push({ ...pos });
     } else {
-      return { point: pos, bounces };
+      return { point: pos, bounces, contacts };
     }
   }
-  return { point: pos, bounces };
+  return { point: pos, bounces, contacts };
 }
 
 function yawTo(agent: { xMm: number; yMm: number }, to: Point): number {

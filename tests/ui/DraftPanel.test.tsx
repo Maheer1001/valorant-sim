@@ -4,10 +4,15 @@ import { describe, expect, it } from "vitest";
 import { App } from "../../src/ui/App.tsx";
 import { CATALOG_VERSION } from "../../src/sim/agents/catalog.ts";
 
+async function openSetup(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Setup" }));
+}
+
 describe("draft panel", () => {
   it("shows the catalog and changes coverage when Brimstone leaves Attack", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await openSetup(user);
 
     expect(screen.getByRole("button", { name: "Brimstone, Controller" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "KAY/O, Initiator" })).toBeInTheDocument();
@@ -35,6 +40,7 @@ describe("draft panel", () => {
     const user = userEvent.setup();
     render(<App />);
     expect(screen.getByLabelText("Round timer")).toHaveTextContent("1:40");
+    await openSetup(user);
     await user.click(screen.getByRole("button", { name: "Export scenario" }));
     const file = screen.getByLabelText("Scenario JSON");
     if (!(file instanceof HTMLTextAreaElement)) throw new Error("Scenario JSON is not a textarea.");

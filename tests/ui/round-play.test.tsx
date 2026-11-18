@@ -2,6 +2,13 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "../../src/ui/App.tsx";
+import { SHIPPED_CATALOG } from "../../src/sim/agents/catalog.ts";
+import { isLiveRound, openLiveRound, stepLive } from "../../src/sim/live-round.ts";
+import { STANDARD_RULESET } from "../../src/rules/ruleset.ts";
+import { createPlayableDrill } from "../../src/ui/scenario/playableDrill.ts";
+import { serializeReplay, REPLAY_FILE_VERSION } from "../../src/ui/live/replayFile.ts";
+import { resultBanner, RoundEndBanner } from "../../src/ui/live/RoundEndBanner.tsx";
+import { defenseHoldDecide } from "../../src/tactics/defense-stub.ts";
 
 beforeAll(() => {
   Object.defineProperty(SVGElement.prototype, "getBoundingClientRect", {
@@ -41,6 +48,10 @@ function board() {
   return screen.getByRole("img", { name: "Drill Hall" });
 }
 
+async function openSetup(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Setup" }));
+}
+
 async function clickBoard(user: ReturnType<typeof userEvent.setup>, clientX: number, clientY: number) {
   await user.pointer({ keys: "[MouseLeft]", target: board(), coords: { clientX, clientY } });
 }
@@ -57,12 +68,47 @@ async function flushFrames(frames: number) {
   }
 }
 
+function timeoutReplay(): string {
+  const scenario = createPlayableDrill(1);
+  const opened = openLiveRound(scenario, SHIPPED_CATALOG, STANDARD_RULESET, {
+    decide: defenseHoldDecide,
+  });
+  if (!isLiveRound(opened)) throw new Error(opened.message);
+  stepLive(opened, Math.ceil(STANDARD_RULESET.roundDurationMs / STANDARD_RULESET.simStepMs) + 2);
+  expect(opened.phase).toBe("ended");
+  expect(opened.result?.kind).toBe("timeout");
+  return serializeReplay({
+    version: REPLAY_FILE_VERSION,
+    scenario,
+    seed: scenario.seed,
+    orderLog: structuredClone(opened.orderLog),
+    simTimeMs: opened.world.timeMs,
+  });
+}
+
 describe("live round UI", () => {
   it("starts paused with a visible paused badge", () => {
     render(<App />);
     expect(screen.getByText("Paused — press Space to start")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Resume" })).toBeInTheDocument();
     expect(screen.getByLabelText("Round timer")).toHaveTextContent("1:40");
+  });
+
+  it("keeps the Setup drawer closed by default and opens it", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    expect(document.getElementById("setup-drawer")?.hidden).toBe(true);
+    expect(screen.queryByRole("button", { name: "Close setup" })).toBeNull();
+    await openSetup(user);
+    expect(document.getElementById("setup-drawer")?.hidden).toBe(false);
+    expect(screen.getByRole("button", { name: "Close setup" })).toBeInTheDocument();
+  });
+
+  it("renders the board stage before the Setup drawer in DOM order", () => {
+    const { container } = render(<App />);
+    const stage = container.querySelector('[aria-label="Game stage"]');
+    expect(stage?.firstElementChild?.classList.contains("board-shell")).toBe(true);
+    expect(stage?.lastElementChild?.id).toBe("setup-drawer");
   });
 
   it("issues a one-waypoint move immediately and updates the board after steps", async () => {
@@ -81,11 +127,39 @@ describe("live round UI", () => {
     expect(time).toBeGreaterThan(0);
   });
 
+  it("selects attackers with keys 1-5 and clears with Escape", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.keyboard("2");
+    expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Selected brimstone-attack/);
+    await user.keyboard("{Escape}");
+    expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Selection cleared/);
+  });
+
+  it("drag-box selects attackers on the board", async () => {
+    render(<App />);
+    const svg = board();
+    fireEvent.pointerDown(svg, { button: 0, clientX: 5, clientY: 5, pointerId: 1 });
+    fireEvent.pointerMove(svg, { button: 0, clientX: 195, clientY: 115, pointerId: 1 });
+    fireEvent.pointerUp(svg, { button: 0, clientX: 195, clientY: 115, pointerId: 1 });
+    expect(screen.getByLabelText("Plan status").textContent).toMatch(/Selected breach-attack/);
+  });
+
   it("casts Flashpoint with aim from the click (immediate issueOrders)", async () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     await user.click(screen.getByRole("button", { name: "Cast Flashpoint" }));
+    await clickBoard(user, 100, 60);
+    expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Flashpoint aim/);
+  });
+
+  it("arms Flashpoint with hotkey Q then confirms with a click", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Select Breach" }));
+    await user.keyboard("q");
+    expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Armed Flashpoint/);
     await clickBoard(user, 100, 60);
     expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Flashpoint aim/);
   });
@@ -101,11 +175,23 @@ describe("live round UI", () => {
     expect(screen.getByLabelText("Plan status")).toHaveTextContent(/length 32 m/);
   });
 
+  it("changes Fault Line charge length with the mouse wheel while armed", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Select Breach" }));
+    await user.click(screen.getByRole("button", { name: "Cast Fault Line" }));
+    fireEvent.wheel(board(), { deltaY: -100 });
+    expect(screen.getByLabelText("Fault Line charge length")).toHaveValue("21");
+    fireEvent.wheel(board(), { deltaY: 100 });
+    expect(screen.getByLabelText("Fault Line charge length")).toHaveValue("20");
+  });
+
   it("refuses an out-of-range map target with a message", async () => {
     const { pointInRange } = await import("../../src/ui/board/coords.ts");
     expect(pointInRange({ xMm: 0, yMm: 0 }, { xMm: 60000, yMm: 0 }, 55000)).toBe(false);
     const user = userEvent.setup();
     render(<App />);
+    await openSetup(user);
     fireEvent.change(screen.getByLabelText("Starting ult points"), { target: { value: "8" } });
     await user.click(screen.getByRole("button", { name: "Select Brimstone" }));
     await user.click(screen.getByRole("button", { name: "Cast Orbital Strike" }));
@@ -138,6 +224,7 @@ describe("live round UI", () => {
     await clickBoard(user, 40, 70);
     await user.click(screen.getByRole("button", { name: "1x" }));
     await flushFrames(5);
+    await openSetup(user);
     const panel = screen.getByRole("region", { name: "Selected agent" });
     await user.click(within(panel).getByRole("button", { name: /Buy Stim Beacon/ }));
     expect(within(panel).getByRole("status")).toHaveTextContent(/Bought Stim Beacon/);
@@ -149,6 +236,7 @@ describe("live round UI", () => {
     render(<App />);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     expect(screen.getByRole("button", { name: "Cast Rolling Thunder" })).toBeDisabled();
+    await openSetup(user);
     fireEvent.change(screen.getByLabelText("Starting ult points"), { target: { value: "8" } });
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     expect(screen.getByRole("button", { name: "Cast Rolling Thunder" })).toBeEnabled();
@@ -180,6 +268,15 @@ describe("live round UI", () => {
     expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Move breach-attack/);
   });
 
+  it("Shift+right-click appends a waypoint", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Select Breach" }));
+    await rightClickBoard(user, 70, 50);
+    fireEvent.contextMenu(board(), { clientX: 110, clientY: 55, shiftKey: true });
+    expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Append waypoint/);
+  });
+
   it("hides a defender behind the wall in attack fog", async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -202,7 +299,7 @@ describe("live round UI", () => {
     await user.click(screen.getByRole("button", { name: "Download replay" }));
     const replayBox = screen.getByLabelText("Replay JSON");
     expect((replayBox as HTMLTextAreaElement).value).toContain('"orderLog"');
-    await user.click(screen.getByRole("button", { name: "Load replay" }));
+    await user.click(screen.getAllByRole("button", { name: "Load replay" }).at(-1)!);
     expect(screen.getByLabelText("Plan status").textContent).toMatch(/Replay loaded/);
     expect(screen.getByRole("button", { name: "Resume" })).toBeInTheDocument();
     const loadedTime = /t=(\d+)/.exec(screen.getByLabelText("Plan status").textContent ?? "")?.[1];
@@ -232,11 +329,43 @@ describe("live round UI", () => {
       });
     }
     expect(screen.getByLabelText("Round timer").textContent).not.toBe("1:40");
-    // Timeout/elimination banners are asserted in tests/sim/live-round.test.ts.
-    // New round UI path: changing the drill option rebuilds a paused round at 1:40.
+    await openSetup(user);
     fireEvent.change(screen.getByLabelText("Starting ult points"), { target: { value: "1" } });
     expect(screen.getByLabelText("Round timer")).toHaveTextContent("1:40");
     expect(screen.getByText("Paused — press Space to start")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Resume" })).toBeInTheDocument();
+  });
+
+  it("shows the timeout banner and New round resets", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await openSetup(user);
+    fireEvent.change(screen.getByLabelText("Replay JSON"), { target: { value: timeoutReplay() } });
+    await user.click(screen.getAllByRole("button", { name: "Load replay" }).at(-1)!);
+    expect(screen.getByText(resultBanner({ kind: "timeout", winner: "defense" }))).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "New round" }));
+    expect(screen.getByLabelText("Round timer")).toHaveTextContent("1:40");
+    expect(screen.getByText("Paused — press Space to start")).toBeInTheDocument();
+  });
+
+  it("shows attackers-eliminated and defenders-eliminated banners", async () => {
+    const onNewRound = vi.fn();
+    const { rerender } = render(
+      <RoundEndBanner result={{ kind: "attack-eliminated" }} onNewRound={onNewRound} />,
+    );
+    expect(screen.getByText(/Defenders win — all attackers eliminated/)).toBeInTheDocument();
+    rerender(<RoundEndBanner result={{ kind: "defense-eliminated" }} onNewRound={onNewRound} />);
+    expect(screen.getByText(/Attackers win — all defenders eliminated/)).toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "New round" }));
+    expect(onNewRound).toHaveBeenCalledTimes(1);
+  });
+
+  it("HUD cast buttons expose charges, cooldown and disabled reasons", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Select Breach" }));
+    const aftershock = screen.getByRole("button", { name: "Cast Aftershock" });
+    expect(aftershock.title).toMatch(/Aftershock/);
+    expect(screen.getByRole("button", { name: "Cast Rolling Thunder" }).title).toMatch(/Need 8 ult/);
   });
 });

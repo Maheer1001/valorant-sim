@@ -1,24 +1,39 @@
-# Manual playtest — live round (Breach + Brimstone)
+# Manual playtest — live round (fast controls)
 
-Default load: attack = Breach + Brimstone, defense = KAY/O + Jett holding. Attack fog is on. The round **starts paused** at **1:40**. Starting ult points = 0 (drill option, assumed).
+Default load: attack = Breach + Brimstone, defense = KAY/O + Jett holding. Attack fog is on. The round **starts paused** at **1:40**. Setup drawer is **closed**. Starting ult points = 0 (drill option, assumed).
 
-1. **Paused start** — Confirm the **Paused — press Space to start** badge and timer **1:40**. Agents should not move until you resume.
-2. **Space / Resume** — Press **Space** or **Resume**. Timer should count down. Press Space again to pause; windups and moves freeze with sim time.
-3. **Speed** — Click **0.5x / 1x / 2x / 4x** or use **[** / **]** . Faster speeds only change how many sim steps run per frame.
-4. **Fog** — KAY/O may be visible through the doorway; Jett should be hidden. Toggle **Showing attack view** → **Showing truth** and confirm Jett appears, then switch back.
-5. **Select + Move** — Click **Breach**. Click **Move**, then click a corridor point (or **right-click** the board). Order applies immediately. Resume and watch Breach walk smoothly (no jump-teleport between windows).
-6. **Hold** — Select Breach, click **Hold**. He stops after the current segment.
-7. **Aftershock** — **Cast Aftershock** → click ahead. Aim line while hovering. Resume; look for zone / damage lines in the live event log (newest first).
-8. **Flashpoint** — **Cast Flashpoint** → click toward a defender. Expect flash / status badges when someone is hit.
-9. **Fault Line** — **Cast Fault Line**, drag the **charge length** slider (8–56 m), click aim. Expect concuss badges and signature cooldown on the button.
-10. **Rolling Thunder** — Set **Starting ult points** to **8**, re-select Breach. **Cast Rolling Thunder** should enable. Aim-click; expect ult spend in the log.
-11. **Incendiary / Stim / Sky Smoke / Orbital** — Select Brimstone. Cast each with a board click (map target for Sky Smoke / Orbital — **9 m** Orbital preview). Stim shows a radius for your team only. Buy Stim after spending a charge; credits drop.
-12. **Disabled casts** — Empty Aftershock or Stim; cast button disabled with a tooltip. Ult below 8 disables Rolling Thunder / Orbital.
-13. **Event log** — After several casts, confirm human lines (flash, concuss, damage tick, zone start, ult spend, kill).
-14. **Replay** — **Download replay**, copy the Replay JSON, optionally tweak nothing, **Load replay**. Round should restore paused at the same sim time with the same agent positions.
-15. **Draft / scenario** — Change an agent in Draft; round rebuilds paused. **Export scenario** / **Import scenario** still round-trip teams.
-16. **Round end** — Let the timer reach **0:00** (or eliminate a side). Banner shows who won. **New round** (or change starting ult) restores a paused 1:40.
+## Controls
 
-**Reporting a bug:** attach the **Replay JSON** (scenario + seed + orderLog + simTimeMs), the ruleset / catalog version from the header, and what you clicked. Prefer a short clip description (agent, ability, expected vs seen).
+| Input | Action |
+| --- | --- |
+| Click agent / keys **1–5** | Select attacker |
+| Shift-click / drag-box | Multi-select |
+| **Right-click** ground | Formation move (replace route) for selection |
+| **Shift+right-click** | Append a waypoint to each selected route |
+| **C / Q / E / X** | Arm ability slot on primary selected agent, then left-click to confirm |
+| Mouse wheel (Fault Line armed) | Change charge length 8–56 m |
+| **H** | Hold for the whole selection |
+| **Space** | Pause / resume |
+| **Escape** | Clear selection and cancel armed ability |
+| **[ ]** | Cycle speed 0.5 ↔ 1 ↔ 2 ↔ 4 |
+| Move / Hold buttons | Secondary; same as right-click / H |
+
+Ability slots on the HUD: **C** and **Q** = basics in catalog order, **E** = signature, **X** = ultimate.
+
+## Checklist
+
+1. **Paused start** — Paused badge, timer **1:40**, agents still. Board fills most of the width; Setup is closed.
+2. **Space / speed** — Resume; timer counts down. **[** / **]** and speed buttons only change steps per frame.
+3. **HUD** — One card per attacker: HP, ult x/8, C/Q/E/X with charges / cooldown / disabled tooltip.
+4. **Select** — Click Breach, or press **1**. Shift-click Brimstone. Drag-box both. Escape clears.
+5. **Group move** — With both selected, right-click a point. Routes keep formation offsets (not one shared destination). Resume; smooth walk. Shift+right-click adds a waypoint.
+6. **Hotkey cast** — Select Breach, press **Q**, aim preview follows cursor, left-click confirms Flashpoint. Escape cancels arming.
+7. **Fault Line** — Arm **E**, scroll wheel to change length (label next to cursor), confirm.
+8. **Previews while armed** — Aftershock cylinder, Flashpoint corridor, Fault Line / Rolling Thunder rectangles, Incendiary bounce dots + landing radius, Stim radius, Sky Smoke / Orbital radius + cast-range ring. Faint existing routes always shown.
+9. **Fog / replay** — Top bar fog toggle. **Download replay** / **Load replay** (opens Setup for JSON). Round-trip should match sim time.
+10. **Setup drawer** — Draft, coverage, starting ult, Buy, full event log, scenario import/export.
+11. **Round end** — Timeout or wipe → banner + **New round** → paused 1:40.
+
+**Reporting a bug:** attach Replay JSON (scenario + seed + orderLog + simTimeMs), catalog / ruleset versions, and what you clicked.
 
 Assumed drill option: **Starting ult points** is not a live Valorant economy rule.

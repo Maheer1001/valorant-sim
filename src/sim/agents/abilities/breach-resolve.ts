@@ -12,14 +12,21 @@ import {
   FLASHPOINT_ID,
   ROLLING_THUNDER_ID,
 } from "./breach.ts";
+import {
+  AFTERSHOCK_CYLINDER_LENGTH_MM,
+  AFTERSHOCK_RADIUS_MM,
+  FAULT_LINE_HALF_WIDTH_MM,
+  FAULT_LINE_START_AHEAD_MM,
+  FLASHPOINT_CORRIDOR_HALF_WIDTH_MM,
+  FLASHPOINT_RANGE_MM,
+  FLASHPOINT_WALL_DEPTH_MM,
+  ROLLING_THUNDER_HALF_WIDTH_MM,
+  ROLLING_THUNDER_LENGTH_MM,
+  ROLLING_THUNDER_START_AHEAD_MM,
+} from "./geometry-constants.ts";
 import { applyStatus, lookingAt, pointFromYaw, STATUS_BLIND, STATUS_CONCUSS } from "../../effects/status.ts";
 import { pointInCylinder, pointInOrientedRect } from "../../effects/geometry-aoe.ts";
 import { grantKillUltPoints, spendUltPoints } from "../../combat/ult-points.ts";
-
-/** Design: Flashpoint look corridor half-width. Not a measured Valorant cone width. */
-const FLASHPOINT_CORRIDOR_HALF_WIDTH_MM = 4000;
-/** Verified Flashpoint wallDepthM 10 — max solid wall span the flash may cross. */
-const FLASHPOINT_WALL_DEPTH_MM = 10000;
 
 export type CastExtras = {
   aimYawDeg?: number;
@@ -212,7 +219,10 @@ export function applyAftershockBurst(
   for (const other of world.agents) {
     if (!other.alive || other.instanceId === caster.instanceId) continue;
     if (
-      pointInCylinder(origin, job.yawDeg, 10000, 3000, { xMm: other.xMm, yMm: other.yMm })
+      pointInCylinder(origin, job.yawDeg, AFTERSHOCK_CYLINDER_LENGTH_MM, AFTERSHOCK_RADIUS_MM, {
+        xMm: other.xMm,
+        yMm: other.yMm,
+      })
     ) {
       const wasAlive = other.alive;
       other.hp = Math.max(0, other.hp - 80);
@@ -269,7 +279,14 @@ export function applyFlashpointImpact(
     // Design corridor: verified range 35 m ahead, half-width FLASHPOINT_CORRIDOR_HALF_WIDTH_MM.
     // Verified wallDepthM 10 caps how much wall span the flash may cross (separate from range).
     const to = { xMm: other.xMm, yMm: other.yMm };
-    const inCorridor = pointInOrientedRect(origin, job.yawDeg, 0, 35000, FLASHPOINT_CORRIDOR_HALF_WIDTH_MM, to);
+    const inCorridor = pointInOrientedRect(
+      origin,
+      job.yawDeg,
+      0,
+      FLASHPOINT_RANGE_MM,
+      FLASHPOINT_CORRIDOR_HALF_WIDTH_MM,
+      to,
+    );
     if (!inCorridor) continue;
     if (wallDepthMmAlongRay(origin, to, walls) > FLASHPOINT_WALL_DEPTH_MM) {
       blocked.push(other.instanceId);
@@ -335,7 +352,7 @@ export function applyFaultLineWave(
   for (const other of world.agents) {
     if (!other.alive || other.side === caster.side) continue;
     if (
-      pointInOrientedRect(origin, job.yawDeg, 8000, job.lengthMm, 4000, {
+      pointInOrientedRect(origin, job.yawDeg, FAULT_LINE_START_AHEAD_MM, job.lengthMm, FAULT_LINE_HALF_WIDTH_MM, {
         xMm: other.xMm,
         yMm: other.yMm,
       })
@@ -396,10 +413,17 @@ export function applyRollingThunderBlast(
   for (const other of world.agents) {
     if (!other.alive || other.side === caster.side) continue;
     if (
-      pointInOrientedRect(origin, job.yawDeg, 8000, 32000, 9000, {
-        xMm: other.xMm,
-        yMm: other.yMm,
-      })
+      pointInOrientedRect(
+        origin,
+        job.yawDeg,
+        ROLLING_THUNDER_START_AHEAD_MM,
+        ROLLING_THUNDER_LENGTH_MM,
+        ROLLING_THUNDER_HALF_WIDTH_MM,
+        {
+          xMm: other.xMm,
+          yMm: other.yMm,
+        },
+      )
     ) {
       applyStatus(other, {
         id: STATUS_CONCUSS,
