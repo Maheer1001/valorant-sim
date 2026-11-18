@@ -43,8 +43,10 @@ Live `stepLive` uses standing `move-route` orders and last-fire auto-engage sche
 | `tests/sim/breach.test.ts` — catalog drift | **Keep** | No window API. |
 | `tests/sim/brimstone.test.ts` — interactive cases | **Keep via shim** | Harness unchanged. |
 | `tests/sim/brimstone.test.ts` — catalog / pure apply | **Keep** | No window API. |
-| `tests/ui/round-play.test.tsx` | **Keep via shim** | No UI changes in Stage a. |
-| `tests/ui/DraftPanel.test.tsx` | **Keep via shim** | Resolve window still works. |
+| `tests/ui/round-play.test.tsx` | **Rewritten (Stage b)** | Live flow: immediate orders, Space/speed, right-click move, replay, fog, ult/buy/charges. |
+| `tests/ui/DraftPanel.test.tsx` | **Rewritten (Stage b)** | Dropped Resolve/Step timeline; keeps catalog coverage + scenario export. |
+| `tests/ui/hostLoop.test.ts` | **New (Stage b)** | Pure host clock. |
+| `tests/ui/replayFile.test.ts` | **New (Stage b)** | Replay JSON round trip. |
 | `tests/sim/live-round.test.ts` | **New** | Live API coverage for Stage a. |
 | Scripted `runScenario` tests | **Keep** | Unrelated to windows. |
 

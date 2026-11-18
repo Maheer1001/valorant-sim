@@ -32,10 +32,49 @@ import {
   type Round,
   type WindowOrder,
 } from "../../src/sim/round.ts";
+import type { SimEvent } from "../../src/sim/run.ts";
 import { createDefaultDrill } from "../../src/sim/scenario/default-drill.ts";
 import type { Scenario } from "../../src/sim/scenario/types.ts";
 import { STANDARD_RULESET } from "../../src/rules/ruleset.ts";
 import { defenseHoldDecide, defenseHoldPlan } from "../../src/tactics/defense-stub.ts";
+
+const ABILITY_PARITY_TYPES = new Set([
+  "cast-accepted",
+  "cast-rejected",
+  "ability-damage",
+  "status-wave",
+  "status-expired",
+  "flash-resolved",
+  "incendiary-detonated",
+  "orbital-activated",
+  "orbital-shrink",
+  "zone-damage",
+  "zone-expired",
+  "smoke-active",
+  "smoke-expired",
+  "stim-pulse",
+  "device-expired",
+]);
+
+/**
+ * Strip sequence and ephemeral ids (zoneId / smokeId / deviceId are sequence-derived
+ * and differ when auto-fire jobs consume sequence numbers differently).
+ * Keep type, timeMs, damage, hits, radii, status fields.
+ */
+function abilityParityEvents(events: readonly SimEvent[]): unknown[] {
+  return events
+    .filter((event) => ABILITY_PARITY_TYPES.has(event.type))
+    .map((event) => {
+      const { sequence: _sequence, ...rest } = event as SimEvent & Record<string, unknown>;
+      const copy: Record<string, unknown> = { ...rest };
+      for (const key of ["zoneId", "smokeId", "deviceId"] as const) {
+        if (key in copy && typeof copy[key] === "string") {
+          copy[key] = "<id>";
+        }
+      }
+      return copy;
+    });
+}
 
 describe("live round ruleset constants", () => {
   it("tags sim step, round duration, buy phase and decision interval", () => {
@@ -255,127 +294,49 @@ describe("live ability timings", () => {
   });
 });
 
-describe("live vs window shim outcomes", () => {
-  it("ports a Breach Aftershock cast to live with the same damage outcome shape", () => {
-    const scenario = breachScenario(11, 0, 10_000);
-    let windowed = mustOpenWindow(scenario);
-    windowed = mustSubmitWindow(windowed, "attack", [
-      {
-        kind: "cast",
-        instanceId: "breach-attack",
-        abilityId: AFTERSHOCK_ID,
-        target: { xMm: 7000, yMm: 6000 },
-        aimYawDeg: 0,
-      },
-    ]);
-    windowed = mustSubmitWindow(windowed, "defense", defenseHoldPlan(windowed));
-    const first = resolveWindow(windowed);
-    expect(first.ok).toBe(true);
-    if (!first.ok) return;
-    let round = first.round;
-    const windowEvents = [...first.events];
-    for (let i = 0; i < 2; i += 1) {
-      round = mustSubmitWindow(
-        round,
-        "attack",
-        round.state.agents
-          .filter((agent) => agent.side === "attack" && agent.alive)
-          .map((agent) => ({ kind: "hold" as const, instanceId: agent.instanceId })),
-      );
-      round = mustSubmitWindow(round, "defense", defenseHoldPlan(round));
-      const step = resolveWindow(round);
-      expect(step.ok).toBe(true);
-      if (!step.ok) return;
-      windowEvents.push(...step.events);
-      round = step.round;
-    }
-
-    const live = mustOpenLive(scenario);
-    issueOrders(live, "attack", [
-      {
-        kind: "cast",
-        instanceId: "breach-attack",
-        abilityId: AFTERSHOCK_ID,
-        target: { xMm: 7000, yMm: 6000 },
-        aimYawDeg: 0,
-      },
-    ]);
-    stepLive(live, (STANDARD_RULESET.windowMs * 3) / STANDARD_RULESET.simStepMs);
-
-    const windowDamage = windowEvents.filter((event) => event.type === "ability-damage");
-    const liveDamage = live.events.filter((event) => event.type === "ability-damage");
-    expect(liveDamage.length).toBe(windowDamage.length);
-    expect(liveDamage.map((event) => event.timeMs)).toEqual(windowDamage.map((event) => event.timeMs));
+describe("live vs window shim ability parity", () => {
+  it("matches Aftershock ability events exactly (no LOS, no combat noise)", () => {
+    // Defender behind the wall — no auto-fire draws; ability geometry still resolves.
+    const scenario = parityBreachScenario(11);
+    const cast = {
+      kind: "cast" as const,
+      instanceId: "breach-attack",
+      abilityId: AFTERSHOCK_ID,
+      target: { xMm: 7000, yMm: 6000 },
+      aimYawDeg: 0,
+    };
+    const windowEvents = runWindowCast(scenario, cast, 3);
+    const liveEvents = runLiveCast(scenario, cast, STANDARD_RULESET.windowMs * 3);
+    expect(abilityParityEvents(liveEvents)).toEqual(abilityParityEvents(windowEvents));
   });
 
-  it("ports a Brimstone Orbital Strike to live with the same activation timing", () => {
-    const scenario = brimScenario(21, 8);
-    let windowed = mustOpenWindow(scenario);
-    windowed = mustSubmitWindow(windowed, "attack", [
-      {
-        kind: "cast",
-        instanceId: "brimstone-attack",
-        abilityId: ORBITAL_STRIKE_ID,
-        target: { xMm: 8000, yMm: 2000 },
-        mapTarget: { xMm: 8000, yMm: 2000 },
-      },
-    ]);
-    windowed = mustSubmitWindow(windowed, "defense", defenseHoldPlan(windowed));
-    const cast = resolveWindow(windowed);
-    expect(cast.ok).toBe(true);
-    if (!cast.ok) return;
-    let round = cast.round;
-    const windowEvents = [...cast.events];
-    for (let i = 0; i < 3; i += 1) {
-      round = mustSubmitWindow(
-        round,
-        "attack",
-        round.state.agents
-          .filter((agent) => agent.side === "attack" && agent.alive)
-          .map((agent) => ({ kind: "hold" as const, instanceId: agent.instanceId })),
-      );
-      round = mustSubmitWindow(round, "defense", defenseHoldPlan(round));
-      const step = resolveWindow(round);
-      expect(step.ok).toBe(true);
-      if (!step.ok) return;
-      windowEvents.push(...step.events);
-      round = step.round;
-    }
-
-    const live = mustOpenLive(scenario);
-    issueOrders(live, "attack", [
-      {
-        kind: "cast",
-        instanceId: "brimstone-attack",
-        abilityId: ORBITAL_STRIKE_ID,
-        target: { xMm: 8000, yMm: 2000 },
-        mapTarget: { xMm: 8000, yMm: 2000 },
-      },
-    ]);
-    stepLive(live, (STANDARD_RULESET.windowMs * 4) / STANDARD_RULESET.simStepMs);
-
-    const wAct = windowEvents.find((event) => event.type === "orbital-activated");
-    const lAct = live.events.find((event) => event.type === "orbital-activated");
-    expect(wAct?.timeMs).toBe(lAct?.timeMs);
-    expect(live.events.some((event) => event.type === "zone-damage")).toBe(
-      windowEvents.some((event) => event.type === "zone-damage"),
-    );
+  it("matches Orbital Strike ability events exactly (target empty, defender out of range/LOS)", () => {
+    const scenario = parityBrimScenario(21, 8);
+    // 9 m radius; jett is at 17000,10500 — well outside.
+    const cast = {
+      kind: "cast" as const,
+      instanceId: "brimstone-attack",
+      abilityId: ORBITAL_STRIKE_ID,
+      target: { xMm: 4500, yMm: 2000 },
+      mapTarget: { xMm: 4500, yMm: 2000 },
+    };
+    const windowEvents = runWindowCast(scenario, cast, 4);
+    const liveEvents = runLiveCast(scenario, cast, STANDARD_RULESET.windowMs * 4);
+    expect(abilityParityEvents(liveEvents)).toEqual(abilityParityEvents(windowEvents));
   });
 
-  it("ports Incendiary detonation presence through the shim and live API", () => {
-    const scenario = brimScenario(22);
-    const live = mustOpenLive(scenario);
-    issueOrders(live, "attack", [
-      {
-        kind: "cast",
-        instanceId: "brimstone-attack",
-        abilityId: INCENDIARY_ID,
-        target: { xMm: 8000, yMm: 2000 },
-        aimYawDeg: 0,
-      },
-    ]);
-    stepLive(live, 200);
-    expect(live.events.some((event) => event.type === "incendiary-detonated")).toBe(true);
+  it("matches Incendiary ability events exactly (defender out of LOS and out of molly)", () => {
+    const scenario = parityBrimScenario(22, 0);
+    const cast = {
+      kind: "cast" as const,
+      instanceId: "brimstone-attack",
+      abilityId: INCENDIARY_ID,
+      target: { xMm: 4500, yMm: 2000 },
+      aimYawDeg: 0,
+    };
+    const windowEvents = runWindowCast(scenario, cast, 5);
+    const liveEvents = runLiveCast(scenario, cast, STANDARD_RULESET.windowMs * 5);
+    expect(abilityParityEvents(liveEvents)).toEqual(abilityParityEvents(windowEvents));
   });
 });
 
@@ -507,7 +468,37 @@ function noLosScenario(seed: number): Scenario {
   };
 }
 
-function brimScenario(seed: number, ultPoints = 0): Scenario {
+/** Breach on doorway line; Jett behind the wall — no rifle LOS. */
+function parityBreachScenario(seed: number): Scenario {
+  const breach = getAgent(SHIPPED_CATALOG, "breach");
+  const jett = getAgent(SHIPPED_CATALOG, "jett");
+  if (!breach || !jett) throw new Error("missing agents");
+  return {
+    ...createDefaultDrill(seed),
+    catalogVersion: SHIPPED_CATALOG.version,
+    mapId: DRILL_HALL.id,
+    attack: {
+      side: "attack",
+      members: [
+        createInstance(breach, "attack", { xMm: 6000, yMm: 6000 }, "breach-attack", null, {
+          facingDeg: 0,
+        }),
+      ],
+    },
+    defense: {
+      side: "defense",
+      members: [
+        createInstance(jett, "defense", { xMm: 11000, yMm: 2000 }, "jett-defense", "entry", {
+          facingDeg: 180,
+        }),
+      ],
+    },
+    orders: [],
+  };
+}
+
+/** Brimstone at y=2000; Jett far behind the wall — no LOS and outside Orbital/Incendiary radii. */
+function parityBrimScenario(seed: number, ultPoints: number): Scenario {
   const brimstone = getAgent(SHIPPED_CATALOG, "brimstone");
   const jett = getAgent(SHIPPED_CATALOG, "jett");
   if (!brimstone || !jett) throw new Error("missing agents");
@@ -531,13 +522,56 @@ function brimScenario(seed: number, ultPoints = 0): Scenario {
     defense: {
       side: "defense",
       members: [
-        createInstance(jett, "defense", { xMm: 8000, yMm: 2000 }, "jett-defense", "entry", {
+        createInstance(jett, "defense", { xMm: 17000, yMm: 10500 }, "jett-defense", "entry", {
           facingDeg: 180,
         }),
       ],
     },
     orders: [],
   };
+}
+
+function runWindowCast(
+  scenario: Scenario,
+  cast: Extract<WindowOrder, { kind: "cast" }>,
+  holdWindows: number,
+): SimEvent[] {
+  let round = mustOpenWindow(scenario);
+  round = mustSubmitWindow(round, "attack", [cast]);
+  round = mustSubmitWindow(round, "defense", defenseHoldPlan(round));
+  const first = resolveWindow(round);
+  expect(first.ok).toBe(true);
+  if (!first.ok) throw new Error(first.message);
+  const events = [...first.events];
+  round = first.round;
+  for (let i = 0; i < holdWindows; i += 1) {
+    round = mustSubmitWindow(
+      round,
+      "attack",
+      round.state.agents
+        .filter((agent) => agent.side === "attack" && agent.alive)
+        .map((agent) => ({ kind: "hold" as const, instanceId: agent.instanceId })),
+    );
+    round = mustSubmitWindow(round, "defense", defenseHoldPlan(round));
+    const step = resolveWindow(round);
+    expect(step.ok).toBe(true);
+    if (!step.ok) throw new Error(step.message);
+    events.push(...step.events);
+    round = step.round;
+  }
+  return events;
+}
+
+function runLiveCast(
+  scenario: Scenario,
+  cast: Extract<AgentCommand, { kind: "cast" }>,
+  untilMs: number,
+): SimEvent[] {
+  const live = mustOpenLive(scenario);
+  issueOrders(live, "attack", [cast]);
+  const steps = Math.ceil(untilMs / STANDARD_RULESET.simStepMs);
+  stepLive(live, steps);
+  return live.events;
 }
 
 function mustOpenLive(scenario: Scenario): LiveRound {

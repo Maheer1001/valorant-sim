@@ -65,6 +65,53 @@ button:disabled { cursor: default; opacity: 0.55; }
   border-radius: 4px;
 }
 
+/* Interpolation owns motion — do not CSS-transition agent glyphs. */
+.board svg circle,
+.board svg line,
+.board svg text,
+.board svg rect {
+  transition: none;
+}
+
+.live-hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.live-hud h2 {
+  margin: 0;
+}
+
+.timer {
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.paused-badge {
+  background: #5a3d1c;
+  border-color: #c48a3a;
+}
+
+.round-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  background: #242b33;
+  border: 1px solid #3a4450;
+  border-radius: 4px;
+}
+
+.round-banner p {
+  margin: 0;
+}
+
 .draft { grid-column: 2; grid-row: 2 / span 2; }
 .timeline { grid-column: 1; }
 

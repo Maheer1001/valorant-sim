@@ -1,21 +1,24 @@
-# Manual playtest — interactive round (Breach + Brimstone)
+# Manual playtest — live round (Breach + Brimstone)
 
-Default load: attack = Breach + Brimstone, defense = KAY/O + Jett holding. Attack fog is on. Starting ult points = 0 (drill option).
+Default load: attack = Breach + Brimstone, defense = KAY/O + Jett holding. Attack fog is on. The round **starts paused** at **1:40**. Starting ult points = 0 (drill option, assumed).
 
-1. **Board / fog** — Confirm Breach and Brimstone markers on the left. KAY/O may be visible through the doorway; Jett should be hidden. Toggle **Showing attack view** → **Showing truth** and confirm Jett appears behind the wall, then switch back to attack fog.
-2. **Select + Move** — Click **Breach**. Click **Move**, then click a point further into the corridor. Confirm a queued order and an aim/facing update after **Resolve window**.
-3. **Hold** — Select Breach, click **Hold**, resolve. Event log should mention hold / resolve; Breach stays put.
-4. **Aftershock** — Select Breach → **Cast Aftershock** → click ahead of him. Confirm aim line, then resolve. Look for zone start / damage tick lines if a defender sits in the cone.
-5. **Flashpoint** — **Cast Flashpoint** → click toward a defender. Resolve. Expect flash / status badges (flashed) with seconds when someone is hit.
-6. **Fault Line** — **Cast Fault Line**. Drag the **charge length** slider (label shows metres, 8–56). Click aim direction. Resolve. Expect concuss statuses / event lines; confirm signature cooldown appears on the Fault Line button.
-7. **Rolling Thunder** — Set **Starting ult points** to **8**, re-select Breach. Confirm **Cast Rolling Thunder** enables. Aim-click and resolve. Expect ult spend in the log and ult points back to 0.
-8. **Incendiary** — Select Brimstone → **Cast Incendiary** → click ahead. Resolve. Confirm incendiary circle overlay (shrinking radius) and damage-tick lines if someone stands in it.
-9. **Stim Beacon** — **Cast Stim Beacon** → click near Brimstone. Resolve. Confirm a stim radius ring (attack team only) and haste / combat-stim badges. Spend the charge, then use **Buy Stim Beacon** in the agent panel; credits should drop and a charge return.
-10. **Sky Smoke** — **Cast Sky Smoke** → click a map point within ~55 m. Confirm range ring + smoke preview circle, then resolve. Smoke discs should appear on the board.
-11. **Orbital Strike** — Set ult points to **8**, select Brimstone → **Cast Orbital Strike** → click a map point. Confirm 60 m range ring + **9 m** preview (sheet / catalog `radiusMm` 9000). Resolve. Expect ult spend, orbital circle / shrink overlays, and damage ticks if a defender stays inside.
-12. **Disabled casts** — After emptying Aftershock (or Stim), confirm the cast button is disabled with a tooltip about charges. With ult at 0, Rolling Thunder / Orbital should explain “need 8”.
-13. **Plan errors** — Queue nothing harmful; clear plan; try casting with 0 charges via UI (disabled). If you import a bad scenario, rejection text should be plain language, not raw codes alone.
-14. **Draft / scenarios** — Open Draft, change an agent if desired, confirm the round rebuilds. Export JSON, refresh, import — agents and window should restore.
-15. **Event log** — After several resolves, skim the log for human lines: flash, concuss, damage tick, zone start, ult spend, kill (if someone dies).
+1. **Paused start** — Confirm the **Paused — press Space to start** badge and timer **1:40**. Agents should not move until you resume.
+2. **Space / Resume** — Press **Space** or **Resume**. Timer should count down. Press Space again to pause; windups and moves freeze with sim time.
+3. **Speed** — Click **0.5x / 1x / 2x / 4x** or use **[** / **]** . Faster speeds only change how many sim steps run per frame.
+4. **Fog** — KAY/O may be visible through the doorway; Jett should be hidden. Toggle **Showing attack view** → **Showing truth** and confirm Jett appears, then switch back.
+5. **Select + Move** — Click **Breach**. Click **Move**, then click a corridor point (or **right-click** the board). Order applies immediately. Resume and watch Breach walk smoothly (no jump-teleport between windows).
+6. **Hold** — Select Breach, click **Hold**. He stops after the current segment.
+7. **Aftershock** — **Cast Aftershock** → click ahead. Aim line while hovering. Resume; look for zone / damage lines in the live event log (newest first).
+8. **Flashpoint** — **Cast Flashpoint** → click toward a defender. Expect flash / status badges when someone is hit.
+9. **Fault Line** — **Cast Fault Line**, drag the **charge length** slider (8–56 m), click aim. Expect concuss badges and signature cooldown on the button.
+10. **Rolling Thunder** — Set **Starting ult points** to **8**, re-select Breach. **Cast Rolling Thunder** should enable. Aim-click; expect ult spend in the log.
+11. **Incendiary / Stim / Sky Smoke / Orbital** — Select Brimstone. Cast each with a board click (map target for Sky Smoke / Orbital — **9 m** Orbital preview). Stim shows a radius for your team only. Buy Stim after spending a charge; credits drop.
+12. **Disabled casts** — Empty Aftershock or Stim; cast button disabled with a tooltip. Ult below 8 disables Rolling Thunder / Orbital.
+13. **Event log** — After several casts, confirm human lines (flash, concuss, damage tick, zone start, ult spend, kill).
+14. **Replay** — **Download replay**, copy the Replay JSON, optionally tweak nothing, **Load replay**. Round should restore paused at the same sim time with the same agent positions.
+15. **Draft / scenario** — Change an agent in Draft; round rebuilds paused. **Export scenario** / **Import scenario** still round-trip teams.
+16. **Round end** — Let the timer reach **0:00** (or eliminate a side). Banner shows who won. **New round** (or change starting ult) restores a paused 1:40.
 
-Assumed drill option: **Starting ult points** is not a live Valorant economy rule; it only primes ult for testing.
+**Reporting a bug:** attach the **Replay JSON** (scenario + seed + orderLog + simTimeMs), the ruleset / catalog version from the header, and what you clicked. Prefer a short clip description (agent, ability, expected vs seen).
+
+Assumed drill option: **Starting ult points** is not a live Valorant economy rule.

@@ -31,16 +31,10 @@ describe("draft panel", () => {
     expect(screen.getByRole("region", { name: "Attack coverage" })).not.toHaveTextContent("Brimstone Sky Smoke");
   });
 
-  it("steps the timeline and exports the scenario", async () => {
+  it("exports the scenario from the live UI", async () => {
     const user = userEvent.setup();
     render(<App />);
-    expect(screen.getByLabelText("Timeline position")).toHaveTextContent(/^0 \//);
-    await user.click(screen.getByRole("button", { name: "Resolve window" }));
-    expect(screen.getByLabelText("Timeline position")).toHaveTextContent(/^0 \//);
-    await user.click(screen.getByRole("button", { name: "Step" }));
-    expect(screen.getByLabelText("Timeline position")).toHaveTextContent(/^1 \//);
-    expect(screen.getByRole("listitem", { current: "step" })).toBeInTheDocument();
-
+    expect(screen.getByLabelText("Round timer")).toHaveTextContent("1:40");
     await user.click(screen.getByRole("button", { name: "Export scenario" }));
     const file = screen.getByLabelText("Scenario JSON");
     if (!(file instanceof HTMLTextAreaElement)) throw new Error("Scenario JSON is not a textarea.");

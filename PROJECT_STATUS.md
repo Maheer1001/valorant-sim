@@ -1,6 +1,6 @@
 # Project status
 
-Updated: 18 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Interactive cast UI is playable**. **Live round engine Stage (a)** is in: clock, standing orders, order log, round result, `resolveWindow` shim. Live UI / pre-round / spike / real opponent are not done.
+Updated: 18 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Live round engine Stage (a)** and **live UI Stage (b)** are in: pauseable host loop, smooth motion, immediate orders, round timer, replay download/load. Pre-round buy/plan, Stage (c) fast controls, spike, and a real opponent are not done.
 
 Agent records for patch 13.10 are in `agent-reference.json`. That file is a reference, not the sim catalog. Breach and Brimstone catalog numbers are guarded against drift by `tests/sim/breach.test.ts` and `tests/sim/brimstone.test.ts`.
 
@@ -12,7 +12,7 @@ No backend. No machine-learning runtime. Opponent code, when it exists, will be 
 
 ## Architecture
 
-One package. `src/sim`, `src/tactics`, `src/learning`, `src/persistence`, and `src/rules` do not import React or the UI. A boundary test scans those folders. The UI holds a session or interactive round and renders snapshots.
+One package. `src/sim`, `src/tactics`, `src/learning`, `src/persistence`, and `src/rules` do not import React or the UI. A boundary test scans those folders. The UI holds a mutable `LiveRound` in a ref (plus a version counter) and renders fogged or truth snapshots. The old windowed `Round` API remains as a shim for characterization tests.
 
 ```text
 src/
@@ -22,6 +22,8 @@ src/
     board/MapView.tsx
     board/coords.ts
     draft/DraftPanel.tsx
+    live/hostLoop.ts
+    live/replayFile.ts
     orders/AgentPanel.tsx
     orders/abilityUi.ts
     orders/rejectionMessages.ts
@@ -33,6 +35,7 @@ src/
     clock.ts
     run.ts
     round.ts
+    live-round.ts
     session.ts
     describe.ts
     map/geometry.ts
@@ -68,13 +71,13 @@ tests/
 
 `runScenario` executes scenario orders only. It does not call `DecisionContext` or write learning records. Those modules export their contracts and version constants so later milestones can fill them without reshaping the runner.
 
-`openRound` / `submitPlan` / `resolveWindow` run the interactive turn layer. Both sides submit a plan for a fixed window; the shared event queue drains `[t, t + windowMs]` with the same `(timeMs, sequence, agentId)` ordering. `view(side)` returns fog-of-war. `defenseHoldPlan` is a hold-position stub in `tactics/`.
+`openLiveRound` / `issueOrders` / `stepLive` run the live interactive layer. The host loop converts wall-clock elapsed and speed into a step count; `viewLive(side)` returns fog-of-war. `defenseHoldDecide` is a hold-position stub in `tactics/`. `openRound` / `submitPlan` / `resolveWindow` remain as the Stage (a) compatibility shim.
 
 Coverage is the only composition evaluator. `PLANNED_EVALUATORS` names map suitability, synergy, counter-composition, and supported plans. `evaluateCoverage` accepts an opposing profile and does not score it. A coverage report is not a match prediction.
 
 ## Simulation state and randomness
 
-`runScenario` and `openSession` / `stepSession` do not render. The interactive UI stores a `Round`. Play, pause, and step walk the last resolved window log. The board reads positions, charges, and smokes from the stepped snapshot, fogged to attack view unless truth mode is on.
+`runScenario` and `openSession` / `stepSession` do not render. The interactive UI stores a `LiveRound` in a ref. Pause skips `stepLive`; speed only changes steps per frame. The board interpolates standing move-routes with `standingPositionAt` and reads charges, zones, and smokes from the committed live world, fogged to attack view unless truth mode is on.
 
 Time is integer milliseconds. Positions are integer millimeters. The queue orders events by `(timeMs, sequence, agentId)`.
 
@@ -341,23 +344,29 @@ API in `src/sim/live-round.ts`: `openLiveRound`, `issueOrders`, `stepLive`, `rep
 
 `resolveWindow` is a **compatibility shim** over stepped `drainJobsUntil` with the old window enqueue (including pre-batched auto-engage). Characterization fixtures: `tests/fixtures/characterization/`. Migration notes: [`docs/live-round-migration.md`](docs/live-round-migration.md). Plan: [`docs/live-round-plan.md`](docs/live-round-plan.md).
 
+## Live UI — Stage (b) (18 November 2026)
+
+React holds `LiveRound` in a **ref** plus a **version** counter. Pure `src/ui/live/hostLoop.ts` converts wall-clock elapsed + speed → step count (cap 10/frame) and interpolation `alpha`. Agents render via `standingPositionAt` (no CSS transitions). Round starts **paused**; Space / Pause / speed buttons / `[` `]`; timer `m:ss` from `roundDurationMs`. Orders (`issueOrders`) apply immediately — no Resolve window queue. Right-click = move. Event log: last 30 live events. Replay JSON download/load via `replayOrderLog`. Fog + Buy + draft/scenario import-export remain.
+
+Manual checklist: [`docs/playtest.md`](docs/playtest.md).
+
 ### Not done yet
 
-- Live UI (smooth motion, pause/speed controls, fewer clicks, previews)
+- Stage (c) fewer clicks / previews (Valorant hotkeys, multi-select, path ETA)
 - Pre-round buy / plan screen (`buyPhaseMs` unused)
 - Spike plant / defuse
 - Real opponent (hold stub + decide hook only)
 - Retiring the window API (Stage e)
 
-### Checks (Live Stage a — `npm run check`, 18 November 2026)
+### Checks (Live Stage b — `npm run check`, 18 November 2026)
 
 | Step | Result |
 | --- | --- |
 | lint | Pass. ESLint completed with no findings. |
 | typecheck | Pass. `tsc --noEmit` completed with no errors. |
-| test | Pass. Vitest 5.0.5, 19 files, 94 tests. |
-| build | Pass. Vite 8.3.4 produced `dist/` in 362 ms (56 modules). |
+| test | Pass. Vitest 5.0.5, 21 files, 105 tests. |
+| build | Pass. Vite 8.3.4 produced `dist/` in 271 ms (55 modules). |
 
 ## Next task
 
-Live round Stage (b): live UI with smooth movement, pause and speed — or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.
+Live round Stage (c) fast controls and previews, or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.

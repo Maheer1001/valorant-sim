@@ -1,102 +1,206 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FAULT_LINE_ID } from "../sim/agents/abilities/breach.ts";
 import { getAgent, SHIPPED_CATALOG } from "../sim/agents/catalog.ts";
-import { DRILL_HALL } from "../sim/map/drill-hall.ts";
+import { describeEvent } from "../sim/describe.ts";
 import {
-  isRound,
-  openRound,
-  resolveWindow,
-  snapshotRound,
-  stepRound,
-  submitPlan,
-  viewWorld,
-  type Round,
-  type WindowOrder,
-} from "../sim/round.ts";
+  isLiveRound,
+  issueOrders,
+  openLiveRound,
+  replayOrderLog,
+  standingPositionAt,
+  stepLive,
+  viewLive,
+  type LiveRound,
+  type RoundResult,
+} from "../sim/live-round.ts";
+import { DRILL_HALL } from "../sim/map/drill-hall.ts";
 import type { AgentBody } from "../sim/run.ts";
 import type { Scenario } from "../sim/scenario/types.ts";
 import type { Team } from "../sim/composition/team.ts";
 import type { Point, RejectionCode } from "../sim/types.ts";
 import { STANDARD_RULESET } from "../rules/ruleset.ts";
 import { parseScenario, ScenarioFileError, serializeScenario } from "../persistence/scenario-file.ts";
-import { defenseHoldPlan } from "../tactics/defense-stub.ts";
-import { MapView, type BoardPreview } from "./board/MapView.tsx";
+import { defenseHoldDecide } from "../tactics/defense-stub.ts";
+import { MapView, type AgentDisplay, type BoardPreview } from "./board/MapView.tsx";
 import { pointInRange, yawDegFromPoints } from "./board/coords.ts";
 import { DraftPanel } from "./draft/DraftPanel.tsx";
+import {
+  cycleSpeedDown,
+  cycleSpeedUp,
+  formatRoundTimer,
+  hostLoopStep,
+  type HostSpeed,
+} from "./live/hostLoop.ts";
+import { parseReplay, REPLAY_FILE_VERSION, serializeReplay } from "./live/replayFile.ts";
 import { AgentPanel } from "./orders/AgentPanel.tsx";
 import { castGate, castKind, completeAbilities, cooldownRemainingMs } from "./orders/abilityUi.ts";
 import { rejectionMessage } from "./orders/rejectionMessages.ts";
 import { createPlayableDrill } from "./scenario/playableDrill.ts";
-import { EventList } from "./timeline/EventList.tsx";
-import { Transport } from "./timeline/Transport.tsx";
 
 type ClickMode = "move" | "hold" | { cast: string };
 
-function bootRound(scenario: Scenario): Round {
-  const opened = openRound(scenario);
-  if (!isRound(opened)) {
+function bootLive(scenario: Scenario): LiveRound {
+  const opened = openLiveRound(scenario, SHIPPED_CATALOG, STANDARD_RULESET, {
+    decide: defenseHoldDecide,
+  });
+  if (!isLiveRound(opened)) {
     throw new Error(opened.message);
   }
   return opened;
 }
 
+function resultBanner(result: RoundResult): string {
+  if (result.kind === "defense-eliminated") return "Attackers win — all defenders eliminated.";
+  if (result.kind === "attack-eliminated") return "Defenders win — all attackers eliminated.";
+  return "Defenders win — round timer expired.";
+}
+
 export function App() {
   const [startingUlt, setStartingUlt] = useState(0);
   const [scenario, setScenario] = useState(() => createPlayableDrill(1, { startingUltPoints: 0 }));
-  const [round, setRound] = useState<Round>(() => bootRound(createPlayableDrill(1)));
-  const [queued, setQueued] = useState<WindowOrder[]>([]);
+  const liveRef = useRef<LiveRound>(bootLive(createPlayableDrill(1)));
+  const [version, setVersion] = useState(0);
+  const bump = () => setVersion((value) => value + 1);
+
   const [selectedId, setSelectedId] = useState<string | null>("breach-attack");
   const [clickMode, setClickMode] = useState<ClickMode>("move");
   const [faultLengthM, setFaultLengthM] = useState(20);
   const [hoverPoint, setHoverPoint] = useState<Point | null>(null);
   const [showTruth, setShowTruth] = useState(false);
-  const [planMessage, setPlanMessage] = useState("");
+  const [planMessage, setPlanMessage] = useState("Paused — press Space to start.");
   const [agentMessage, setAgentMessage] = useState("");
-  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState<HostSpeed>(0);
+  const [alpha, setAlpha] = useState(0);
+  const accumulatorRef = useRef(0);
+  const lastFrameRef = useRef<number | null>(null);
   const [fileText, setFileText] = useState("");
   const [fileMessage, setFileMessage] = useState("");
+  const [replayText, setReplayText] = useState("");
 
-  function commit(next: Scenario) {
-    setPlaying(false);
+  const live = liveRef.current;
+  const paused = speed === 0;
+  const remainingMs = Math.max(0, live.ruleset.roundDurationMs - live.world.timeMs);
+
+  function commitScenario(next: Scenario) {
+    setSpeed(0);
+    accumulatorRef.current = 0;
+    setAlpha(0);
+    lastFrameRef.current = null;
     setScenario(next);
-    setRound(bootRound(next));
-    setQueued([]);
-    setPlanMessage("");
+    liveRef.current = bootLive(next);
+    setSelectedId(next.attack.members[0]?.instanceId ?? null);
+    setPlanMessage("Paused — press Space to start.");
     setAgentMessage("");
-    const firstAttack = next.attack.members[0]?.instanceId ?? null;
-    setSelectedId(firstAttack);
+    bump();
+  }
+
+  function newRound() {
+    commitScenario(createPlayableDrill(scenario.seed, { startingUltPoints: startingUlt }));
+  }
+
+  function togglePause() {
+    setSpeed((current) => {
+      const next = current === 0 ? 1 : 0;
+      setPlanMessage(next === 0 ? "Paused." : "Running.");
+      return next;
+    });
   }
 
   useEffect(() => {
-    if (!playing) return;
-    if (round.cursor >= round.lastWindowEvents.length) {
-      setPlaying(false);
-      return;
-    }
-    const timer = window.setInterval(() => {
-      setRound((current) => stepRound(current));
-    }, 700);
-    return () => window.clearInterval(timer);
-  }, [playing, round.cursor, round.lastWindowEvents.length]);
+    let raf = 0;
+    const tick = (now: number) => {
+      const previous = lastFrameRef.current;
+      lastFrameRef.current = now;
+      if (previous != null && liveRef.current.phase === "live") {
+        const elapsedMs = now - previous;
+        const out = hostLoopStep({
+          elapsedMs,
+          speed,
+          accumulator: accumulatorRef.current,
+          simStepMs: liveRef.current.ruleset.simStepMs,
+        });
+        accumulatorRef.current = out.accumulator;
+        setAlpha(out.alpha);
+        if (out.steps > 0) {
+          stepLive(liveRef.current, out.steps);
+          bump();
+        }
+      }
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [speed]);
 
-  const steppedWorld = snapshotRound(round);
-  const boardWorld = showTruth ? steppedWorld : viewWorld(round.state.mapId, steppedWorld, "attack");
-  const selected = round.state.agents.find((agent) => agent.instanceId === selectedId) ?? null;
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+      if (event.code === "Space") {
+        event.preventDefault();
+        togglePause();
+        return;
+      }
+      if (event.key === "]") {
+        setSpeed((current) => cycleSpeedUp(current === 0 ? 1 : current));
+        return;
+      }
+      if (event.key === "[") {
+        setSpeed((current) => (current === 0 ? 0.5 : cycleSpeedDown(current)));
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const boardWorld = useMemo(() => {
+    void version;
+    return showTruth ? live.world : viewLive(live, "attack");
+  }, [live, showTruth, version]);
+
+  const selected =
+    live.world.agents.find((agent) => agent.instanceId === selectedId) ?? null;
   const selectedDef = selected ? getAgent(SHIPPED_CATALOG, selected.definitionId) : null;
   const abilities = completeAbilities(selectedDef);
 
-  const events = round.lastWindowEvents;
-  const canStep = round.cursor < events.length;
+  const agentDisplay = useMemo(() => {
+    void version;
+    const display: Record<string, AgentDisplay> = {};
+    const renderTime = live.world.timeMs + alpha * live.ruleset.simStepMs;
+    for (const agent of boardWorld.agents) {
+      const truth = live.world.agents.find((item) => item.instanceId === agent.instanceId);
+      if (!truth) continue;
+      const order = live.standing[agent.instanceId] ?? { kind: "hold" as const };
+      const at = standingPositionAt(order, renderTime, { xMm: truth.xMm, yMm: truth.yMm });
+      display[agent.instanceId] = {
+        xMm: at.xMm,
+        yMm: at.yMm,
+        facingDeg: truth.facingDeg,
+      };
+    }
+    return display;
+  }, [alpha, boardWorld.agents, live, version]);
 
   const preview: BoardPreview | null = useMemo(() => {
     if (!selected || !hoverPoint) return null;
+    const origin = agentDisplay[selected.instanceId] ?? {
+      xMm: selected.xMm,
+      yMm: selected.yMm,
+      facingDeg: selected.facingDeg,
+    };
     if (typeof clickMode === "object") {
       const ability = abilities.find((item) => item.id === clickMode.cast);
       if (!ability) return null;
       const kind = castKind(ability.id);
       if (kind === "map-targeted") {
         return {
-          rangeOrigin: { xMm: selected.xMm, yMm: selected.yMm },
+          rangeOrigin: { xMm: origin.xMm, yMm: origin.yMm },
           rangeMm: ability.maxRangeMm ?? undefined,
           previewCenter: hoverPoint,
           previewRadiusMm: ability.radiusMm ?? undefined,
@@ -104,32 +208,58 @@ export function App() {
       }
       if (kind === "aimed") {
         return {
-          aimFrom: { xMm: selected.xMm, yMm: selected.yMm },
+          aimFrom: { xMm: origin.xMm, yMm: origin.yMm },
           aimTo: hoverPoint,
           previewCenter: ability.radiusMm != null ? hoverPoint : undefined,
           previewRadiusMm: ability.radiusMm ?? undefined,
         };
       }
     }
-    return { aimFrom: { xMm: selected.xMm, yMm: selected.yMm }, aimTo: hoverPoint };
-  }, [abilities, clickMode, hoverPoint, selected]);
+    return { aimFrom: { xMm: origin.xMm, yMm: origin.yMm }, aimTo: hoverPoint };
+  }, [abilities, agentDisplay, clickMode, hoverPoint, selected]);
+
+  const recentEvents = useMemo(() => {
+    void version;
+    return live.events.slice(-30).reverse();
+  }, [live.events, version]);
 
   function onTeams(attack: Team, defense: Team) {
-    commit({ ...scenario, attack, defense });
+    commitScenario({ ...scenario, attack, defense });
   }
 
   function onAgentClick(instanceId: string) {
-    const agent = round.state.agents.find((item) => item.instanceId === instanceId);
+    const agent = live.world.agents.find((item) => item.instanceId === instanceId);
     if (!agent || agent.side !== "attack") return;
     setSelectedId(instanceId);
     setPlanMessage(`Selected ${instanceId}.`);
   }
 
-  function replaceOrdersFor(instanceId: string, order: WindowOrder) {
-    setQueued((current) => [
-      ...current.filter((item) => item.instanceId !== instanceId),
-      order,
-    ]);
+  function applyCommands(
+    side: "attack" | "defense",
+    commands: Parameters<typeof issueOrders>[2],
+    okMessage: string,
+  ) {
+    const result = issueOrders(liveRef.current, side, commands);
+    if (!result.ok) {
+      setPlanMessage(rejectionMessage(result.code as RejectionCode));
+      bump();
+      return false;
+    }
+    setPlanMessage(okMessage);
+    bump();
+    return true;
+  }
+
+  function issueMove(point: Point) {
+    if (!selectedId || !selected) {
+      setPlanMessage("Select an attacker first.");
+      return;
+    }
+    applyCommands(
+      "attack",
+      [{ kind: "move-route", instanceId: selectedId, waypoints: [point] }],
+      `Move ${selectedId} to ${point.xMm},${point.yMm}.`,
+    );
   }
 
   function onPointClick(point: Point) {
@@ -138,13 +268,11 @@ export function App() {
       return;
     }
     if (clickMode === "hold") {
-      replaceOrdersFor(selectedId, { kind: "hold", instanceId: selectedId });
-      setPlanMessage(`Queued hold for ${selectedId}.`);
+      applyCommands("attack", [{ kind: "hold", instanceId: selectedId }], `Hold ${selectedId}.`);
       return;
     }
     if (clickMode === "move") {
-      replaceOrdersFor(selectedId, { kind: "move", instanceId: selectedId, to: point });
-      setPlanMessage(`Queued move for ${selectedId} to ${point.xMm},${point.yMm}.`);
+      issueMove(point);
       return;
     }
     const ability = abilities.find((item) => item.id === clickMode.cast);
@@ -152,7 +280,7 @@ export function App() {
       setPlanMessage("Pick a complete ability first.");
       return;
     }
-    const gate = castGate(selected, ability, round.state.timeMs);
+    const gate = castGate(selected, ability, live.world.timeMs);
     if (!gate.ok) {
       setPlanMessage(gate.reason);
       return;
@@ -166,91 +294,84 @@ export function App() {
         );
         return;
       }
-      replaceOrdersFor(selectedId, {
-        kind: "cast",
-        instanceId: selectedId,
-        abilityId: ability.id,
-        target: point,
-        mapTarget: point,
-      });
-      setPlanMessage(`Queued ${ability.name} at ${point.xMm},${point.yMm}.`);
+      applyCommands(
+        "attack",
+        [
+          {
+            kind: "cast",
+            instanceId: selectedId,
+            abilityId: ability.id,
+            target: point,
+            mapTarget: point,
+          },
+        ],
+        `${ability.name} at ${point.xMm},${point.yMm}.`,
+      );
       return;
     }
     const yaw = yawDegFromPoints({ xMm: selected.xMm, yMm: selected.yMm }, point);
-    replaceOrdersFor(selectedId, {
-      kind: "cast",
-      instanceId: selectedId,
-      abilityId: ability.id,
-      target: point,
-      aimYawDeg: yaw,
-      chargeValue: ability.id === FAULT_LINE_ID ? faultLengthM : undefined,
-    });
-    setPlanMessage(
+    applyCommands(
+      "attack",
+      [
+        {
+          kind: "cast",
+          instanceId: selectedId,
+          abilityId: ability.id,
+          target: point,
+          aimYawDeg: yaw,
+          chargeValue: ability.id === FAULT_LINE_ID ? faultLengthM : undefined,
+        },
+      ],
       ability.id === FAULT_LINE_ID
-        ? `Queued Fault Line aim ${yaw}° · length ${faultLengthM} m.`
-        : `Queued ${ability.name} aim ${yaw}°.`,
-    );
-  }
-
-  function buildAttackPlan(): WindowOrder[] {
-    const byAgent = new Map<string, WindowOrder[]>();
-    for (const order of queued) {
-      const list = byAgent.get(order.instanceId) ?? [];
-      list.push(order);
-      byAgent.set(order.instanceId, list);
-    }
-    const orders: WindowOrder[] = [];
-    for (const agent of round.state.agents) {
-      if (agent.side !== "attack" || !agent.alive) continue;
-      const listed = byAgent.get(agent.instanceId);
-      if (!listed || listed.length === 0) {
-        orders.push({ kind: "hold", instanceId: agent.instanceId });
-      } else {
-        orders.push(...listed);
-      }
-    }
-    return orders;
-  }
-
-  function onResolveWindow() {
-    setPlaying(false);
-    let next = round;
-    const attackPlan = buildAttackPlan();
-    const attackResult = submitPlan(next, "attack", attackPlan);
-    if (!attackResult.ok) {
-      setPlanMessage(rejectionMessage(attackResult.code as RejectionCode));
-      return;
-    }
-    next = attackResult.round;
-    const defenseResult = submitPlan(next, "defense", defenseHoldPlan(next));
-    if (!defenseResult.ok) {
-      setPlanMessage(rejectionMessage(defenseResult.code as RejectionCode));
-      return;
-    }
-    next = defenseResult.round;
-    const resolved = resolveWindow(next);
-    if (!resolved.ok) {
-      setPlanMessage(rejectionMessage(resolved.code as RejectionCode));
-      return;
-    }
-    setRound(resolved.round);
-    setQueued([]);
-    setPlanMessage(
-      `Resolved window ${resolved.state.windowIndex}. ${resolved.events.length} events. Assumed window ${STANDARD_RULESET.windowMs} ms.`,
+        ? `Fault Line aim ${yaw}° · length ${faultLengthM} m.`
+        : `${ability.name} aim ${yaw}°.`,
     );
   }
 
   function onBuy(nextAgent: AgentBody, note: string) {
     setAgentMessage(note);
-    setRound((current) => ({
-      ...current,
-      state: {
-        ...current.state,
-        agents: current.state.agents.map((agent) =>
-          agent.instanceId === nextAgent.instanceId ? structuredClone(nextAgent) : agent,
-        ),
-      },
-    }));
+    const agent = liveRef.current.world.agents.find((item) => item.instanceId === nextAgent.instanceId);
+    if (agent) {
+      agent.credits = nextAgent.credits;
+      agent.charges = { ...nextAgent.charges };
+    }
+    bump();
+  }
+
+  function downloadReplay() {
+    const file = serializeReplay({
+      version: REPLAY_FILE_VERSION,
+      scenario,
+      seed: scenario.seed,
+      orderLog: structuredClone(liveRef.current.orderLog),
+      simTimeMs: liveRef.current.world.timeMs,
+    });
+    setReplayText(file);
+    setFileMessage("Replay JSON ready below (copy or save).");
+  }
+
+  function loadReplay() {
+    try {
+      const file = parseReplay(replayText);
+      setSpeed(0);
+      accumulatorRef.current = 0;
+      setAlpha(0);
+      setScenario(file.scenario);
+      const replayed = replayOrderLog(file.scenario, file.orderLog, file.simTimeMs);
+      if (!isLiveRound(replayed)) {
+        setFileMessage(replayed.message);
+        return;
+      }
+      liveRef.current = replayed;
+      liveRef.current.enableDecide = true;
+      liveRef.current.decide = defenseHoldDecide;
+      setSelectedId(file.scenario.attack.members[0]?.instanceId ?? null);
+      setPlanMessage(`Replay loaded at t=${file.simTimeMs} ms (paused).`);
+      bump();
+      setFileMessage("Replay loaded.");
+    } catch (error) {
+      setFileMessage(error instanceof Error ? error.message : "Could not load that replay.");
+    }
   }
 
   return (
@@ -258,22 +379,65 @@ export function App() {
       <header className="masthead">
         <h1>Tactical Simulation Lab</h1>
         <p>
-          Drill Hall playable round · Catalog {SHIPPED_CATALOG.version}. Breach and Brimstone are fully executable.
-          Walk speed, auto-fire, and the {STANDARD_RULESET.windowMs} ms window are assumed.
+          Live Drill Hall round · Catalog {SHIPPED_CATALOG.version}. Starts paused — Space to run.
+          Walk speed, auto-fire, and sim step {STANDARD_RULESET.simStepMs} ms are assumed. Round timer is
+          owner-specified.
         </p>
       </header>
       <section className="board">
-        <h2>{DRILL_HALL.name}</h2>
+        <div className="live-hud">
+          <h2>{DRILL_HALL.name}</h2>
+          <div className="timer" aria-label="Round timer">
+            {formatRoundTimer(remainingMs)}
+          </div>
+          {paused ? (
+            <span className="badge paused-badge" role="status">
+              Paused — press Space to start
+            </span>
+          ) : (
+            <span className="badge" role="status">
+              {speed}x
+            </span>
+          )}
+        </div>
+        {live.phase === "ended" && live.result ? (
+          <div className="round-banner" role="status">
+            <p>{resultBanner(live.result)}</p>
+            <button type="button" onClick={newRound}>
+              New round
+            </button>
+          </div>
+        ) : null}
         <MapView
           map={DRILL_HALL}
           world={boardWorld}
           selectedInstanceId={selectedId}
           preview={preview}
+          agentDisplay={agentDisplay}
           onAgentClick={onAgentClick}
           onPointClick={onPointClick}
+          onPointRightClick={issueMove}
           onHoverPoint={setHoverPoint}
         />
-        <p className="footnote">{DRILL_HALL.notes}</p>
+        <p className="footnote">{DRILL_HALL.notes} Right-click the board to move the selected attacker.</p>
+        <div className="team-actions" aria-label="Transport">
+          <button type="button" aria-pressed={!paused} onClick={togglePause}>
+            {paused ? "Resume" : "Pause"}
+          </button>
+          {([0.5, 1, 2, 4] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={speed === value}
+              onClick={() => {
+                setSpeed(value);
+                setPlanMessage(`Speed ${value}x.`);
+              }}
+            >
+              {value}x
+            </button>
+          ))}
+        </div>
         <div className="team-actions" aria-label="Order modes">
           <button type="button" aria-pressed={clickMode === "move"} onClick={() => setClickMode("move")}>
             Move
@@ -284,20 +448,21 @@ export function App() {
             onClick={() => {
               setClickMode("hold");
               if (selectedId) {
-                replaceOrdersFor(selectedId, { kind: "hold", instanceId: selectedId });
-                setPlanMessage(`Queued hold for ${selectedId}.`);
+                applyCommands("attack", [{ kind: "hold", instanceId: selectedId }], `Hold ${selectedId}.`);
               }
             }}
           >
             Hold
           </button>
           {abilities.map((ability) => {
-            const gate = selected ? castGate(selected, ability, round.state.timeMs) : { ok: false as const, code: "unknown-agent" as const, reason: "Select an attacker." };
+            const gate = selected
+              ? castGate(selected, ability, live.world.timeMs)
+              : { ok: false as const, code: "unknown-agent" as const, reason: "Select an attacker." };
             const charges =
               ability.maxCharges === null
                 ? `${selected?.ultimatePoints ?? 0}/8 ult`
                 : `${selected?.charges[ability.id] ?? 0}/${ability.maxCharges}`;
-            const cd = selected ? cooldownRemainingMs(selected, ability.id, round.state.timeMs) : 0;
+            const cd = selected ? cooldownRemainingMs(selected, ability.id, live.world.timeMs) : 0;
             const title = gate.ok
               ? `${ability.name} · ${charges}${cd > 0 ? ` · CD ${(cd / 1000).toFixed(1)}s` : ""}`
               : gate.reason;
@@ -316,14 +481,8 @@ export function App() {
               </button>
             );
           })}
-          <button type="button" onClick={onResolveWindow}>
-            Resolve window
-          </button>
           <button type="button" aria-pressed={showTruth} onClick={() => setShowTruth((value) => !value)}>
             {showTruth ? "Showing truth" : "Showing attack view"}
-          </button>
-          <button type="button" onClick={() => setQueued([])}>
-            Clear queued orders
           </button>
         </div>
         {typeof clickMode === "object" && clickMode.cast === FAULT_LINE_ID ? (
@@ -350,26 +509,17 @@ export function App() {
             onChange={(event) => {
               const value = Math.max(0, Math.min(8, Number(event.target.value) || 0));
               setStartingUlt(value);
-              commit(createPlayableDrill(scenario.seed, { startingUltPoints: value }));
+              commitScenario(createPlayableDrill(scenario.seed, { startingUltPoints: value }));
             }}
           />
         </label>
-        <p className="message" role="status">
-          Window {round.state.windowIndex} · t={round.state.timeMs} ms · queued {queued.length}. {planMessage}
+        <p className="message" role="status" aria-label="Plan status">
+          t={live.world.timeMs} ms · {planMessage}
         </p>
-        {queued.length > 0 ? (
-          <ul className="queue-list" aria-label="Queued attack orders">
-            {queued.map((order, index) => (
-              <li key={`${order.kind}-${order.instanceId}-${index}`}>
-                {describeQueued(order)}
-              </li>
-            ))}
-          </ul>
-        ) : null}
         <AgentPanel
           agent={selected}
           catalog={SHIPPED_CATALOG}
-          timeMs={round.state.timeMs}
+          timeMs={live.world.timeMs}
           onBuy={onBuy}
           message={agentMessage}
         />
@@ -385,20 +535,19 @@ export function App() {
         />
       </aside>
       <section className="timeline">
-        <h2>Window timeline</h2>
-        <Transport
-          seed={scenario.seed}
-          cursor={round.cursor}
-          total={events.length}
-          playing={playing}
-          canStep={canStep}
-          onSeed={(seed) => commit({ ...scenario, seed })}
-          onPlay={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          onStep={() => setRound((current) => stepRound(current))}
-        />
-        <EventList events={events} cursor={round.cursor} />
+        <h2>Live event log</h2>
+        <ol className="event-log" aria-label="Event log">
+          {recentEvents.map((event) => (
+            <li key={`${event.sequence}-${event.type}-${event.timeMs}`}>{describeEvent(event)}</li>
+          ))}
+        </ol>
         <div className="team-actions">
+          <button type="button" onClick={downloadReplay}>
+            Download replay
+          </button>
+          <button type="button" onClick={loadReplay}>
+            Load replay
+          </button>
           <button
             type="button"
             onClick={() => {
@@ -412,10 +561,11 @@ export function App() {
             type="button"
             onClick={() => {
               try {
-                commit(parseScenario(fileText));
+                commitScenario(parseScenario(fileText));
                 setFileMessage("Scenario loaded.");
               } catch (error) {
-                const message = error instanceof ScenarioFileError ? error.message : "Could not load that scenario.";
+                const message =
+                  error instanceof ScenarioFileError ? error.message : "Could not load that scenario.";
                 setFileMessage(message);
               }
             }}
@@ -432,30 +582,19 @@ export function App() {
             onChange={(event) => setFileText(event.target.value)}
           />
         </label>
+        <label>
+          Replay JSON
+          <textarea
+            className="file-box"
+            aria-label="Replay JSON"
+            value={replayText}
+            onChange={(event) => setReplayText(event.target.value)}
+          />
+        </label>
         <p className="message" role="status">
           {fileMessage}
         </p>
       </section>
     </div>
   );
-}
-
-function describeQueued(order: WindowOrder): string {
-  if (order.kind === "move") {
-    return `${order.instanceId} move to ${order.to.xMm},${order.to.yMm}`;
-  }
-  if (order.kind === "cast") {
-    const extras = [
-      order.aimYawDeg != null ? `yaw ${order.aimYawDeg}` : null,
-      order.chargeValue != null ? `length ${order.chargeValue} m` : null,
-      order.mapTarget ? `map ${order.mapTarget.xMm},${order.mapTarget.yMm}` : null,
-    ]
-      .filter(Boolean)
-      .join(" · ");
-    return `${order.instanceId} cast ${order.abilityId}${extras ? ` (${extras})` : ""}`;
-  }
-  if (order.kind === "shoot") {
-    return `${order.instanceId} shoot ${order.targetInstanceId}`;
-  }
-  return `${order.instanceId} hold`;
 }

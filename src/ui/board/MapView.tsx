@@ -23,21 +23,32 @@ export type BoardPreview = {
   previewRadiusMm?: number;
 };
 
+export type AgentDisplay = {
+  xMm: number;
+  yMm: number;
+  facingDeg: number;
+};
+
 export function MapView({
   map,
   world,
   selectedInstanceId = null,
   preview = null,
+  agentDisplay = null,
   onAgentClick,
   onPointClick,
+  onPointRightClick,
   onHoverPoint,
 }: {
   map: MapDefinition;
   world: World;
   selectedInstanceId?: string | null;
   preview?: BoardPreview | null;
+  /** Optional interpolated positions/facing; overlays still use committed `world`. */
+  agentDisplay?: Record<string, AgentDisplay> | null;
   onAgentClick?: (instanceId: string) => void;
   onPointClick?: (point: Point) => void;
+  onPointRightClick?: (point: Point) => void;
   onHoverPoint?: (point: Point | null) => void;
 }) {
   const smokes = activeSmokes(world.smokes, world.timeMs);
@@ -52,12 +63,20 @@ export function MapView({
     onPointClick(pointFromEvent(event));
   }
 
+  function handleContextMenu(event: MouseEvent<SVGSVGElement>) {
+    if (!onPointRightClick) return;
+    event.preventDefault();
+    onPointRightClick(pointFromEvent(event));
+  }
+
   return (
     <svg
       viewBox={`0 0 ${map.widthMm} ${map.heightMm}`}
       role="img"
       aria-label={map.name}
+      tabIndex={0}
       onClick={handleSvgClick}
+      onContextMenu={handleContextMenu}
       onMouseMove={(event) => onHoverPoint?.(pointFromEvent(event))}
       onMouseLeave={() => onHoverPoint?.(null)}
     >
@@ -172,7 +191,11 @@ export function MapView({
         const fill = agent.side === "attack" ? "#d28a2e" : "#3d8bfd";
         const selected = agent.instanceId === selectedInstanceId;
         const statuses = activeStatuses(agent, world.timeMs);
-        const tip = pointFromYawPreview({ xMm: agent.xMm, yMm: agent.yMm }, agent.facingDeg, 500);
+        const display = agentDisplay?.[agent.instanceId];
+        const xMm = display?.xMm ?? agent.xMm;
+        const yMm = display?.yMm ?? agent.yMm;
+        const facingDeg = display?.facingDeg ?? agent.facingDeg;
+        const tip = pointFromYawPreview({ xMm, yMm }, facingDeg, 500);
         const barWidth = 600;
         const hpRatio = Math.max(0, Math.min(1, agent.hp / 100));
         return (
@@ -188,8 +211,8 @@ export function MapView({
             }}
           >
             <circle
-              cx={agent.xMm}
-              cy={agent.yMm}
+              cx={xMm}
+              cy={yMm}
               r="280"
               fill={fill}
               stroke={selected ? "#f2f5f8" : "none"}
@@ -197,35 +220,35 @@ export function MapView({
               opacity={agent.alive ? 1 : 0.35}
             />
             <line
-              x1={agent.xMm}
-              y1={agent.yMm}
+              x1={xMm}
+              y1={yMm}
               x2={tip.xMm}
               y2={tip.yMm}
               stroke="#f2f5f8"
               strokeWidth="50"
             />
             <rect
-              x={agent.xMm - barWidth / 2}
-              y={agent.yMm - 480}
+              x={xMm - barWidth / 2}
+              y={yMm - 480}
               width={barWidth}
               height="70"
               fill="#242b33"
             />
             <rect
-              x={agent.xMm - barWidth / 2}
-              y={agent.yMm - 480}
+              x={xMm - barWidth / 2}
+              y={yMm - 480}
               width={Math.round(barWidth * hpRatio)}
               height="70"
               fill="#5cb86a"
             />
-            <text x={agent.xMm + 360} y={agent.yMm - 80} fill="#e7ecf1" fontSize="280">
+            <text x={xMm + 360} y={yMm - 80} fill="#e7ecf1" fontSize="280">
               {name}
             </text>
-            <text x={agent.xMm + 360} y={agent.yMm + 220} fill="#9aa6b2" fontSize="220">
+            <text x={xMm + 360} y={yMm + 220} fill="#9aa6b2" fontSize="220">
               {agent.hp} hp · ult {agent.ultimatePoints}
             </text>
             {statuses.length > 0 ? (
-              <text x={agent.xMm + 360} y={agent.yMm + 480} fill="#f0b27a" fontSize="200">
+              <text x={xMm + 360} y={yMm + 480} fill="#f0b27a" fontSize="200">
                 {statuses
                   .map((status) => {
                     const left = Math.max(0, status.untilMs - world.timeMs);
