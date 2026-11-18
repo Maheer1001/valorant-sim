@@ -19,17 +19,39 @@ Every rule and ability number is tagged with its source (patch notes, wiki, or a
 
 React 19, TypeScript, Vite, SVG rendering. Vitest with Testing Library for tests, and ESLint with `typescript-eslint` for linting. There's no backend.
 
-## Run it
+## Prerequisites
 
-Requires Node.js 20+ on your PATH.
+- Node.js 20.19+ or 22.12+ (required by Vite 8; verified with Node 24) and npm.
+- No API keys or environment variables are needed. Everything runs locally in the browser.
+
+## Install
 
 ```bash
-npm install
-npm run dev        # dev server
-npm test           # Vitest
-npm run lint
-npm run typecheck
+git clone https://github.com/Maheer1001/valorant-simulator.git
+cd valorant-simulator
+npm ci
+```
+
+## Run (dev)
+
+```bash
+npm run dev        # Vite dev server, open the printed http://localhost:5173 URL
+```
+
+## Build
+
+```bash
 npm run build      # production build to dist/
+npm run preview    # serve the built dist/ locally
+```
+
+## Test
+
+```bash
+npm test           # Vitest (unit + component tests)
+npm run lint       # ESLint
+npm run typecheck  # tsc --noEmit
+npm run check      # lint, typecheck, test and build in one go
 ```
 
 ## Layout
