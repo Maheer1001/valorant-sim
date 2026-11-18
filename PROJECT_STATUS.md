@@ -379,4 +379,4 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 
 ## Next task
 
-Live round Stage (d) pre-round buy/plan, or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.
+Stage (d) planning is in progress: [`docs/stage-d-plan.md`](docs/stage-d-plan.md). Implementation next, or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.
