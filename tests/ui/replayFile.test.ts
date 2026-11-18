@@ -24,6 +24,7 @@ describe("replay file", () => {
       orderLog: structuredClone(live.orderLog),
       simTimeMs: live.world.timeMs,
     });
+    expect(json).toContain('"version": 2');
     const parsed = parseReplay(json);
     const replayed = replayOrderLog(parsed.scenario, parsed.orderLog, parsed.simTimeMs);
     expect(isLiveRound(replayed)).toBe(true);

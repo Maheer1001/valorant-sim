@@ -326,3 +326,17 @@ Shim `resolveWindow` / `submitPlan` untouched.
 ## Out of scope (stage d)
 
 Spike plant/defuse; real opponent; weapons/armor economy; retiring the window API (stage e); inventing buy-phase length beyond the existing assumed 30 s; defense planning UI; IndexedDB.
+
+---
+
+## Stage (d1) engine decisions (owner overrides)
+
+Implemented in `src/sim/preround.ts` + `planSteps` on `LiveRound` (no pre-round UI yet).
+
+| ID | Decision |
+| --- | --- |
+| D1 | Replay **version 2** stores post-buy `scenario`, `seed`, full `orderLog`. Load replays the log only; never re-runs plan steps. `preRoundPlan` is optional audit only. Version 1 files still parse. |
+| D2 | `at-waypoint` fires on arrival, or when the route stops early on a wall (cast from stop; order log message notes the block). Unfired steps become `not-reached` at round end. |
+| D3 | Queue-time soft reserve of charges and ult; over-queue uses existing rejection codes/messages. Fire-time validation still runs. |
+| D4 | Live move cancels that agent's untriggered `at-waypoint` steps; live cast of A cancels untriggered plan steps for A. Status stays `cancelled` for UI. |
+| D5 | After `startLiveFromPreRound`, `timeMs === 0` and nothing has fired. `at-time` 0 fires on the first `stepLive`. |

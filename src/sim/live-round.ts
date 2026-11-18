@@ -90,6 +90,28 @@ export type LiveDecideFn = (side: Side, foggedWorld: World) => AgentCommand[];
 
 export type PendingBatch = { side: Side; commands: AgentCommand[] };
 
+export type PlanStepStatus = "armed" | "fired" | "cancelled" | "not-reached" | "rejected";
+
+export type PlanStepTrigger =
+  | { kind: "at-time"; timeMs: number }
+  | { kind: "at-waypoint"; waypointIndex: number };
+
+/** Armed pre-round cast; fires only through `issueOrders` inside `stepLive`. */
+export type PlanStepState = {
+  id: string;
+  instanceId: string;
+  abilityId: string;
+  trigger: PlanStepTrigger;
+  target: Point;
+  aimYawDeg?: number;
+  chargeValue?: number;
+  mapTarget?: Point;
+  status: PlanStepStatus;
+  /** Waypoint step ready to fire after arrival or blocked-early completion. */
+  due: boolean;
+  fireReason?: "arrived" | "blocked-early";
+};
+
 export type LiveRound = {
   phase: RoundPhase;
   result: RoundResult | null;
@@ -118,6 +140,8 @@ export type LiveRound = {
   decide?: LiveDecideFn;
   /** False during replay so logged decisions are not regenerated. */
   enableDecide: boolean;
+  /** Pre-round plan casts. Empty during plain open / replay-from-log. */
+  planSteps: PlanStepState[];
 };
 
 export type OpenLiveOptions = { decide?: LiveDecideFn };
@@ -186,7 +210,14 @@ export function openLiveRound(
     nextDecisionAtMs: ruleset.decisionIntervalMs,
     decide: options.decide,
     enableDecide: options.decide !== undefined,
+    planSteps: [],
   };
+}
+
+/** Apply any pending `issueOrders` batches at the current sim time without advancing the clock. */
+export function flushPendingBatches(round: LiveRound): void {
+  const map = getMap(round.mapId);
+  applyPendingBatch(round, map?.walls ?? []);
 }
 
 /**
@@ -242,6 +273,9 @@ function stepOnce(round: LiveRound, walls: readonly Segment[], combat: Rng): voi
   const prevTime = world.timeMs;
   const eventStart = round.events.length;
 
+  // Fire plan steps due at the current committed time (at-time 0 on first step).
+  fireDuePlanSteps(round, prevTime);
+
   // a. Apply batches issued since the last step at the current time.
   const hadBatch = round.pendingBatch.length > 0;
   applyPendingBatch(round, walls);
@@ -267,6 +301,10 @@ function stepOnce(round: LiveRound, walls: readonly Segment[], combat: Rng): voi
   for (const agent of world.agents) {
     advanceStanding(round, agent, newTime, walls);
   }
+
+  // Plan waypoint steps marked due during movement fire at the next step start.
+  // Also flush any at-time steps that become due exactly at newTime after commit below
+  // by leaving them for the following step (trigger.timeMs <= world.timeMs).
 
   // e. Auto-engage / shoot-override fire times in (prevTime, newTime], scheduled at exact times.
   scheduleFires(round, prevTime, newTime);
@@ -299,6 +337,7 @@ function stepOnce(round: LiveRound, walls: readonly Segment[], combat: Rng): voi
   if (result) {
     round.phase = "ended";
     round.result = result;
+    markUnfiredPlanSteps(round);
     round.events.push({
       type: "round-ended",
       timeMs: newTime,
@@ -315,6 +354,98 @@ function stepOnce(round: LiveRound, walls: readonly Segment[], combat: Rng): voi
     runDecisions(round, round.decide);
     while (round.nextDecisionAtMs <= newTime) {
       round.nextDecisionAtMs += ruleset.decisionIntervalMs;
+    }
+  }
+}
+
+/** Issue casts for armed plan steps that are due; only path that spends plan casts. */
+function fireDuePlanSteps(round: LiveRound, atTimeMs: number): void {
+  if (round.planSteps.length === 0 || round.phase !== "live") return;
+  for (const step of round.planSteps) {
+    if (step.status !== "armed") continue;
+    let shouldFire = false;
+    if (step.trigger.kind === "at-time") {
+      if (step.trigger.timeMs <= atTimeMs) shouldFire = true;
+    } else if (step.due) {
+      shouldFire = true;
+    }
+    if (!shouldFire) continue;
+
+    const command: AgentCommand = {
+      kind: "cast",
+      instanceId: step.instanceId,
+      abilityId: step.abilityId,
+      target: { ...step.target },
+    };
+    if (step.aimYawDeg !== undefined) command.aimYawDeg = step.aimYawDeg;
+    if (step.chargeValue !== undefined) command.chargeValue = step.chargeValue;
+    if (step.mapTarget !== undefined) command.mapTarget = { ...step.mapTarget };
+
+    const issued = issueOrders(round, "attack", [command]);
+    step.due = false;
+    if (issued.ok) {
+      step.status = "fired";
+      if (step.fireReason === "blocked-early") {
+        const last = round.orderLog[round.orderLog.length - 1];
+        if (last) {
+          last.message = "Plan cast fired after route blocked by wall.";
+        }
+      }
+    } else {
+      step.status = "rejected";
+    }
+  }
+}
+
+function markUnfiredPlanSteps(round: LiveRound): void {
+  for (const step of round.planSteps) {
+    if (step.status === "armed") {
+      step.status = "not-reached";
+      step.due = false;
+    }
+  }
+}
+
+function cancelWaypointPlans(round: LiveRound, instanceId: string): void {
+  for (const step of round.planSteps) {
+    if (step.status !== "armed") continue;
+    if (step.instanceId !== instanceId) continue;
+    if (step.trigger.kind === "at-waypoint") {
+      step.status = "cancelled";
+      step.due = false;
+    }
+  }
+}
+
+function cancelAbilityPlans(round: LiveRound, instanceId: string, abilityId: string): void {
+  for (const step of round.planSteps) {
+    if (step.status !== "armed") continue;
+    if (step.instanceId !== instanceId) continue;
+    if (step.abilityId === abilityId) {
+      step.status = "cancelled";
+      step.due = false;
+    }
+  }
+}
+
+function markWaypointReached(
+  round: LiveRound,
+  instanceId: string,
+  waypointIndex: number,
+  reason: "arrived" | "blocked-early",
+): void {
+  for (const step of round.planSteps) {
+    if (step.status !== "armed") continue;
+    if (step.instanceId !== instanceId) continue;
+    if (step.trigger.kind !== "at-waypoint") continue;
+    if (reason === "blocked-early") {
+      if (step.trigger.waypointIndex >= waypointIndex) {
+        step.due = true;
+        step.fireReason = "blocked-early";
+      }
+    } else if (step.trigger.waypointIndex === waypointIndex) {
+      step.due = true;
+      step.fireReason = "arrived";
     }
   }
 }
@@ -361,11 +492,13 @@ function applyPendingBatch(round: LiveRound, walls: readonly Segment[]): void {
         if (agent.alive) {
           round.standing[agent.instanceId] = { kind: "hold" };
           round.shootOverride[agent.instanceId] = undefined;
+          cancelWaypointPlans(round, agent.instanceId);
         }
         continue;
       }
       if (command.kind === "move-route") {
         if (!agent.alive) continue;
+        cancelWaypointPlans(round, agent.instanceId);
         round.standing[agent.instanceId] = startSegment(
           round,
           agent,
@@ -377,6 +510,7 @@ function applyPendingBatch(round: LiveRound, walls: readonly Segment[]): void {
         continue;
       }
       if (command.kind === "cast") {
+        cancelAbilityPlans(round, agent.instanceId, command.abilityId);
         enqueue(round, now, agent.instanceId, {
           type: "cast",
           instanceId: agent.instanceId,
@@ -477,7 +611,14 @@ function advanceStanding(round: LiveRound, agent: AgentBody, newTime: number, wa
       at: { ...order.segmentTo },
     });
     round.nextSequence += 1;
-    if (order.blocked || order.index + 1 >= order.waypoints.length) {
+    const reachedIndex = order.index;
+    if (order.blocked) {
+      markWaypointReached(round, agent.instanceId, reachedIndex, "blocked-early");
+      order = { kind: "hold" };
+      break;
+    }
+    markWaypointReached(round, agent.instanceId, reachedIndex, "arrived");
+    if (order.index + 1 >= order.waypoints.length) {
       order = { kind: "hold" };
       break;
     }

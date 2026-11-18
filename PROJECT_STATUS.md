@@ -361,9 +361,13 @@ No document scroll at 1366x768 (flex board height, compact HUD row, thin header,
 
 Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 
+### Pre-round engine — Stage (d1) (18 November 2026)
+
+Pure `src/sim/preround.ts`: `PreRoundPlan`, `validatePlan`, `startLiveFromPreRound`. `LiveRound.planSteps` fire only via `issueOrders` inside `stepLive` (D1-D5 in [`docs/stage-d-plan.md`](docs/stage-d-plan.md)). Replay file version 2 (still reads v1). Window shim untouched. No pre-round UI yet.
+
 ### Not done yet
 
-- Pre-round buy / plan screen (`buyPhaseMs` unused)
+- Pre-round buy / plan **UI** (`buyPhaseMs` host countdown)
 - Spike plant / defuse
 - Real opponent (hold stub + decide hook only)
 - Retiring the window API (Stage e)
@@ -377,6 +381,15 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 | test | Pass. Vitest 5.0.5, 22 files, 126 tests. |
 | build | Pass. Vite 8.3.4 produced `dist/` in 309 ms (60 modules). |
 
+### Checks (Live Stage d1 — `npm run check`, 18 November 2026)
+
+| Step | Result |
+| --- | --- |
+| lint | Pass. ESLint completed with no findings. |
+| typecheck | Pass. `tsc --noEmit` completed with no errors. |
+| test | Pass. Vitest 5.0.5, 23 files, 141 tests. |
+| build | Pass. Vite 8.3.4 produced `dist/` in 281 ms (60 modules). |
+
 ## Next task
 
-Stage (d) planning is in progress: [`docs/stage-d-plan.md`](docs/stage-d-plan.md). Implementation next, or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.
+Stage (d) pre-round UI, or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.
