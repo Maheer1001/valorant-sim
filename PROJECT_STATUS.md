@@ -1,6 +1,6 @@
 # Project status
 
-Updated: 18 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Live round Stages (a)–(c)** are in: pauseable host loop, smooth motion, immediate orders, round timer, replay, board-first layout, multi-select, hotkeys, and ability/path previews. Pre-round buy/plan, spike, and a real opponent are not done.
+Updated: 18 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Live round Stages (a)–(d2)** are in: pauseable host loop, smooth motion, immediate orders, round timer, replay, board-first layout, multi-select, hotkeys, ability/path previews, and pre-round buy/plan UI. Spike and a real opponent are not done.
 
 Agent records for patch 13.10 are in `agent-reference.json`. That file is a reference, not the sim catalog. Breach and Brimstone catalog numbers are guarded against drift by `tests/sim/breach.test.ts` and `tests/sim/brimstone.test.ts`.
 
@@ -363,27 +363,21 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 
 ### Pre-round engine — Stage (d1) (18 November 2026)
 
-Pure `src/sim/preround.ts`: `PreRoundPlan`, `validatePlan`, `startLiveFromPreRound`. `LiveRound.planSteps` fire only via `issueOrders` inside `stepLive` (D1-D5 in [`docs/stage-d-plan.md`](docs/stage-d-plan.md)). Replay file version 2 (still reads v1). Window shim untouched. No pre-round UI yet.
+Pure `src/sim/preround.ts`: `PreRoundPlan`, `validatePlan`, `startLiveFromPreRound`. `LiveRound.planSteps` fire only via `issueOrders` inside `stepLive` (D1-D5 in [`docs/stage-d-plan.md`](docs/stage-d-plan.md)). Replay file version 2 (still reads v1). Window shim untouched.
 
 ### Stage (d1) fix — plan cast cancel (18 November 2026)
 
 Order batches and log entries carry `origin: "plan" | "live"`. Only live casts/moves cancel untriggered plan steps (D4). Plan-fired casts do not cancel sibling steps for the same ability. Blocked-early messages pass through `issueOrders` options. Old replay logs without `origin` default to `"live"`. Waypoint next-step fire lag documented in [`docs/stage-d-plan.md`](docs/stage-d-plan.md).
 
+### Pre-round UI — Stage (d2) (18 November 2026)
+
+App boots into pre-round (attackers at spawn only). Host buy timer with Hold toggle (default on) and Go; timer never enters the engine. HUD buy +/- uses `buyCharge` / `applyBuysToScenario`. Route + cast plan editor with default triggers, edit/delete, route-shorten drops. Go -> `validatePlan` / `startLiveFromPreRound`, live starts paused. Replay download carries post-buy scenario + `preRoundPlan` (v2). No 0-100 s scrub bar (vertical space). Sim packages unchanged except existing preround exports. Manual checklist: [`docs/playtest.md`](docs/playtest.md).
+
 ### Not done yet
 
-- Pre-round buy / plan **UI** (`buyPhaseMs` host countdown)
 - Spike plant / defuse
 - Real opponent (hold stub + decide hook only)
 - Retiring the window API (Stage e)
-
-### Checks (Live Stage d1 — `npm run check`, 18 November 2026)
-
-| Step | Result |
-| --- | --- |
-| lint | Pass. ESLint completed with no findings. |
-| typecheck | Pass. `tsc --noEmit` completed with no errors. |
-| test | Pass. Vitest 5.0.5, 23 files, 141 tests. |
-| build | Pass. Vite 8.3.4 produced `dist/` in 281 ms (60 modules). |
 
 ### Checks (Live Stage d1 fix — `npm run check`, 18 November 2026)
 
@@ -394,6 +388,17 @@ Order batches and log entries carry `origin: "plan" | "live"`. Only live casts/m
 | test | Pass. Vitest 5.0.5, 23 files, 145 tests. |
 | build | Pass. Vite 8.3.4 produced `dist/` in 336 ms (60 modules). |
 
+### Checks (Live Stage d2 — `npm run check`, 18 November 2026)
+
+| Step | Result |
+| --- | --- |
+| lint | Pass. ESLint completed with no findings. |
+| typecheck | Pass. `tsc --noEmit` completed with no errors. |
+| test | Pass. Vitest 5.0.5, 25 files, 156 tests. |
+| build | Pass. Vite 8.3.4 produced `dist/` in 334 ms (63 modules). |
+
+Browser check at 1366x768 (dev server): `documentElement.scrollHeight` = `clientHeight` = 768; no document overflow. Scrub bar omitted on purpose.
+
 ## Next task
 
-Stage (d) pre-round UI, or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.
+Stage (e) retire window shim, or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.

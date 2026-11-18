@@ -39,6 +39,8 @@ describe("draft panel", () => {
   it("exports the scenario from the live UI", async () => {
     const user = userEvent.setup();
     render(<App />);
+    expect(screen.getByLabelText("Phase")).toHaveTextContent("Pre-round");
+    await user.click(screen.getByRole("button", { name: "Go" }));
     expect(screen.getByLabelText("Round timer")).toHaveTextContent("1:40");
     await openSetup(user);
     await user.click(screen.getByRole("button", { name: "Export scenario" }));

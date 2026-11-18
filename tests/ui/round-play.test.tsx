@@ -52,6 +52,21 @@ async function openSetup(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: "Setup" }));
 }
 
+/** Buy common Breach charges and enter live (paused). */
+async function clickGo(user: ReturnType<typeof userEvent.setup>, options?: { flash?: number; aftershock?: boolean }) {
+  const flashBuys = options?.flash ?? 2;
+  const breach = screen.getByLabelText("Breach HUD");
+  for (let i = 0; i < flashBuys; i += 1) {
+    const buy = within(breach).queryByRole("button", { name: "Buy Flashpoint" });
+    if (buy && !buy.hasAttribute("disabled")) await user.click(buy);
+  }
+  if (options?.aftershock !== false) {
+    const buyAs = within(breach).queryByRole("button", { name: "Buy Aftershock" });
+    if (buyAs && !buyAs.hasAttribute("disabled")) await user.click(buyAs);
+  }
+  await user.click(screen.getByRole("button", { name: "Go" }));
+}
+
 async function clickBoard(user: ReturnType<typeof userEvent.setup>, clientX: number, clientY: number) {
   await user.pointer({ keys: "[MouseLeft]", target: board(), coords: { clientX, clientY } });
 }
@@ -87,8 +102,10 @@ function timeoutReplay(): string {
 }
 
 describe("live round UI", () => {
-  it("starts paused with a visible paused badge", () => {
+  it("starts paused with a visible paused badge after Go", async () => {
+    const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     expect(screen.getByText("Paused — press Space to start")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Resume" })).toBeInTheDocument();
     expect(screen.getByLabelText("Round timer")).toHaveTextContent("1:40");
@@ -115,6 +132,7 @@ describe("live round UI", () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     await user.click(screen.getByRole("button", { name: "Move" }));
     await clickBoard(user, 80, 50);
@@ -130,6 +148,7 @@ describe("live round UI", () => {
   it("selects attackers with keys 1-5 and clears with Escape", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     await user.keyboard("2");
     expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Selected brimstone-attack/);
     await user.keyboard("{Escape}");
@@ -137,7 +156,9 @@ describe("live round UI", () => {
   });
 
   it("drag-box selects attackers on the board", async () => {
+    const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     const svg = board();
     fireEvent.pointerDown(svg, { button: 0, clientX: 5, clientY: 5, pointerId: 1 });
     fireEvent.pointerMove(svg, { button: 0, clientX: 195, clientY: 115, pointerId: 1 });
@@ -148,6 +169,7 @@ describe("live round UI", () => {
   it("casts Flashpoint with aim from the click (immediate issueOrders)", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     await user.click(screen.getByRole("button", { name: "Cast Flashpoint" }));
     await clickBoard(user, 100, 60);
@@ -157,6 +179,7 @@ describe("live round UI", () => {
   it("arms Flashpoint with hotkey Q then confirms with a click", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     await user.keyboard("q");
     expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Armed Flashpoint/);
@@ -167,6 +190,7 @@ describe("live round UI", () => {
   it("sets Fault Line chargeValue from the length slider", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     await user.click(screen.getByRole("button", { name: "Cast Fault Line" }));
     const slider = screen.getByLabelText("Fault Line charge length");
@@ -178,6 +202,7 @@ describe("live round UI", () => {
   it("arms Fault Line with E and changes length via wheel (clamped, preview grows)", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     await user.keyboard("e");
     expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Armed Fault Line/);
@@ -220,6 +245,7 @@ describe("live round UI", () => {
     render(<App />);
     await openSetup(user);
     fireEvent.change(screen.getByLabelText("Starting ult points"), { target: { value: "8" } });
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Brimstone" }));
     await user.click(screen.getByRole("button", { name: "Cast Orbital Strike" }));
     await clickBoard(user, 100, 60);
@@ -230,6 +256,7 @@ describe("live round UI", () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     const aftershock = screen.getByRole("button", { name: "Cast Aftershock" });
     expect(aftershock).toBeEnabled();
@@ -246,6 +273,9 @@ describe("live round UI", () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<App />);
+    const brim = screen.getByLabelText("Brimstone HUD");
+    await user.click(within(brim).getByRole("button", { name: "Buy Stim Beacon" }));
+    await clickGo(user, { flash: 0, aftershock: false });
     await user.click(screen.getByRole("button", { name: "Select Brimstone" }));
     await user.click(screen.getByRole("button", { name: "Cast Stim Beacon" }));
     await clickBoard(user, 40, 70);
@@ -255,16 +285,19 @@ describe("live round UI", () => {
     const panel = screen.getByRole("region", { name: "Selected agent" });
     await user.click(within(panel).getByRole("button", { name: /Buy Stim Beacon/ }));
     expect(within(panel).getByRole("status")).toHaveTextContent(/Bought Stim Beacon/);
-    expect(panel).toHaveTextContent(/Credits 600/);
+    // Pre-round buy (-200) then live buy (-200) from 800.
+    expect(panel).toHaveTextContent(/Credits 400/);
   });
 
   it("disables ultimate below 8 points and enables at 8", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     expect(screen.getByRole("button", { name: "Cast Rolling Thunder" })).toBeDisabled();
     await openSetup(user);
     fireEvent.change(screen.getByLabelText("Starting ult points"), { target: { value: "8" } });
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     expect(screen.getByRole("button", { name: "Cast Rolling Thunder" })).toBeEnabled();
   });
@@ -273,6 +306,7 @@ describe("live round UI", () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<App />);
+    await clickGo(user);
     const before = screen.getByLabelText("Plan status").textContent ?? "";
     await flushFrames(20);
     expect(screen.getByLabelText("Plan status").textContent).toBe(before);
@@ -290,6 +324,7 @@ describe("live round UI", () => {
   it("right-clicks the board to move the selected agent", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     await rightClickBoard(user, 90, 55);
     expect(screen.getByLabelText("Plan status")).toHaveTextContent(/Move breach-attack/);
@@ -298,6 +333,7 @@ describe("live round UI", () => {
   it("Shift+right-click appends a waypoint", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     await rightClickBoard(user, 70, 50);
     fireEvent.contextMenu(board(), { clientX: 110, clientY: 55, shiftKey: true });
@@ -307,6 +343,7 @@ describe("live round UI", () => {
   it("hides defenders behind the wall in attack fog", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     expect(screen.queryByRole("button", { name: "Select Jett" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Select KAY/O" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Showing attack view" }));
@@ -333,6 +370,7 @@ describe("live round UI", () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     await user.click(screen.getByRole("button", { name: "Move" }));
     await clickBoard(user, 70, 50);
@@ -350,7 +388,7 @@ describe("live round UI", () => {
     expect(loadedTime).toBe(priorTime);
   });
 
-  it("counts the timer down while running; resetting via drill option restores paused 1:40", async () => {
+  it("counts the timer down while running; resetting via drill option restores pre-round then Go", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     let nowMs = 0;
     vi.stubGlobal(
@@ -364,6 +402,7 @@ describe("live round UI", () => {
     vi.stubGlobal("cancelAnimationFrame", (id: number) => window.clearTimeout(id));
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<App />);
+    await clickGo(user);
     expect(screen.getByLabelText("Round timer")).toHaveTextContent("1:40");
     await user.click(screen.getByRole("button", { name: "4x" }));
     for (let i = 0; i < 30; i += 1) {
@@ -374,12 +413,14 @@ describe("live round UI", () => {
     expect(screen.getByLabelText("Round timer").textContent).not.toBe("1:40");
     await openSetup(user);
     fireEvent.change(screen.getByLabelText("Starting ult points"), { target: { value: "1" } });
+    expect(screen.getByLabelText("Phase")).toHaveTextContent("Pre-round");
+    await clickGo(user);
     expect(screen.getByLabelText("Round timer")).toHaveTextContent("1:40");
     expect(screen.getByText("Paused — press Space to start")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Resume" })).toBeInTheDocument();
   });
 
-  it("shows the timeout banner and New round resets", async () => {
+  it("shows the timeout banner and New round returns to pre-round", async () => {
     const user = userEvent.setup();
     render(<App />);
     await openSetup(user);
@@ -387,8 +428,8 @@ describe("live round UI", () => {
     await user.click(screen.getAllByRole("button", { name: "Load replay" }).at(-1)!);
     expect(screen.getByText(resultBanner({ kind: "timeout", winner: "defense" }))).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "New round" }));
-    expect(screen.getByLabelText("Round timer")).toHaveTextContent("1:40");
-    expect(screen.getByText("Paused — press Space to start")).toBeInTheDocument();
+    expect(screen.getByLabelText("Phase")).toHaveTextContent("Pre-round");
+    expect(screen.getByRole("button", { name: "Go" })).toBeInTheDocument();
   });
 
   it("shows attackers-eliminated and defenders-eliminated banners", async () => {
@@ -406,6 +447,7 @@ describe("live round UI", () => {
   it("HUD cast buttons expose charges, cooldown and disabled reasons", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await clickGo(user);
     await user.click(screen.getByRole("button", { name: "Select Breach" }));
     const aftershock = screen.getByRole("button", { name: "Cast Aftershock" });
     expect(aftershock.title).toMatch(/Aftershock/);

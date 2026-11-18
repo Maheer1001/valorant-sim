@@ -349,6 +349,129 @@ button:disabled { cursor: default; opacity: 0.55; }
   line-height: 1.1;
 }
 
+.timer-note {
+  font-size: 10px;
+  color: #9aa6b2;
+  font-weight: normal;
+}
+
+.hold-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #c5ced6;
+  white-space: nowrap;
+}
+
+.hud-card-preround {
+  max-height: 210px;
+  overflow: auto;
+}
+
+.hud-buy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 3px;
+}
+
+.hud-buy-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 9px;
+  color: #9aa6b2;
+}
+
+.hud-buy-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hud-buy-row button {
+  padding: 1px 4px;
+  font-size: 10px;
+  min-height: 0;
+}
+
+.hud-roadmap {
+  margin: 2px 0 0;
+  font-size: 9px;
+  color: #6a7380;
+  opacity: 0.85;
+}
+
+.hud-plan {
+  list-style: none;
+  margin: 3px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hud-plan-empty,
+.hud-plan-route {
+  margin: 2px 0 0;
+  font-size: 9px;
+  color: #9aa6b2;
+}
+
+.hud-plan-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  font-size: 9px;
+}
+
+.hud-plan-step.flagged .hud-plan-step-select {
+  color: #e08a7a;
+}
+
+.hud-plan-step-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 1px 3px;
+  font-size: 9px;
+  text-align: left;
+}
+
+.hud-plan-step-delete {
+  padding: 0 4px;
+  font-size: 10px;
+  min-height: 0;
+}
+
+.hud-plan-edit {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: 2px;
+  padding: 2px;
+  background: #10151b;
+  border: 1px solid #3a4450;
+}
+
+.hud-plan-edit label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 9px;
+  color: #9aa6b2;
+}
+
+.hud-plan-edit input,
+.hud-plan-edit select {
+  font-size: 10px;
+  max-width: 72px;
+}
+
 .setup-drawer {
   flex: 0 0 0;
   width: 0;
