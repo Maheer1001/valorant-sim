@@ -2,22 +2,9 @@
   "id": "breach-aftershock",
   "events": [
     {
-      "type": "shot",
-      "timeMs": 0,
-      "sequence": 1,
-      "agentId": "breach-attack",
-      "targetInstanceId": "jett-defense",
-      "weaponId": "rifle_a",
-      "hitProbabilityBp": 5833,
-      "draw": 7055,
-      "hit": false,
-      "damage": 0,
-      "targetHpAfter": 100
-    },
-    {
       "type": "cast-accepted",
       "timeMs": 0,
-      "sequence": 2,
+      "sequence": 1,
       "agentId": "breach-attack",
       "abilityId": "aftershock",
       "target": {
@@ -29,7 +16,20 @@
     {
       "type": "shot",
       "timeMs": 0,
-      "sequence": 3,
+      "sequence": 4,
+      "agentId": "breach-attack",
+      "targetInstanceId": "jett-defense",
+      "weaponId": "rifle_a",
+      "hitProbabilityBp": 5833,
+      "draw": 7055,
+      "hit": false,
+      "damage": 0,
+      "targetHpAfter": 100
+    },
+    {
+      "type": "shot",
+      "timeMs": 0,
+      "sequence": 5,
       "agentId": "jett-defense",
       "targetInstanceId": "breach-attack",
       "weaponId": "rifle_a",
@@ -42,7 +42,7 @@
     {
       "type": "shot",
       "timeMs": 1000,
-      "sequence": 4,
+      "sequence": 6,
       "agentId": "breach-attack",
       "targetInstanceId": "jett-defense",
       "weaponId": "rifle_a",
@@ -55,7 +55,7 @@
     {
       "type": "shot",
       "timeMs": 1000,
-      "sequence": 5,
+      "sequence": 7,
       "agentId": "jett-defense",
       "targetInstanceId": "breach-attack",
       "weaponId": "rifle_a",
@@ -68,7 +68,7 @@
     {
       "type": "shot",
       "timeMs": 2000,
-      "sequence": 6,
+      "sequence": 8,
       "agentId": "breach-attack",
       "targetInstanceId": "jett-defense",
       "weaponId": "rifle_a",
@@ -81,7 +81,7 @@
     {
       "type": "shot",
       "timeMs": 2000,
-      "sequence": 7,
+      "sequence": 9,
       "agentId": "jett-defense",
       "targetInstanceId": "breach-attack",
       "weaponId": "rifle_a",
@@ -94,7 +94,7 @@
     {
       "type": "ability-damage",
       "timeMs": 2200,
-      "sequence": 8,
+      "sequence": 2,
       "agentId": "breach-attack",
       "abilityId": "aftershock",
       "burstIndex": 0,
@@ -107,67 +107,17 @@
       ]
     },
     {
-      "type": "ability-damage",
-      "timeMs": 2800,
-      "sequence": 9,
-      "agentId": "breach-attack",
-      "abilityId": "aftershock",
-      "burstIndex": 1,
-      "hits": []
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 3000,
+      "type": "round-ended",
+      "timeMs": 2200,
       "sequence": 10,
-      "agentId": "breach-attack",
-      "targetInstanceId": "breach-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 4000,
-      "sequence": 11,
-      "agentId": "breach-attack",
-      "targetInstanceId": "breach-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 5000,
-      "sequence": 12,
-      "agentId": "breach-attack",
-      "targetInstanceId": "breach-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 6000,
-      "sequence": 13,
-      "agentId": "breach-attack",
-      "targetInstanceId": "breach-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 7000,
-      "sequence": 14,
-      "agentId": "breach-attack",
-      "targetInstanceId": "breach-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 8000,
-      "sequence": 15,
-      "agentId": "breach-attack",
-      "targetInstanceId": "breach-attack",
-      "reason": "no-line-of-sight"
+      "agentId": "",
+      "result": {
+        "kind": "defense-eliminated"
+      }
     }
   ],
-  "finalState": {
-    "seed": 11,
-    "windowIndex": 3,
-    "timeMs": 9000,
+  "finalWorld": {
+    "timeMs": 2200,
     "agents": [
       {
         "instanceId": "breach-attack",
@@ -206,9 +156,9 @@
     ],
     "smokes": [],
     "devices": [],
-    "zones": [],
-    "mapId": "drill-hall",
-    "rulesetId": "standard-competitive",
-    "catalogVersion": "m2-stage1-brimstone-2026-11-17"
+    "zones": []
+  },
+  "result": {
+    "kind": "defense-eliminated"
   }
 }

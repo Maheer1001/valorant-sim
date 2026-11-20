@@ -289,6 +289,8 @@ Recommended shape (owner sketch preserved; stage (e) last so ability tests stay 
 
 ### (e) Retire the window layer
 
+**Done (20 November 2026).** See [`live-round-migration.md`](live-round-migration.md) for what replaced each window API and which guards remain.
+
 **Deliverable:** No `submitPlan` / `resolveWindow` / `windowMs` in the public API; all former window tests rewritten to live helpers; PROJECT_STATUS + playtest updated.
 
 **Files:** delete or internalise shim; update `rejectionMessages`; purge window copy from UI.

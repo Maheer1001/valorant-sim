@@ -1,5 +1,5 @@
 {
-  "id": "auto-fire-seed-1-windows-3",
+  "id": "auto-fire-seed-1-9000ms",
   "events": [
     {
       "type": "shot",
@@ -80,58 +80,17 @@
       "targetHpAfter": 0
     },
     {
-      "type": "shot-withheld",
-      "timeMs": 3000,
+      "type": "round-ended",
+      "timeMs": 2000,
       "sequence": 7,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 4000,
-      "sequence": 8,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 5000,
-      "sequence": 9,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 6000,
-      "sequence": 10,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 7000,
-      "sequence": 11,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 8000,
-      "sequence": 12,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
+      "agentId": "",
+      "result": {
+        "kind": "attack-eliminated"
+      }
     }
   ],
-  "finalState": {
-    "seed": 1,
-    "windowIndex": 3,
-    "timeMs": 9000,
+  "finalWorld": {
+    "timeMs": 2000,
     "agents": [
       {
         "instanceId": "brimstone-attack",
@@ -170,9 +129,9 @@
     ],
     "smokes": [],
     "devices": [],
-    "zones": [],
-    "mapId": "drill-hall",
-    "rulesetId": "standard-competitive",
-    "catalogVersion": "m2-stage1-brimstone-2026-11-17"
+    "zones": []
+  },
+  "result": {
+    "kind": "attack-eliminated"
   }
 }

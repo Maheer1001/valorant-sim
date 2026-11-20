@@ -3,7 +3,7 @@ import { evaluateCast } from "./agents/cast.ts";
 import type { AgentInstance } from "./agents/state.ts";
 import { buyCharge } from "./economy/buy.ts";
 import { distanceMm } from "./map/geometry.ts";
-import type { PlanFailure } from "./round.ts";
+import type { PlanFailure } from "./live-round.ts";
 import type { Scenario } from "./scenario/types.ts";
 import type { Point, RejectionCode, Side } from "./types.ts";
 import { STANDARD_RULESET, type Ruleset } from "../rules/ruleset.ts";

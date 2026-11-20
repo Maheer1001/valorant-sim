@@ -2,17 +2,9 @@
   "id": "brimstone-incendiary",
   "events": [
     {
-      "type": "shot-withheld",
-      "timeMs": 0,
-      "sequence": 1,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
       "type": "cast-accepted",
       "timeMs": 0,
-      "sequence": 2,
+      "sequence": 1,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
       "target": {
@@ -25,6 +17,14 @@
       "type": "shot-withheld",
       "timeMs": 0,
       "sequence": 3,
+      "agentId": "brimstone-attack",
+      "targetInstanceId": "brimstone-attack",
+      "reason": "no-line-of-sight"
+    },
+    {
+      "type": "shot-withheld",
+      "timeMs": 0,
+      "sequence": 4,
       "agentId": "jett-defense",
       "targetInstanceId": "jett-defense",
       "reason": "no-line-of-sight"
@@ -32,7 +32,7 @@
     {
       "type": "shot-withheld",
       "timeMs": 1000,
-      "sequence": 4,
+      "sequence": 5,
       "agentId": "brimstone-attack",
       "targetInstanceId": "brimstone-attack",
       "reason": "no-line-of-sight"
@@ -40,7 +40,7 @@
     {
       "type": "shot-withheld",
       "timeMs": 1000,
-      "sequence": 5,
+      "sequence": 6,
       "agentId": "jett-defense",
       "targetInstanceId": "jett-defense",
       "reason": "no-line-of-sight"
@@ -48,109 +48,119 @@
     {
       "type": "incendiary-detonated",
       "timeMs": 1100,
-      "sequence": 8,
+      "sequence": 2,
       "agentId": "brimstone-attack",
       "at": {
         "xMm": 3999,
         "yMm": 2000
       },
       "bounces": 2,
-      "zoneId": "incendiary-8"
+      "zoneId": "incendiary-2"
     },
     {
       "type": "zone-damage",
       "timeMs": 1100,
-      "sequence": 9,
+      "sequence": 7,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 0,
       "hits": []
     },
     {
       "type": "zone-damage",
       "timeMs": 1200,
-      "sequence": 10,
+      "sequence": 8,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 0,
       "hits": []
     },
     {
       "type": "zone-damage",
       "timeMs": 1300,
-      "sequence": 11,
+      "sequence": 9,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 0,
       "hits": []
     },
     {
       "type": "zone-damage",
       "timeMs": 1400,
-      "sequence": 12,
+      "sequence": 10,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 300,
       "hits": []
     },
     {
       "type": "zone-damage",
       "timeMs": 1500,
-      "sequence": 13,
+      "sequence": 11,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 900,
       "hits": []
     },
     {
       "type": "zone-damage",
       "timeMs": 1600,
-      "sequence": 14,
+      "sequence": 12,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 1500,
       "hits": []
     },
     {
       "type": "zone-damage",
       "timeMs": 1700,
-      "sequence": 15,
+      "sequence": 13,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 2100,
       "hits": []
     },
     {
       "type": "zone-damage",
       "timeMs": 1800,
-      "sequence": 16,
+      "sequence": 14,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 2700,
       "hits": []
     },
     {
       "type": "zone-damage",
       "timeMs": 1900,
-      "sequence": 17,
+      "sequence": 15,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 3300,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2000,
+      "sequence": 16,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "incendiary-2",
+      "radiusMm": 3900,
       "hits": []
     },
     {
       "type": "shot-withheld",
       "timeMs": 2000,
-      "sequence": 6,
+      "sequence": 88,
       "agentId": "brimstone-attack",
       "targetInstanceId": "brimstone-attack",
       "reason": "no-line-of-sight"
@@ -158,28 +168,18 @@
     {
       "type": "shot-withheld",
       "timeMs": 2000,
-      "sequence": 7,
+      "sequence": 89,
       "agentId": "jett-defense",
       "targetInstanceId": "jett-defense",
       "reason": "no-line-of-sight"
     },
     {
       "type": "zone-damage",
-      "timeMs": 2000,
-      "sequence": 18,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 3900,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
       "timeMs": 2100,
-      "sequence": 19,
+      "sequence": 17,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -192,10 +192,10 @@
     {
       "type": "zone-damage",
       "timeMs": 2200,
-      "sequence": 20,
+      "sequence": 18,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -208,10 +208,10 @@
     {
       "type": "zone-damage",
       "timeMs": 2300,
-      "sequence": 21,
+      "sequence": 19,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -224,10 +224,10 @@
     {
       "type": "zone-damage",
       "timeMs": 2400,
-      "sequence": 22,
+      "sequence": 20,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -240,10 +240,10 @@
     {
       "type": "zone-damage",
       "timeMs": 2500,
-      "sequence": 23,
+      "sequence": 21,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -256,10 +256,10 @@
     {
       "type": "zone-damage",
       "timeMs": 2600,
-      "sequence": 24,
+      "sequence": 22,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -272,10 +272,10 @@
     {
       "type": "zone-damage",
       "timeMs": 2700,
-      "sequence": 25,
+      "sequence": 23,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -288,10 +288,10 @@
     {
       "type": "zone-damage",
       "timeMs": 2800,
-      "sequence": 26,
+      "sequence": 24,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -304,10 +304,10 @@
     {
       "type": "zone-damage",
       "timeMs": 2900,
-      "sequence": 27,
+      "sequence": 25,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -320,10 +320,10 @@
     {
       "type": "zone-damage",
       "timeMs": 3000,
-      "sequence": 28,
+      "sequence": 26,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -352,10 +352,10 @@
     {
       "type": "zone-damage",
       "timeMs": 3100,
-      "sequence": 29,
+      "sequence": 27,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -368,10 +368,10 @@
     {
       "type": "zone-damage",
       "timeMs": 3200,
-      "sequence": 30,
+      "sequence": 28,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -384,10 +384,10 @@
     {
       "type": "zone-damage",
       "timeMs": 3300,
-      "sequence": 31,
+      "sequence": 29,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -400,10 +400,10 @@
     {
       "type": "zone-damage",
       "timeMs": 3400,
-      "sequence": 32,
+      "sequence": 30,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -416,10 +416,10 @@
     {
       "type": "zone-damage",
       "timeMs": 3500,
-      "sequence": 33,
+      "sequence": 31,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -432,10 +432,10 @@
     {
       "type": "zone-damage",
       "timeMs": 3600,
-      "sequence": 34,
+      "sequence": 32,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -448,10 +448,10 @@
     {
       "type": "zone-damage",
       "timeMs": 3700,
-      "sequence": 35,
+      "sequence": 33,
       "agentId": "brimstone-attack",
       "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
+      "zoneId": "incendiary-2",
       "radiusMm": 4500,
       "hits": [
         {
@@ -462,651 +462,17 @@
       ]
     },
     {
-      "type": "zone-damage",
-      "timeMs": 3800,
-      "sequence": 36,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 3900,
-      "sequence": 37,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 4000,
-      "sequence": 38,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 4000,
+      "type": "round-ended",
+      "timeMs": 3700,
       "sequence": 92,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 4000,
-      "sequence": 93,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "shooter-down"
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 4100,
-      "sequence": 39,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 4200,
-      "sequence": 40,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 4300,
-      "sequence": 41,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 4400,
-      "sequence": 42,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 4500,
-      "sequence": 43,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 4600,
-      "sequence": 44,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 4700,
-      "sequence": 45,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 4800,
-      "sequence": 46,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 4900,
-      "sequence": 47,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 5000,
-      "sequence": 48,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 5000,
-      "sequence": 94,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 5000,
-      "sequence": 95,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "shooter-down"
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 5100,
-      "sequence": 49,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 5200,
-      "sequence": 50,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 5300,
-      "sequence": 51,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 5400,
-      "sequence": 52,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 5500,
-      "sequence": 53,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 5600,
-      "sequence": 54,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 5700,
-      "sequence": 55,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 5800,
-      "sequence": 56,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 5900,
-      "sequence": 57,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 6000,
-      "sequence": 58,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 6000,
-      "sequence": 96,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 6100,
-      "sequence": 59,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 6200,
-      "sequence": 60,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 6300,
-      "sequence": 61,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 6400,
-      "sequence": 62,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 6500,
-      "sequence": 63,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 6600,
-      "sequence": 64,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 6700,
-      "sequence": 65,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 6800,
-      "sequence": 66,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 6900,
-      "sequence": 67,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 7000,
-      "sequence": 68,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 7000,
-      "sequence": 97,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 7100,
-      "sequence": 69,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 7200,
-      "sequence": 70,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 7300,
-      "sequence": 71,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 7400,
-      "sequence": 72,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 7500,
-      "sequence": 73,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 7600,
-      "sequence": 74,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 7700,
-      "sequence": 75,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 7800,
-      "sequence": 76,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 7900,
-      "sequence": 77,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 8000,
-      "sequence": 78,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 8000,
-      "sequence": 98,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 8100,
-      "sequence": 79,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 8200,
-      "sequence": 80,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 8300,
-      "sequence": 81,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 8400,
-      "sequence": 82,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 8500,
-      "sequence": 83,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 8600,
-      "sequence": 84,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 8700,
-      "sequence": 85,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 8800,
-      "sequence": 86,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 8900,
-      "sequence": 87,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "zone-damage",
-      "timeMs": 9000,
-      "sequence": 88,
-      "agentId": "brimstone-attack",
-      "abilityId": "incendiary",
-      "zoneId": "incendiary-8",
-      "radiusMm": 4500,
-      "hits": []
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 9000,
-      "sequence": 99,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "zone-expired",
-      "timeMs": 9100,
-      "sequence": 89,
-      "agentId": "brimstone-attack",
-      "zoneId": "incendiary-8"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 10000,
-      "sequence": 100,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 11000,
-      "sequence": 101,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 12000,
-      "sequence": 102,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 13000,
-      "sequence": 103,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 14000,
-      "sequence": 104,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "no-line-of-sight"
+      "agentId": "",
+      "result": {
+        "kind": "defense-eliminated"
+      }
     }
   ],
-  "finalState": {
-    "seed": 22,
-    "windowIndex": 5,
-    "timeMs": 15000,
+  "finalWorld": {
+    "timeMs": 3700,
     "agents": [
       {
         "instanceId": "brimstone-attack",
@@ -1145,9 +511,29 @@
     ],
     "smokes": [],
     "devices": [],
-    "zones": [],
-    "mapId": "drill-hall",
-    "rulesetId": "standard-competitive",
-    "catalogVersion": "m2-stage1-brimstone-2026-11-17"
+    "zones": [
+      {
+        "id": "incendiary-2",
+        "abilityId": "incendiary",
+        "ownerInstanceId": "brimstone-attack",
+        "side": "attack",
+        "xMm": 3999,
+        "yMm": 2000,
+        "fullRadiusMm": 4500,
+        "activeFromMs": 1100,
+        "expiresAtMs": 9100,
+        "burstEndMs": 1350,
+        "spreadEndMs": 2100,
+        "fullEndMs": 9100,
+        "shrinkEndMs": null,
+        "damagesAllies": false,
+        "blocksVision": false,
+        "tickDamage": 6,
+        "tickIntervalMs": 100
+      }
+    ]
+  },
+  "result": {
+    "kind": "defense-eliminated"
   }
 }

@@ -1,0 +1,254 @@
+{
+  "capturedFrom": "resolveWindow shim before stage (e)",
+  "holdWindows": 4,
+  "events": [
+    {
+      "type": "cast-accepted",
+      "timeMs": 0,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "target": {
+        "xMm": 4500,
+        "yMm": 2000
+      },
+      "chargesRemaining": -1
+    },
+    {
+      "type": "orbital-activated",
+      "timeMs": 2000,
+      "agentId": "brimstone-attack",
+      "zoneId": "<id>",
+      "at": {
+        "xMm": 4500,
+        "yMm": 2000
+      }
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2000,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2150,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2300,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2450,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2600,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2750,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2900,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3050,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3200,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3350,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3500,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3650,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3800,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3950,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4100,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4250,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4400,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4550,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4700,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4850,
+      "agentId": "brimstone-attack",
+      "abilityId": "orbital-strike",
+      "zoneId": "<id>",
+      "radiusMm": 9000,
+      "hits": []
+    },
+    {
+      "type": "orbital-shrink",
+      "timeMs": 5150,
+      "agentId": "brimstone-attack",
+      "zoneId": "<id>",
+      "radiusMm": 7200
+    },
+    {
+      "type": "orbital-shrink",
+      "timeMs": 5300,
+      "agentId": "brimstone-attack",
+      "zoneId": "<id>",
+      "radiusMm": 5400
+    },
+    {
+      "type": "orbital-shrink",
+      "timeMs": 5450,
+      "agentId": "brimstone-attack",
+      "zoneId": "<id>",
+      "radiusMm": 3600
+    },
+    {
+      "type": "orbital-shrink",
+      "timeMs": 5600,
+      "agentId": "brimstone-attack",
+      "zoneId": "<id>",
+      "radiusMm": 1800
+    },
+    {
+      "type": "orbital-shrink",
+      "timeMs": 5750,
+      "agentId": "brimstone-attack",
+      "zoneId": "<id>",
+      "radiusMm": 0
+    },
+    {
+      "type": "zone-expired",
+      "timeMs": 5750,
+      "agentId": "brimstone-attack",
+      "zoneId": "<id>"
+    },
+    {
+      "type": "smoke-expired",
+      "timeMs": 5750,
+      "agentId": "brimstone-attack",
+      "smokeId": "<id>"
+    }
+  ]
+}

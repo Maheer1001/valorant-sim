@@ -50,8 +50,6 @@ export type RejectionCode =
   | "agent-down"
   | "target-not-enemy"
   | "target-not-visible"
-  | "missing-plan"
-  | "plan-already-submitted"
   | "signature-on-cooldown"
   | "insufficient-ult-points"
   | "insufficient-credits"

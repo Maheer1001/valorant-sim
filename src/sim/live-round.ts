@@ -16,7 +16,6 @@ import { clipSegment, distanceMm } from "./map/geometry.ts";
 import { hasLineOfSight } from "./map/line-of-sight.ts";
 import { forkSeed, resumeStream, type Rng } from "./rng.ts";
 import { viewWorld } from "./fog.ts";
-import type { PlanFailure } from "./round.ts";
 import type { Scenario } from "./scenario/types.ts";
 import type { Point, RejectionCode, Segment, Side } from "./types.ts";
 import { STANDARD_RULESET, type Ruleset } from "../rules/ruleset.ts";
@@ -34,6 +33,14 @@ import {
 } from "./run.ts";
 
 export type { RoundResult } from "./run.ts";
+
+/** Typed rejection for opening a round or starting one from a pre-round plan. */
+export type PlanFailure = {
+  ok: false;
+  code: RejectionCode;
+  message: string;
+  orderIndex?: number;
+};
 
 /**
  * Live (pauseable) round engine. Time advances only when the host calls
@@ -168,7 +175,7 @@ export function isLiveRound(value: LiveRound | PlanFailure): value is LiveRound 
   return "phase" in value;
 }
 
-/** Same validation as `openRound`; builds a live round at t=0 with every agent holding. */
+/** Validates scenario, catalog, map and composition; builds a live round at t=0 with every agent holding. */
 export function openLiveRound(
   scenario: Scenario,
   catalog: Catalog = SHIPPED_CATALOG,
@@ -746,7 +753,6 @@ function scheduleFires(round: LiveRound, prevTime: number, newTime: number): voi
 /**
  * Pop and apply every queued job with `timeMs <= untilMs` at its exact time.
  * Mutates `world` and `events`; returns the next free sequence number.
- * `onEvent` runs after each applied job (the compat shim uses it to capture frames).
  */
 export function drainJobsUntil(
   queue: EventQueue<Job>,
@@ -758,7 +764,6 @@ export function drainJobsUntil(
   ruleset: Ruleset,
   sequence: number,
   events: SimEvent[],
-  onEvent?: (event: SimEvent, world: World) => void,
 ): number {
   let nextSequence = sequence;
   for (;;) {
@@ -769,7 +774,6 @@ export function drainJobsUntil(
     const applied = applyJob(item.payload, item.timeMs, item.sequence, world, catalog, walls, combat, ruleset);
     world.timeMs = item.timeMs;
     events.push(applied.event);
-    onEvent?.(applied.event, world);
     for (const followup of applied.followups) {
       queue.push({
         timeMs: followup.atMs,

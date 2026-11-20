@@ -17,8 +17,6 @@ const MESSAGES: Record<RejectionCode, string> = {
   "agent-down": "That agent is down.",
   "target-not-enemy": "Shoot targets must be enemies.",
   "target-not-visible": "That target is not visible.",
-  "missing-plan": "Both sides must submit a plan before resolve.",
-  "plan-already-submitted": "A plan is already queued for this window.",
   "signature-on-cooldown": "Signature is still on cooldown.",
   "insufficient-ult-points": "Not enough ultimate points (need 8).",
   "insufficient-credits": "Not enough credits to buy that charge.",

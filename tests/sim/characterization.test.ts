@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -12,26 +12,37 @@ const FIXTURE_DIR = path.join(
   "../fixtures/characterization",
 );
 
+/** Set to rewrite fixtures after an intentional engine change. Never set in CI. */
+const UPDATE = process.env.VALSIM_UPDATE_FIXTURES === "1";
+
 function loadFixture(id: string): CharacterizationCapture {
   const raw = readFileSync(path.join(FIXTURE_DIR, `${id}.json`), "utf8");
   return JSON.parse(raw) as CharacterizationCapture;
 }
 
-describe("windowed API characterization fixtures", () => {
-  it("has a fixture file for every capture id", () => {
-    const captures = allCharacterizationCaptures();
-    const files = new Set(readdirSync(FIXTURE_DIR).filter((name) => name.endsWith(".json")));
-    for (const capture of captures) {
-      expect(files.has(`${capture.id}.json`), `missing fixture ${capture.id}.json`).toBe(true);
-    }
+describe("live engine characterization fixtures", () => {
+  if (UPDATE) {
+    it("rewrites fixtures (VALSIM_UPDATE_FIXTURES=1)", () => {
+      mkdirSync(FIXTURE_DIR, { recursive: true });
+      for (const capture of allCharacterizationCaptures()) {
+        writeFileSync(path.join(FIXTURE_DIR, `${capture.id}.json`), `${JSON.stringify(capture, null, 2)}\n`);
+      }
+    });
+    return;
+  }
+
+  it("has exactly one fixture file per capture id", () => {
+    const ids = allCharacterizationCaptures().map((capture) => `${capture.id}.json`).sort();
+    const files = readdirSync(FIXTURE_DIR).filter((name) => name.endsWith(".json")).sort();
+    expect(files).toEqual(ids);
   });
 
-  it("matches stored event streams and final states for every scenario", () => {
-    const captures = allCharacterizationCaptures();
-    for (const live of captures) {
+  it("matches stored event streams, final worlds and results for every scenario", () => {
+    for (const live of allCharacterizationCaptures()) {
       const fixture = loadFixture(live.id);
       expect(live.events, live.id).toEqual(fixture.events);
-      expect(live.finalState, live.id).toEqual(fixture.finalState);
+      expect(live.finalWorld, live.id).toEqual(fixture.finalWorld);
+      expect(live.result, live.id).toEqual(fixture.result);
     }
   });
 });

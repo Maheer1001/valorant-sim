@@ -1,6 +1,11 @@
 /**
- * Fixed seeded scenarios for windowed-API characterization fixtures.
- * Run through openRound / submitPlan / resolveWindow only.
+ * Fixed seeded scenarios for live-engine characterization fixtures.
+ *
+ * Each capture opens a live round, issues the same orders the retired
+ * windowed captures used at t=0, then steps for the same total sim time
+ * (3000 ms per former window). Fixtures guard against silent behaviour
+ * changes in the live engine; regenerate them deliberately with
+ * `VALSIM_UPDATE_FIXTURES=1 npx vitest run tests/sim/characterization.test.ts`.
  */
 import {
   AFTERSHOCK_ID,
@@ -12,72 +17,61 @@ import {
 } from "../../../src/sim/agents/abilities/brimstone.ts";
 import { SHIPPED_CATALOG, getAgent } from "../../../src/sim/agents/catalog.ts";
 import { createInstance } from "../../../src/sim/agents/state.ts";
-import { DRILL_HALL } from "../../../src/sim/map/drill-hall.ts";
 import {
-  isRound,
-  openRound,
-  resolveWindow,
-  submitPlan,
-  type Round,
-  type RoundState,
-  type WindowOrder,
-} from "../../../src/sim/round.ts";
-import type { SimEvent } from "../../../src/sim/run.ts";
+  isLiveRound,
+  issueOrders,
+  openLiveRound,
+  stepLive,
+  truthLiveWorld,
+  type AgentCommand,
+  type RoundResult,
+} from "../../../src/sim/live-round.ts";
+import { DRILL_HALL } from "../../../src/sim/map/drill-hall.ts";
+import type { SimEvent, World } from "../../../src/sim/run.ts";
 import { createDefaultDrill } from "../../../src/sim/scenario/default-drill.ts";
 import type { Scenario } from "../../../src/sim/scenario/types.ts";
-import { defenseHoldPlan } from "../../../src/tactics/defense-stub.ts";
 
 export type CharacterizationCapture = {
   id: string;
   events: SimEvent[];
-  finalState: RoundState;
+  finalWorld: World;
+  result: RoundResult | null;
 };
 
-function mustOpen(scenario: Scenario): Round {
-  const opened = openRound(scenario);
-  if (!isRound(opened)) throw new Error(opened.message);
-  return opened;
-}
+/** Former window length; captures keep the same total sim time. */
+const SLICE_MS = 3000;
 
-function mustSubmit(round: Round, side: "attack" | "defense", orders: WindowOrder[]): Round {
-  const result = submitPlan(round, side, orders);
-  if (!result.ok) throw new Error(`${result.code}: ${result.message}`);
-  return result.round;
-}
-
-function mustResolve(round: Round): { round: Round; events: SimEvent[] } {
-  const resolved = resolveWindow(round);
-  if (!resolved.ok) throw new Error(resolved.message);
-  return { round: resolved.round, events: resolved.events };
-}
-
-function holdDefense(round: Round): WindowOrder[] {
-  return defenseHoldPlan(round);
-}
-
-function holdAttack(round: Round): WindowOrder[] {
-  return round.state.agents
-    .filter((agent) => agent.side === "attack" && agent.alive)
-    .map((agent) => ({ kind: "hold" as const, instanceId: agent.instanceId }));
-}
-
-function advanceHold(round: Round): { round: Round; events: SimEvent[] } {
-  let next = mustSubmit(round, "attack", holdAttack(round));
-  next = mustSubmit(next, "defense", holdDefense(next));
-  return mustResolve(next);
+function capture(
+  id: string,
+  scenario: Scenario,
+  attack: AgentCommand[],
+  slices: number,
+): CharacterizationCapture {
+  const round = openLiveRound(scenario);
+  if (!isLiveRound(round)) throw new Error(round.message);
+  if (attack.length > 0) {
+    const issued = issueOrders(round, "attack", attack);
+    if (!issued.ok) throw new Error(`${issued.code}: ${issued.message}`);
+  }
+  stepLive(round, (slices * SLICE_MS) / round.ruleset.simStepMs);
+  return {
+    id,
+    events: structuredClone(round.events),
+    finalWorld: truthLiveWorld(round),
+    result: round.result,
+  };
 }
 
 export function captureWallMove(): CharacterizationCapture {
-  let round = mustOpen(createDefaultDrill(3));
-  round = mustSubmit(round, "attack", [
-    { kind: "move", instanceId: "brimstone-attack", to: { xMm: 12000, yMm: 2000 } },
-  ]);
-  round = mustSubmit(round, "defense", holdDefense(round));
-  const { round: resolved, events } = mustResolve(round);
-  return { id: "wall-move", events, finalState: structuredClone(resolved.state) };
+  return capture(
+    "wall-move",
+    createDefaultDrill(3),
+    [{ kind: "move-route", instanceId: "brimstone-attack", waypoints: [{ xMm: 12000, yMm: 2000 }] }],
+    1,
+  );
 }
 
-export function captureAutoFire(seed: number, windows: number): CharacterizationCapture {
+export function captureAutoFire(seed: number, slices: number): CharacterizationCapture {
   const brimstone = getAgent(SHIPPED_CATALOG, "brimstone");
   const jett = getAgent(SHIPPED_CATALOG, "jett");
   if (!brimstone || !jett) throw new Error("missing agents");
@@ -97,20 +91,7 @@ export function captureAutoFire(seed: number, windows: number): Characterization
     },
     orders: [],
   };
-  let round = mustOpen(scenario);
-  const events: SimEvent[] = [];
-  for (let i = 0; i < windows; i += 1) {
-    round = mustSubmit(round, "attack", holdAttack(round));
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const step = mustResolve(round);
-    events.push(...step.events);
-    round = step.round;
-  }
-  return {
-    id: `auto-fire-seed-${seed}-windows-${windows}`,
-    events,
-    finalState: structuredClone(round.state),
-  };
+  return capture(`auto-fire-seed-${seed}-${slices * SLICE_MS}ms`, scenario, [], slices);
 }
 
 function breachScenario(seed: number, ultPoints = 0): Scenario {
@@ -152,51 +133,39 @@ function breachScenario(seed: number, ultPoints = 0): Scenario {
 }
 
 export function captureAftershock(): CharacterizationCapture {
-  let round = mustOpen(breachScenario(11));
-  round = mustSubmit(round, "attack", [
-    {
-      kind: "cast",
-      instanceId: "breach-attack",
-      abilityId: AFTERSHOCK_ID,
-      target: { xMm: 7000, yMm: 6000 },
-      aimYawDeg: 0,
-    },
-  ]);
-  round = mustSubmit(round, "defense", holdDefense(round));
-  const first = mustResolve(round);
-  const events = [...first.events];
-  round = first.round;
-  // Aftershock windup 2.2s + bursts — hold a few windows so damage lands.
-  for (let i = 0; i < 2; i += 1) {
-    const step = advanceHold(round);
-    events.push(...step.events);
-    round = step.round;
-  }
-  return { id: "breach-aftershock", events, finalState: structuredClone(round.state) };
+  // Aftershock windup 2.2 s + bursts; 9 s total so damage lands.
+  return capture(
+    "breach-aftershock",
+    breachScenario(11),
+    [
+      {
+        kind: "cast",
+        instanceId: "breach-attack",
+        abilityId: AFTERSHOCK_ID,
+        target: { xMm: 7000, yMm: 6000 },
+        aimYawDeg: 0,
+      },
+    ],
+    3,
+  );
 }
 
 export function captureFaultLine(): CharacterizationCapture {
-  let round = mustOpen(breachScenario(12));
-  round = mustSubmit(round, "attack", [
-    {
-      kind: "cast",
-      instanceId: "breach-attack",
-      abilityId: FAULT_LINE_ID,
-      target: { xMm: 9000, yMm: 6000 },
-      aimYawDeg: 0,
-      chargeValue: 32,
-    },
-  ]);
-  round = mustSubmit(round, "defense", holdDefense(round));
-  const first = mustResolve(round);
-  const events = [...first.events];
-  round = first.round;
-  for (let i = 0; i < 2; i += 1) {
-    const step = advanceHold(round);
-    events.push(...step.events);
-    round = step.round;
-  }
-  return { id: "breach-fault-line", events, finalState: structuredClone(round.state) };
+  return capture(
+    "breach-fault-line",
+    breachScenario(12),
+    [
+      {
+        kind: "cast",
+        instanceId: "breach-attack",
+        abilityId: FAULT_LINE_ID,
+        target: { xMm: 9000, yMm: 6000 },
+        aimYawDeg: 0,
+        chargeValue: 32,
+      },
+    ],
+    3,
+  );
 }
 
 function brimScenario(seed: number, ultPoints = 0): Scenario {
@@ -223,14 +192,10 @@ function brimScenario(seed: number, ultPoints = 0): Scenario {
     defense: {
       side: "defense",
       members: [
-        createInstance(
-          jett,
-          "defense",
-          { xMm: 8000, yMm: 2000 },
-          "jett-defense",
-          "entry",
-          { facingDeg: 180, /* stays in orbital / molly */ },
-        ),
+        // Stays inside the orbital / molly.
+        createInstance(jett, "defense", { xMm: 8000, yMm: 2000 }, "jett-defense", "entry", {
+          facingDeg: 180,
+        }),
       ],
     },
     orders: [],
@@ -238,49 +203,37 @@ function brimScenario(seed: number, ultPoints = 0): Scenario {
 }
 
 export function captureOrbital(): CharacterizationCapture {
-  let round = mustOpen(brimScenario(21, 8));
-  round = mustSubmit(round, "attack", [
-    {
-      kind: "cast",
-      instanceId: "brimstone-attack",
-      abilityId: ORBITAL_STRIKE_ID,
-      target: { xMm: 8000, yMm: 2000 },
-      mapTarget: { xMm: 8000, yMm: 2000 },
-    },
-  ]);
-  round = mustSubmit(round, "defense", holdDefense(round));
-  const first = mustResolve(round);
-  const events = [...first.events];
-  round = first.round;
-  for (let i = 0; i < 3; i += 1) {
-    const step = advanceHold(round);
-    events.push(...step.events);
-    round = step.round;
-  }
-  return { id: "brimstone-orbital", events, finalState: structuredClone(round.state) };
+  return capture(
+    "brimstone-orbital",
+    brimScenario(21, 8),
+    [
+      {
+        kind: "cast",
+        instanceId: "brimstone-attack",
+        abilityId: ORBITAL_STRIKE_ID,
+        target: { xMm: 8000, yMm: 2000 },
+        mapTarget: { xMm: 8000, yMm: 2000 },
+      },
+    ],
+    4,
+  );
 }
 
 export function captureIncendiary(): CharacterizationCapture {
-  let round = mustOpen(brimScenario(22));
-  round = mustSubmit(round, "attack", [
-    {
-      kind: "cast",
-      instanceId: "brimstone-attack",
-      abilityId: INCENDIARY_ID,
-      target: { xMm: 8000, yMm: 2000 },
-      aimYawDeg: 0,
-    },
-  ]);
-  round = mustSubmit(round, "defense", holdDefense(round));
-  const first = mustResolve(round);
-  const events = [...first.events];
-  round = first.round;
-  for (let i = 0; i < 4; i += 1) {
-    const step = advanceHold(round);
-    events.push(...step.events);
-    round = step.round;
-  }
-  return { id: "brimstone-incendiary", events, finalState: structuredClone(round.state) };
+  return capture(
+    "brimstone-incendiary",
+    brimScenario(22),
+    [
+      {
+        kind: "cast",
+        instanceId: "brimstone-attack",
+        abilityId: INCENDIARY_ID,
+        target: { xMm: 8000, yMm: 2000 },
+        aimYawDeg: 0,
+      },
+    ],
+    5,
+  );
 }
 
 export function allCharacterizationCaptures(): CharacterizationCapture[] {

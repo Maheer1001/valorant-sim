@@ -1,53 +1,61 @@
-# Live round migration notes (Stage a)
+# Live round migration notes
 
-## Characterization
+Status: **complete** (Stage e, 20 November 2026). The windowed API (`openRound` / `submitPlan` / `resolveWindow`, `src/sim/round.ts`) is deleted. The live runner in `src/sim/live-round.ts` is the only interactive engine. Scripted `runScenario` is unchanged.
 
-Fixtures under `tests/fixtures/characterization/` were captured from the **pre-shim** windowed API (`openRound` / `submitPlan` / `resolveWindow`) and are asserted by `tests/sim/characterization.test.ts`.
+## Stage (a): the shim
 
-Scenarios:
+During stages (a)–(d) `resolveWindow` was a compatibility shim. It:
 
-| Fixture id | Coverage |
+1. Applied both pending window plans as jobs at `windowStart` (move jobs, casts and shoot orders).
+2. Pre-batched auto-engage for `[windowStart, windowEnd)`.
+3. Advanced in `simStepMs` increments, draining jobs with `drainJobsUntil` (shared with the live runner).
+4. Captured `lastWindowEvents` / `lastWindowFrames` for the old UI.
+5. Lerped in-flight moves at `windowEnd`.
+
+Characterization fixtures captured from the pre-shim API still deep-equalled after the shim landed, so Stage (a) changed no windowed behaviour.
+
+## Stage (e): what replaced it
+
+| Old | New |
 | --- | --- |
-| `wall-move` | Move into the Drill Hall divider |
-| `auto-fire-seed-1-windows-3` | Rifle auto-fire over 3 windows, seed 1 |
-| `auto-fire-seed-2-windows-3` | Same plans, seed 2 (draw changes) |
-| `breach-aftershock` | Aftershock + hold windows |
-| `breach-fault-line` | Fault Line + hold windows |
-| `brimstone-orbital` | Orbital Strike + hold windows |
-| `brimstone-incendiary` | Incendiary + hold windows |
+| `openRound(scenario)` | `openLiveRound(scenario)` |
+| `submitPlan(round, side, orders)` | `issueOrders(round, side, commands)`. Same per-command validation and rejection codes; the whole batch is rejected on the first failure. |
+| `{ kind: "move", to }` | `{ kind: "move-route", waypoints: [to] }` |
+| `resolveWindow(round)` | `stepLive(round, n)` (`n × simStepMs` of sim time). There is no "both sides must submit" gate. |
+| `view(round, side)` | `viewLive(round, side)` |
+| `round.state` (immutable snapshot) | `round.world` (mutable truth) or `truthLiveWorld(round)` (copy) |
+| `defenseHoldPlan(round)` | Not needed: agents hold by default. `defenseHoldDecide` remains for the decide hook. |
+| `ruleset.windowMs` | Removed. Tests use a local 3000 ms slice (`SLICE_MS`) that is not a game rule. |
+| `missing-plan`, `plan-already-submitted` | Removed rejection codes. |
+| `PlanFailure` in `round.ts` | Exported from `live-round.ts`. |
 
-### Differences found after the shim
+### Behaviour differences the tests now pin
 
-**None.** After reimplementing `resolveWindow` to drain with `simStepMs` steps via shared `drainJobsUntil`, every characterization fixture still deep-equals. Window auto-engage remains **pre-batched** for `[windowStart, windowEnd)`; moves remain **move / move-resolve jobs** (not live standing routes). That is intentional so Stage (a) does not silently change windowed behaviour.
+- **Same-instant ordering.** The window shim sorted all t=0 jobs by `(agentId, sortKey)`, so `alpha-defense` moved before `zeta-attack` whichever side planned first. The live runner applies accepted batches in **issue order** (the order log is the reproducibility spine). `tests/sim/round.test.ts` asserts both orders.
+- **Auto-engage.** Live fire uses last-fire + interval scheduling instead of a pre-batched window grid.
+- **Round end.** Live rounds stop stepping when a side is eliminated or the timer runs out. Characterization fixtures now record `result`.
+- **Moves.** Standing routes move every step instead of `move` / `move-resolve` jobs plus an end-of-window lerp.
 
-Live `stepLive` uses standing `move-route` orders and last-fire auto-engage scheduling. Those differences are **live-only**; they are not applied inside the shim.
+### Guards kept
 
-## Shim shape
-
-`resolveWindow` now:
-
-1. Applies both pending window plans as jobs at `windowStart` (unchanged enqueue, including move jobs and shoot).
-2. Pre-batches auto-engage for the window (unchanged).
-3. Advances time in `simStepMs` increments, draining jobs with `drainJobsUntil` (shared with the live runner).
-4. Captures `lastWindowEvents` / `lastWindowFrames` per applied job for the old UI.
-5. Runs `advanceInFlightMoves` at `windowEnd`.
+| Guard | How |
+| --- | --- |
+| Live ability timing equals the old window engine | `tests/sim/live-round.test.ts` compares live ability events (Aftershock, Orbital Strike, Incendiary) with events **recorded from `resolveWindow` just before deletion** in `tests/fixtures/window-parity/`. These fixtures are frozen; do not regenerate them. |
+| Live engine does not drift silently | `tests/sim/characterization.test.ts` re-records the seven former window scenarios through the live runner (same t=0 orders, same total sim time). Regenerate on purpose with `VALSIM_UPDATE_FIXTURES=1 npx vitest run tests/sim/characterization.test.ts` and review the diff. |
+| Ability behaviour | Every Breach / Brimstone interactive case was rewritten onto `tests/sim/support/live-harness.ts`; none were dropped. |
 
 ## Test migration status
 
-| File / test | Fate (Stage a) | Notes |
+| File / test | Fate | Notes |
 | --- | --- | --- |
-| `tests/sim/characterization.test.ts` | **Keep** | Guards shim fidelity. |
-| `tests/sim/round.test.ts` — all window cases | **Keep via shim** | Still call `resolveWindow`. |
-| `tests/sim/round.test.ts` — `tags assumed window rules…` | **Keep** (extend later) | Still asserts `windowMs`; live constants covered in `live-round.test.ts`. |
-| `tests/sim/breach.test.ts` — interactive cases | **Keep via shim** | Harness unchanged. |
-| `tests/sim/breach.test.ts` — catalog drift | **Keep** | No window API. |
-| `tests/sim/brimstone.test.ts` — interactive cases | **Keep via shim** | Harness unchanged. |
-| `tests/sim/brimstone.test.ts` — catalog / pure apply | **Keep** | No window API. |
+| `tests/sim/characterization.test.ts` | **Re-recorded (Stage e)** | Live captures; fixture ids for auto-fire renamed to `auto-fire-seed-N-9000ms`. |
+| `tests/sim/round.test.ts` | **Rewritten (Stage e)** | Live determinism, issue-order batches, wall block, smoke vs auto-engage, rejection, fog. |
+| `tests/sim/breach.test.ts` — interactive cases | **Rewritten (Stage e)** | Live harness. |
+| `tests/sim/brimstone.test.ts` — interactive cases | **Rewritten (Stage e)** | Live harness. |
+| `tests/sim/live-round.test.ts` — window parity | **Rewritten (Stage e)** | Compares against frozen window-parity fixtures. |
+| `tests/sim/breach.test.ts` / `brimstone.test.ts` — catalog drift, pure apply paths | **Kept** | Never used the window API. |
 | `tests/ui/round-play.test.tsx` | **Rewritten (Stage b)** | Live flow: immediate orders, Space/speed, right-click move, replay, fog, ult/buy/charges. |
 | `tests/ui/DraftPanel.test.tsx` | **Rewritten (Stage b)** | Dropped Resolve/Step timeline; keeps catalog coverage + scenario export. |
 | `tests/ui/hostLoop.test.ts` | **New (Stage b)** | Pure host clock. |
 | `tests/ui/replayFile.test.ts` | **New (Stage b)** | Replay JSON round trip. |
-| `tests/sim/live-round.test.ts` | **New** | Live API coverage for Stage a. |
-| Scripted `runScenario` tests | **Keep** | Unrelated to windows. |
-
-Stage (e) will rewrite window harnesses to live helpers; until then do not delete window tests.
+| Scripted `runScenario` tests | **Kept** | Unrelated to windows. |

@@ -21,20 +21,12 @@ import { createInstance } from "../../src/sim/agents/state.ts";
 import { buyCharge } from "../../src/sim/economy/buy.ts";
 import { STATUS_COMBAT_STIM, STATUS_HASTE, hasStatus } from "../../src/sim/effects/status.ts";
 import { DRILL_HALL, DRILL_HALL_DOORWAY } from "../../src/sim/map/drill-hall.ts";
-import {
-  isRound,
-  openRound,
-  resolveWindow,
-  submitPlan,
-  view,
-  type Round,
-  type WindowOrder,
-} from "../../src/sim/round.ts";
+import { truthLiveWorld, viewLive } from "../../src/sim/live-round.ts";
 import { autoFireIntervalFor, createWorld, runScenario } from "../../src/sim/run.ts";
 import { createDefaultDrill } from "../../src/sim/scenario/default-drill.ts";
 import type { Scenario } from "../../src/sim/scenario/types.ts";
 import { STANDARD_RULESET } from "../../src/rules/ruleset.ts";
-import { defenseHoldPlan } from "../../src/tactics/defense-stub.ts";
+import { advance, issueRejected, mustOpenLive, playAttack } from "./support/live-harness.ts";
 
 type RefAbility = {
   name: string;
@@ -75,8 +67,8 @@ describe("Brimstone stage-1 kit", () => {
   });
 
   it("rejects Stim Beacon owned only by Brimstone", () => {
-    const round = mustOpen(brimScenario(1));
-    const failed = submitPlan(round, "defense", [
+    const round = mustOpenLive(brimScenario(1));
+    const code = issueRejected(round, "defense", [
       {
         kind: "cast",
         instanceId: "jett-defense",
@@ -84,9 +76,7 @@ describe("Brimstone stage-1 kit", () => {
         target: { xMm: 10000, yMm: 6000 },
       },
     ]);
-    expect(failed.ok).toBe(false);
-    if (failed.ok) return;
-    expect(failed.code).toBe("ability-not-owned");
+    expect(code).toBe("ability-not-owned");
   });
 
   it("buys Stim Beacon and Incendiary charges and spends them", () => {
@@ -109,14 +99,14 @@ describe("Brimstone stage-1 kit", () => {
     expect(molt.agent.charges[INCENDIARY_ID]).toBe(1);
     expect(molt.agent.credits).toBe(350);
 
-    let round = mustOpen(
+    const round = mustOpenLive(
       brimScenario(2, {
         brimAt: { xMm: 3000, yMm: 2000 },
         enemyAt: { xMm: 11000, yMm: 2000 },
       }),
     );
-    round.state.agents[0]!.charges[STIM_BEACON_ID] = 1;
-    round = mustSubmit(round, "attack", [
+    round.world.agents[0]!.charges[STIM_BEACON_ID] = 1;
+    const stimCast = playAttack(round, [
       {
         kind: "cast",
         instanceId: "brimstone-attack",
@@ -125,25 +115,21 @@ describe("Brimstone stage-1 kit", () => {
         mapTarget: { xMm: 4000, yMm: 2000 },
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const stimCast = resolveWindow(round);
-    expect(stimCast.ok).toBe(true);
-    if (!stimCast.ok) return;
     expect(
-      stimCast.events.some((event) => event.type === "cast-accepted" && event.abilityId === STIM_BEACON_ID),
+      stimCast.some((event) => event.type === "cast-accepted" && event.abilityId === STIM_BEACON_ID),
     ).toBe(true);
-    expect(stimCast.state.agents[0]!.charges[STIM_BEACON_ID]).toBe(0);
+    expect(round.world.agents[0]!.charges[STIM_BEACON_ID]).toBe(0);
   });
 
   it("gates Orbital Strike on 8 ult points and spends them", () => {
-    let round = mustOpen(
+    const round = mustOpenLive(
       brimScenario(3, {
         ultPoints: 0,
         brimAt: { xMm: 3000, yMm: 2000 },
         enemyAt: { xMm: 11000, yMm: 2000 },
       }),
     );
-    round = mustSubmit(round, "attack", [
+    const rejected = playAttack(round, [
       {
         kind: "cast",
         instanceId: "brimstone-attack",
@@ -152,12 +138,8 @@ describe("Brimstone stage-1 kit", () => {
         mapTarget: { xMm: 5000, yMm: 2000 },
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const rejected = resolveWindow(round);
-    expect(rejected.ok).toBe(true);
-    if (!rejected.ok) return;
     expect(
-      rejected.events.some(
+      rejected.some(
         (event) =>
           event.type === "cast-rejected" &&
           event.abilityId === ORBITAL_STRIKE_ID &&
@@ -165,14 +147,14 @@ describe("Brimstone stage-1 kit", () => {
       ),
     ).toBe(true);
 
-    let armed = mustOpen(
+    const armed = mustOpenLive(
       brimScenario(4, {
         ultPoints: 8,
         brimAt: { xMm: 3000, yMm: 2000 },
         enemyAt: { xMm: 11000, yMm: 2000 },
       }),
     );
-    armed = mustSubmit(armed, "attack", [
+    const accepted = playAttack(armed, [
       {
         kind: "cast",
         instanceId: "brimstone-attack",
@@ -181,25 +163,21 @@ describe("Brimstone stage-1 kit", () => {
         mapTarget: { xMm: 5000, yMm: 2000 },
       },
     ]);
-    armed = mustSubmit(armed, "defense", holdDefense(armed));
-    const accepted = resolveWindow(armed);
-    expect(accepted.ok).toBe(true);
-    if (!accepted.ok) return;
     expect(
-      accepted.events.some((event) => event.type === "cast-accepted" && event.abilityId === ORBITAL_STRIKE_ID),
+      accepted.some((event) => event.type === "cast-accepted" && event.abilityId === ORBITAL_STRIKE_ID),
     ).toBe(true);
-    expect(accepted.state.agents[0]!.ultimatePoints).toBe(0);
+    expect(armed.world.agents[0]!.ultimatePoints).toBe(0);
   });
 
   it("applies Stim Beacon buffs in radius with 4 s linger, Haste walk, Combat Stim fire rate", () => {
-    let round = mustOpen(
+    const round = mustOpenLive(
       brimScenario(5, {
         brimAt: { xMm: 3000, yMm: 2000 },
         enemyAt: { xMm: 11000, yMm: 2000 },
         allyAt: { xMm: 3500, yMm: 2000 },
       }),
     );
-    round = mustSubmit(round, "attack", [
+    playAttack(round, [
       {
         kind: "cast",
         instanceId: "brimstone-attack",
@@ -208,42 +186,32 @@ describe("Brimstone stage-1 kit", () => {
         mapTarget: { xMm: 3200, yMm: 2000 },
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const placed = resolveWindow(round);
-    expect(placed.ok).toBe(true);
-    if (!placed.ok) return;
-    expect(placed.state.devices.some((device) => device.kind === "stim-beacon")).toBe(true);
-    const ally = placed.state.agents.find((agent) => agent.instanceId === "kayo-attack");
-    expect(ally && hasStatus(ally, STATUS_COMBAT_STIM, placed.state.timeMs)).toBe(true);
-    expect(ally && hasStatus(ally, STATUS_HASTE, placed.state.timeMs)).toBe(true);
+    expect(round.world.devices.some((device) => device.kind === "stim-beacon")).toBe(true);
+    const ally = round.world.agents.find((agent) => agent.instanceId === "kayo-attack");
+    expect(ally && hasStatus(ally, STATUS_COMBAT_STIM, round.world.timeMs)).toBe(true);
+    expect(ally && hasStatus(ally, STATUS_HASTE, round.world.timeMs)).toBe(true);
     expect(ally?.statuses.find((status) => status.id === STATUS_COMBAT_STIM)?.modifiers?.reloadTime).toBe(0.9);
-    expect(autoFireIntervalFor(ally!, placed.state.timeMs, STANDARD_RULESET)).toBe(
+    expect(autoFireIntervalFor(ally!, round.world.timeMs, STANDARD_RULESET)).toBe(
       Math.round(STANDARD_RULESET.autoFireIntervalMs / 1.1),
     );
 
     // Enemy fog hides beacon radius.
-    expect(view(placed.round, "defense").devices).toEqual([]);
-    expect(view(placed.round, "attack").devices.length).toBe(1);
+    expect(viewLive(round, "defense").devices).toEqual([]);
+    expect(viewLive(round, "attack").devices.length).toBe(1);
 
     // Leave radius: move ally far, then hold until linger would still apply briefly.
-    round = placed.round;
-    round = mustSubmit(round, "attack", [
-      { kind: "move", instanceId: "kayo-attack", to: { xMm: 3000, yMm: 10500 } },
+    playAttack(round, [
+      { kind: "move-route", instanceId: "kayo-attack", waypoints: [{ xMm: 3000, yMm: 10500 }] },
       { kind: "hold", instanceId: "brimstone-attack" },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const left = resolveWindow(round);
-    expect(left.ok).toBe(true);
-    if (!left.ok) return;
-    const moved = left.state.agents.find((agent) => agent.instanceId === "kayo-attack");
-    expect(moved && hasStatus(moved, STATUS_HASTE, left.state.timeMs)).toBe(true);
+    const moved = round.world.agents.find((agent) => agent.instanceId === "kayo-attack");
+    expect(moved && hasStatus(moved, STATUS_HASTE, round.world.timeMs)).toBe(true);
     // After linger window (4s) from last pulse while inside — advance holds past linger.
-    round = left.round;
     for (let i = 0; i < 3; i += 1) {
-      round = advanceHold(round);
+      advance(round);
     }
-    const cooled = round.state.agents.find((agent) => agent.instanceId === "kayo-attack");
-    expect(cooled && hasStatus(cooled, STATUS_HASTE, round.state.timeMs)).toBe(false);
+    const cooled = round.world.agents.find((agent) => agent.instanceId === "kayo-attack");
+    expect(cooled && hasStatus(cooled, STATUS_HASTE, round.world.timeMs)).toBe(false);
   });
 
   it("resolves Incendiary bounces, wall clip, ticks, and no allied damage", () => {
@@ -301,13 +269,13 @@ describe("Brimstone stage-1 kit", () => {
     expect(dealt).toBeGreaterThanOrEqual(fullSizeDamage);
     expect(ally.hp).toBe(allyStart);
 
-    let round = mustOpen(
+    const round = mustOpenLive(
       brimScenario(66, {
         brimAt: { xMm: 3000, yMm: 2000 },
         enemyAt: { xMm: 11000, yMm: 2000 },
       }),
     );
-    round = mustSubmit(round, "attack", [
+    const first = playAttack(round, [
       {
         kind: "cast",
         instanceId: "brimstone-attack",
@@ -316,15 +284,9 @@ describe("Brimstone stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const first = resolveWindow(round);
-    expect(first.ok).toBe(true);
-    if (!first.ok) return;
-    round = first.round;
-    let detonated = first.events.find((event) => event.type === "incendiary-detonated");
+    let detonated = first.find((event) => event.type === "incendiary-detonated");
     for (let i = 0; i < 4 && !detonated; i += 1) {
-      round = advanceHold(round);
-      detonated = round.lastWindowEvents.find((event) => event.type === "incendiary-detonated");
+      detonated = advance(round).find((event) => event.type === "incendiary-detonated");
     }
     expect(detonated?.type).toBe("incendiary-detonated");
 
@@ -399,7 +361,7 @@ describe("Brimstone stage-1 kit", () => {
     expect(dealt).toBe(400);
     expect(world.agents.find((agent) => agent.instanceId === "kayo-attack")!.hp).toBe(allyStart);
 
-    let round = mustOpen(
+    const round = mustOpenLive(
       brimScenario(7, {
         ultPoints: 8,
         brimAt: { xMm: 3000, yMm: 2000 },
@@ -408,7 +370,7 @@ describe("Brimstone stage-1 kit", () => {
         allyAt: { xMm: 3200, yMm: 2000 },
       }),
     );
-    round = mustSubmit(round, "attack", [
+    const castWindow = playAttack(round, [
       {
         kind: "cast",
         instanceId: "brimstone-attack",
@@ -417,18 +379,12 @@ describe("Brimstone stage-1 kit", () => {
         mapTarget: { xMm: 5000, yMm: 2000 },
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const castWindow = resolveWindow(round);
-    expect(castWindow.ok).toBe(true);
-    if (!castWindow.ok) return;
-    round = castWindow.round;
-    let sawActivate = castWindow.events.some((event) => event.type === "orbital-activated");
+    let sawActivate = castWindow.some((event) => event.type === "orbital-activated");
     if (!sawActivate) {
-      round = advanceHold(round);
-      sawActivate = round.lastWindowEvents.some((event) => event.type === "orbital-activated");
+      sawActivate = advance(round).some((event) => event.type === "orbital-activated");
     }
     expect(sawActivate).toBe(true);
-    expect(round.state.smokes.some((item) => item.abilityId === ORBITAL_STRIKE_ID)).toBe(true);
+    expect(round.world.smokes.some((item) => item.abilityId === ORBITAL_STRIKE_ID)).toBe(true);
   });
 
   it("keeps Sky Smoke scripted scenarios working via mapTarget routing", () => {
@@ -440,8 +396,8 @@ describe("Brimstone stage-1 kit", () => {
     );
     expect(result.events.some((event) => event.type === "smoke-active")).toBe(true);
 
-    let round = mustOpen(createDefaultDrill(10));
-    round = mustSubmit(round, "attack", [
+    const round = mustOpenLive(createDefaultDrill(10));
+    const smoked = playAttack(round, [
       {
         kind: "cast",
         instanceId: "brimstone-attack",
@@ -450,11 +406,7 @@ describe("Brimstone stage-1 kit", () => {
         mapTarget: DRILL_HALL_DOORWAY,
       },
     ]);
-    round = mustSubmit(round, "defense", defenseHoldPlan(round));
-    const smoked = resolveWindow(round);
-    expect(smoked.ok).toBe(true);
-    if (!smoked.ok) return;
-    const accepted = smoked.events.find((event) => event.type === "cast-accepted");
+    const accepted = smoked.find((event) => event.type === "cast-accepted");
     expect(accepted?.type).toBe("cast-accepted");
     if (accepted?.type === "cast-accepted") {
       expect(accepted.target).toEqual(DRILL_HALL_DOORWAY);
@@ -464,7 +416,7 @@ describe("Brimstone stage-1 kit", () => {
   it("deep-equals for the same seed and Brimstone plans", () => {
     const first = playBrim(11);
     const second = playBrim(11);
-    expect(first.state).toEqual(second.state);
+    expect(first.world).toEqual(second.world);
     expect(first.events).toEqual(second.events);
   });
 });
@@ -515,47 +467,14 @@ function brimScenario(
   };
 }
 
-function mustOpen(scenario: Scenario): Round {
-  const opened = openRound(scenario);
-  expect(isRound(opened)).toBe(true);
-  if (!isRound(opened)) throw new Error(opened.message);
-  return opened;
-}
-
-function mustSubmit(round: Round, side: "attack" | "defense", orders: WindowOrder[]): Round {
-  const result = submitPlan(round, side, orders);
-  expect(result.ok).toBe(true);
-  if (!result.ok) throw new Error(`${result.code}: ${result.message}`);
-  return result.round;
-}
-
-function holdDefense(round: Round): WindowOrder[] {
-  return defenseHoldPlan(round);
-}
-
-function advanceHold(round: Round): Round {
-  let next = mustSubmit(
-    round,
-    "attack",
-    round.state.agents
-      .filter((agent) => agent.side === "attack" && agent.alive)
-      .map((agent) => ({ kind: "hold" as const, instanceId: agent.instanceId })),
-  );
-  next = mustSubmit(next, "defense", holdDefense(next));
-  const resolved = resolveWindow(next);
-  expect(resolved.ok).toBe(true);
-  if (!resolved.ok) throw new Error(resolved.message);
-  return resolved.round;
-}
-
 function playBrim(seed: number) {
-  let round = mustOpen(
+  const round = mustOpenLive(
     brimScenario(seed, {
       brimAt: { xMm: 3000, yMm: 2000 },
       enemyAt: { xMm: 11000, yMm: 2000 },
     }),
   );
-  round = mustSubmit(round, "attack", [
+  const resolved = playAttack(round, [
     {
       kind: "cast",
       instanceId: "brimstone-attack",
@@ -564,9 +483,5 @@ function playBrim(seed: number) {
       mapTarget: { xMm: 3500, yMm: 2000 },
     },
   ]);
-  round = mustSubmit(round, "defense", holdDefense(round));
-  const resolved = resolveWindow(round);
-  expect(resolved.ok).toBe(true);
-  if (!resolved.ok) throw new Error(resolved.message);
-  return { state: resolved.state, events: resolved.events };
+  return { world: truthLiveWorld(round), events: resolved };
 }

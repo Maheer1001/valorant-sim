@@ -1,6 +1,6 @@
 # Project status
 
-Updated: 18 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Live round Stages (a)–(d2)** are in: pauseable host loop, smooth motion, immediate orders, round timer, replay, board-first layout, multi-select, hotkeys, ability/path previews, and pre-round buy/plan UI. Spike and a real opponent are not done.
+Updated: 20 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Live round Stages (a)–(e)** are in: pauseable host loop, smooth motion, immediate orders, round timer, replay, board-first layout, multi-select, hotkeys, ability/path previews, and pre-round buy/plan UI. The old windowed API is gone (Stage e). Spike and a real opponent are not done.
 
 Agent records for patch 13.10 are in `agent-reference.json`. That file is a reference, not the sim catalog. Breach and Brimstone catalog numbers are guarded against drift by `tests/sim/breach.test.ts` and `tests/sim/brimstone.test.ts`.
 
@@ -12,7 +12,7 @@ No backend. No machine-learning runtime. Opponent code, when it exists, will be 
 
 ## Architecture
 
-One package. `src/sim`, `src/tactics`, `src/learning`, `src/persistence`, and `src/rules` do not import React or the UI. A boundary test scans those folders. The UI holds a mutable `LiveRound` in a ref (plus a version counter) and renders fogged or truth snapshots. The old windowed `Round` API remains as a shim for characterization tests.
+One package. `src/sim`, `src/tactics`, `src/learning`, `src/persistence`, and `src/rules` do not import React or the UI. A boundary test scans those folders. The UI holds a mutable `LiveRound` in a ref (plus a version counter) and renders fogged or truth snapshots. The old windowed `Round` API (`openRound` / `submitPlan` / `resolveWindow`) was deleted in Stage (e); the live runner is the only interactive engine.
 
 ```text
 src/
@@ -36,7 +36,6 @@ src/
     rng.ts
     clock.ts
     run.ts
-    round.ts
     live-round.ts
     session.ts
     describe.ts
@@ -74,7 +73,7 @@ tests/
 
 `runScenario` executes scenario orders only. It does not call `DecisionContext` or write learning records. Those modules export their contracts and version constants so later milestones can fill them without reshaping the runner.
 
-`openLiveRound` / `issueOrders` / `stepLive` run the live interactive layer. The host loop converts wall-clock elapsed and speed into a step count; `viewLive(side)` returns fog-of-war. `defenseHoldDecide` is a hold-position stub in `tactics/`. `openRound` / `submitPlan` / `resolveWindow` remain as the Stage (a) compatibility shim.
+`openLiveRound` / `issueOrders` / `stepLive` run the live interactive layer. The host loop converts wall-clock elapsed and speed into a step count; `viewLive(side)` returns fog-of-war. `defenseHoldDecide` is a hold-position stub in `tactics/`.
 
 Coverage is the only composition evaluator. `PLANNED_EVALUATORS` names map suitability, synergy, counter-composition, and supported plans. `evaluateCoverage` accepts an opposing profile and does not score it. A coverage report is not a match prediction.
 
@@ -97,7 +96,6 @@ Standard ruleset id: `standard-competitive`.
 | Team size 5 | `teamSize` | secondary. Wiki gameplay summary says ten players are split into two teams. Not confirmed in the live client. |
 | Agent uniqueness | `per-team` | secondary. The same page says one of each agent can be selected on each team, and that the other team's locks stay hidden until the first buy phase. That is not a cross-team ban. Not confirmed in the live client, so it is not verified. |
 | `per-match` and `none` | selectable on a ruleset | available for later modes and tests. They are not the standard ruleset. |
-| Planning window 3000 ms | `windowMs` | assumed. Retained for the `resolveWindow` shim only. |
 | Sim step 50 ms | `simStepMs` | assumed. Live runner fixed step; wall-clock only changes steps per frame. |
 | Round duration 100000 ms | `roundDurationMs` | owner. Live round timer; defense wins on timeout until spike exists. |
 | Buy phase 30000 ms | `buyPhaseMs` | assumed. Unused until pre-round UI. |
@@ -319,9 +317,8 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 - Drill Hall is smaller than Sky Smoke 55 m / Orbital 60 m cast ranges, so out-of-range map clicks cannot occur on this map; the UI still guards with `pointInRange` + message (covered by unit tests).
 - No IndexedDB. Persistence is versioned JSON text.
 - Uniqueness and team size are secondary, not client-verified.
-- Planning window, walk speed, auto-fire interval, and the assumed/design tables above are lab values.
+- Sim step, walk speed, auto-fire interval, and the assumed/design tables above are lab values.
 - No armor. Auto-engage and player shoot orders use Rifle A only.
-- Mid-window moves that finish after the window end are advanced by integer lerp and carried in the pending queue.
 
 ## Roadmap
 
@@ -345,7 +342,7 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 
 API in `src/sim/live-round.ts`: `openLiveRound`, `issueOrders`, `stepLive`, `replayOrderLog`, `viewLive`, `drainJobsUntil`. Standing orders (`hold` / `move-route`), append-only order log, fixed `simStepMs`, round result (`attack-eliminated` | `defense-eliminated` | `timeout`), injectable `LiveDecideFn` on fogged `view` only. Pause = host skips `stepLive`.
 
-`resolveWindow` is a **compatibility shim** over stepped `drainJobsUntil` with the old window enqueue (including pre-batched auto-engage). Characterization fixtures: `tests/fixtures/characterization/`. Migration notes: [`docs/live-round-migration.md`](docs/live-round-migration.md). Plan: [`docs/live-round-plan.md`](docs/live-round-plan.md).
+`resolveWindow` was a **compatibility shim** over stepped `drainJobsUntil` with the old window enqueue (including pre-batched auto-engage). It was removed in Stage (e). Characterization fixtures: `tests/fixtures/characterization/`. Migration notes: [`docs/live-round-migration.md`](docs/live-round-migration.md). Plan: [`docs/live-round-plan.md`](docs/live-round-plan.md).
 
 ## Live UI — Stage (b) (18 November 2026)
 
@@ -377,7 +374,21 @@ App boots into pre-round (attackers at spawn only). Host buy timer with Hold tog
 
 - Spike plant / defuse
 - Real opponent (hold stub + decide hook only)
-- Retiring the window API (Stage e)
+
+### Retire the window layer — Stage (e) (20 November 2026)
+
+Deleted `src/sim/round.ts` (`openRound`, `submitPlan`, `resolveWindow`, `view`, `snapshotRound`, `stepRound`, `WindowOrder`, `RoundState`). Removed `windowMs` / `WINDOW_MS_PROVENANCE` from the ruleset, the `missing-plan` and `plan-already-submitted` rejection codes, `defenseHoldPlan`, and the shim-only `onEvent` hook on `drainJobsUntil`. `PlanFailure` now lives in `live-round.ts`.
+
+Tests: Breach, Brimstone and round suites run on the live engine through `tests/sim/support/live-harness.ts` (`mustOpenLive`, `mustIssue`, `issueRejected`, `advance`, `playAttack`). No case was dropped. Live/window ability parity now compares against ability events recorded from the shim just before deletion (`tests/fixtures/window-parity/`). Characterization fixtures were re-recorded from the live engine (same orders, same total sim time) and gain a `result` field; regenerate with `VALSIM_UPDATE_FIXTURES=1`. One invariant changed meaning: same-instant batches now apply in issue order, not sorted by agent id (see [`docs/live-round-migration.md`](docs/live-round-migration.md)).
+
+### Checks (Live Stage e — `npm run check`, 20 November 2026)
+
+| Step | Result |
+| --- | --- |
+| lint | Pass. ESLint completed with no findings. |
+| typecheck | Pass. `tsc --noEmit` completed with no errors. |
+| test | Pass. Vitest 5.0.5, 25 files, 156 tests. |
+| build | Pass. Vite 8.3.4 produced `dist/`. |
 
 ### Checks (Live Stage d1 fix — `npm run check`, 18 November 2026)
 
@@ -401,4 +412,4 @@ Browser check at 1366x768 (dev server): `documentElement.scrollHeight` = `client
 
 ## Next task
 
-Stage (e) retire window shim, or Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md). Keep sim free of React.
+Stage 3 Raze per [`docs/stage-3-plan.md`](docs/stage-3-plan.md), built on the live engine only (the plan's window references are superseded; see its note). Keep sim free of React.

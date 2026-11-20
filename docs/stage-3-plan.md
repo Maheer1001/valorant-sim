@@ -4,7 +4,7 @@ Tag: **design**. Implementation plan only; no `src/` changes in this document. T
 
 All four Raze abilities are **sheet**-sourced in `agent-reference.json`. Do not upgrade tags. Invent no numbers. Economy beyond what these four abilities need is out of scope except kill-linked signature recharge for Paint Shells.
 
-Related: live-round migration is planned separately in [`docs/live-round-plan.md`](live-round-plan.md). This stage-3 plan assumes the **current** turn / window layer (`src/sim/round.ts`) unless noted; designs should stay compatible with a later live stepper (jobs + integer ms/mm).
+Related: live-round migration is planned separately in [`docs/live-round-plan.md`](live-round-plan.md). This plan was written against the windowed layer (`src/sim/round.ts`). **That layer was deleted in Stage (e) (20 November 2026).** Read every window / `resolveWindow` / `openRound` reference below as the live runner (`openLiveRound` / `issueOrders` / `stepLive` in `src/sim/live-round.ts`); jobs, followups and integer ms/mm are unchanged.
 
 ## 1. Primitives and extra rules
 
@@ -183,7 +183,7 @@ Integer ms/mm; jobs still ordered `(timeMs, sequence, agentId)`.
 6. **Concuss:** if a concuss status is applied to the device (from future/foreign abilities), multiply speed by `concussWalkSpeedMultiplierBp`. Boom Bot does not apply concuss itself.
 7. **Detonation:** per §2 sequence; damage zone ignores Raze (`damagesRaze: false`); no ally damage.
 
-Works inside a planning window: bot continues via `pendingJobs` / followup ticks across `windowEnd` the same way Incendiary ticks do today.
+Runs on the live stepper: bot continues via followup ticks on the live queue the same way Incendiary ticks do today.
 
 ### Alternative (**design**)
 
@@ -209,9 +209,9 @@ Flag: magnitudes are **assumed**; do not invent heights; do not use Rolling Thun
 | Where kill counts live | On `AgentBody` / `AgentInstance`: `signatureKillProgress: Record<abilityId, number>` or a single `signatureKillsTowardCharge` while the signature ability id is known from definition. |
 | What counts | A kill event where this agent is the **killer** in the existing ult ledger / shot-kill path (`SimEvent` kill). Assists do not count (`givesUltPoints: false` already). |
 | Threshold | At 2 kills, add 1 charge to Paint Shells if below `maxCharges`, then reset that ability’s progress to 0. |
-| Per round | **Reset progress at round start** (and on `openRound`). Charges bought/granted mid-round persist as today. |
+| Per round | **Reset progress at round start** (and on `openLiveRound`). Charges bought/granted mid-round persist as today. |
 | Interaction with ult ledger | Orthogonal: kills still grant ult points per existing rules; signature progress is a separate counter. Spending ult for Showstopper does not clear signature kills. |
-| Window / live | Counter updates inside `applyJob` when a kill is recorded so both `resolveWindow` and a future live stepper see it. |
+| Live | Counter updates inside `applyJob` when a kill is recorded, so `stepLive` and scripted `runScenario` both see it. |
 
 ## 6. File-by-file change plan, tests, UI
 
@@ -226,7 +226,7 @@ Flag: magnitudes are **assumed**; do not invent heights; do not use Rolling Thun
 | `src/sim/agents/state.ts` | `signatureKillProgress` (or equivalent). |
 | `src/sim/combat/` or kill path in `run.ts` | On kill, bump signature progress + maybe grant charge. |
 | `src/sim/effects/` | Shared **DESIGN** falloff helper `damageAtRadius(distance, inner, outer, dMin, dMax)`. |
-| `src/sim/round.ts` | Cast orders already support aim / mapTarget; ensure Raze casts validate ownership/charges/ult. |
+| `src/sim/live-round.ts` | Cast commands already support aim / mapTarget; ensure Raze casts validate ownership/charges/ult in `validateCommand`. |
 | `view(side)` | Boom Bot visibility rules (§3). |
 | `src/rules/ruleset.ts` | ASSUMED / DESIGN constants table entries with provenance. |
 | UI | See below. |

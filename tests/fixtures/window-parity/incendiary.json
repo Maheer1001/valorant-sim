@@ -1,0 +1,754 @@
+{
+  "capturedFrom": "resolveWindow shim before stage (e)",
+  "holdWindows": 5,
+  "events": [
+    {
+      "type": "cast-accepted",
+      "timeMs": 0,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "target": {
+        "xMm": 4500,
+        "yMm": 2000
+      },
+      "chargesRemaining": 0
+    },
+    {
+      "type": "incendiary-detonated",
+      "timeMs": 1100,
+      "agentId": "brimstone-attack",
+      "at": {
+        "xMm": 3999,
+        "yMm": 2000
+      },
+      "bounces": 2,
+      "zoneId": "<id>"
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 1100,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 0,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 1200,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 0,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 1300,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 0,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 1400,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 300,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 1500,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 900,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 1600,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 1500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 1700,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 2100,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 1800,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 2700,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 1900,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 3300,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2000,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 3900,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2100,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2200,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2300,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2400,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2500,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2600,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2700,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2800,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 2900,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3000,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3100,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3200,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3300,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3400,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3500,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3600,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3700,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3800,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 3900,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4000,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4100,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4200,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4300,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4400,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4500,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4600,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4700,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4800,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 4900,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 5000,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 5100,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 5200,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 5300,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 5400,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 5500,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 5600,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 5700,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 5800,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 5900,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 6000,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 6100,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 6200,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 6300,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 6400,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 6500,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 6600,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 6700,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 6800,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 6900,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 7000,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 7100,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 7200,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 7300,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 7400,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 7500,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 7600,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 7700,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 7800,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 7900,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 8000,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 8100,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 8200,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 8300,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 8400,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 8500,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 8600,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 8700,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 8800,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 8900,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-damage",
+      "timeMs": 9000,
+      "agentId": "brimstone-attack",
+      "abilityId": "incendiary",
+      "zoneId": "<id>",
+      "radiusMm": 4500,
+      "hits": []
+    },
+    {
+      "type": "zone-expired",
+      "timeMs": 9100,
+      "agentId": "brimstone-attack",
+      "zoneId": "<id>"
+    }
+  ]
+}

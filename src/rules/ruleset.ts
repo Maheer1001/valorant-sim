@@ -9,12 +9,6 @@ export type Ruleset = {
   teamSizeProvenance: Provenance;
   uniqueness: UniquenessScope;
   uniquenessProvenance: Provenance;
-  /**
-   * Planning window length in integer milliseconds.
-   * Kept for the resolveWindow compatibility shim only.
-   */
-  windowMs: number;
-  windowMsProvenance: Provenance;
   /** Fixed simulation step for the live runner. */
   simStepMs: number;
   simStepMsProvenance: Provenance;
@@ -27,7 +21,7 @@ export type Ruleset = {
   /** How often an injectable opponent decide() may run in sim time. */
   decisionIntervalMs: number;
   decisionIntervalMsProvenance: Provenance;
-  /** Straight-line walk speed for window move orders, millimeters per second. */
+  /** Straight-line walk speed for move-route segments, millimeters per second. */
   walkSpeedMmPerSec: number;
   walkSpeedProvenance: Provenance;
   /** Auto-engage shot interval for agents without a shoot order. */
@@ -68,12 +62,6 @@ export type Ruleset = {
 
 const WIKI_GAMEPLAY = "https://wiki.playvalorant.com/en-us/VALORANT";
 
-export const WINDOW_MS_PROVENANCE: Provenance = {
-  kind: "assumed",
-  source: "milestone-2",
-  note: "Interactive rounds plan in fixed 3000 ms windows. This is a lab turn length, not a Valorant timer. Retained for the resolveWindow shim.",
-};
-
 export const SIM_STEP_MS_PROVENANCE: Provenance = {
   kind: "assumed",
   source: "live-round-plan",
@@ -101,7 +89,7 @@ export const DECISION_INTERVAL_MS_PROVENANCE: Provenance = {
 export const WALK_SPEED_PROVENANCE: Provenance = {
   kind: "assumed",
   source: "milestone-2",
-  note: "Window moves use 3500 mm/s straight-line walk speed. This matches the milestone-1 drill script and is not a measured Valorant walk speed.",
+  note: "Move routes use 3500 mm/s straight-line walk speed. This matches the milestone-1 drill script and is not a measured Valorant walk speed.",
 };
 
 export const AUTO_FIRE_INTERVAL_PROVENANCE: Provenance = {
@@ -170,7 +158,7 @@ export const STIM_BEACON_PULSE_PROVENANCE: Provenance = {
  * was read for this build. They were not confirmed in the live client or in
  * a Riot patch note, so neither field is tagged verified.
  *
- * Window length, walk speed, and auto-fire interval are assumed lab values.
+ * Sim step, walk speed, and auto-fire interval are assumed lab values.
  */
 export const STANDARD_RULESET: Ruleset = {
   id: "standard-competitive",
@@ -187,8 +175,6 @@ export const STANDARD_RULESET: Ruleset = {
     source: WIKI_GAMEPLAY,
     note: "The same summary says only one of each agent can be selected on each team, and that the other team's locks stay hidden until the first buy phase. That is per-team uniqueness, not a ban on the same agent appearing on both teams. It is not tagged verified.",
   },
-  windowMs: 3000,
-  windowMsProvenance: WINDOW_MS_PROVENANCE,
   simStepMs: 50,
   simStepMsProvenance: SIM_STEP_MS_PROVENANCE,
   roundDurationMs: 100_000,

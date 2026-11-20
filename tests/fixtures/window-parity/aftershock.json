@@ -1,0 +1,33 @@
+{
+  "capturedFrom": "resolveWindow shim before stage (e)",
+  "holdWindows": 3,
+  "events": [
+    {
+      "type": "cast-accepted",
+      "timeMs": 0,
+      "agentId": "breach-attack",
+      "abilityId": "aftershock",
+      "target": {
+        "xMm": 7000,
+        "yMm": 6000
+      },
+      "chargesRemaining": 0
+    },
+    {
+      "type": "ability-damage",
+      "timeMs": 2200,
+      "agentId": "breach-attack",
+      "abilityId": "aftershock",
+      "burstIndex": 0,
+      "hits": []
+    },
+    {
+      "type": "ability-damage",
+      "timeMs": 2800,
+      "agentId": "breach-attack",
+      "abilityId": "aftershock",
+      "burstIndex": 1,
+      "hits": []
+    }
+  ]
+}

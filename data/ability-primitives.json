@@ -6,7 +6,7 @@
     "resource.signatureRecharge",
     "resource.ultPoints"
   ],
-  "coreNote": "Charge pools, signature recharge rules, and ult points are engine-wide state, not per-ability primitives. They still appear in RoundState for every agent.",
+  "coreNote": "Charge pools, signature recharge rules, and ult points are engine-wide state, not per-ability primitives. They live on each agent in the live round world.",
   "primitives": {
     "status.concuss": "stun/accuracy debuff for a duration",
     "status.nearsight": "vision radius clamp",

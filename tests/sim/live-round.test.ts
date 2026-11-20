@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   AFTERSHOCK_ID,
@@ -24,19 +27,11 @@ import {
   type OrderLogEntry,
 } from "../../src/sim/live-round.ts";
 import { DRILL_HALL } from "../../src/sim/map/drill-hall.ts";
-import {
-  isRound,
-  openRound,
-  resolveWindow,
-  submitPlan,
-  type Round,
-  type WindowOrder,
-} from "../../src/sim/round.ts";
 import type { SimEvent } from "../../src/sim/run.ts";
 import { createDefaultDrill } from "../../src/sim/scenario/default-drill.ts";
 import type { Scenario } from "../../src/sim/scenario/types.ts";
 import { STANDARD_RULESET } from "../../src/rules/ruleset.ts";
-import { defenseHoldDecide, defenseHoldPlan } from "../../src/tactics/defense-stub.ts";
+import { defenseHoldDecide } from "../../src/tactics/defense-stub.ts";
 
 const ABILITY_PARITY_TYPES = new Set([
   "cast-accepted",
@@ -86,7 +81,6 @@ describe("live round ruleset constants", () => {
     expect(STANDARD_RULESET.buyPhaseMsProvenance.kind).toBe("assumed");
     expect(STANDARD_RULESET.decisionIntervalMs).toBe(500);
     expect(STANDARD_RULESET.decisionIntervalMsProvenance.kind).toBe("assumed");
-    expect(STANDARD_RULESET.windowMs).toBe(3000);
   });
 });
 
@@ -294,7 +288,21 @@ describe("live ability timings", () => {
   });
 });
 
-describe("live vs window shim ability parity", () => {
+/**
+ * Ability events recorded from the retired `resolveWindow` shim (one cast window
+ * plus N hold windows of 3000 ms) just before Stage (e) deleted it.
+ */
+const PARITY_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "../fixtures/window-parity");
+const WINDOW_MS = 3000;
+
+function windowParity(id: string): { holdWindows: number; events: unknown[] } {
+  return JSON.parse(readFileSync(path.join(PARITY_DIR, `${id}.json`), "utf8")) as {
+    holdWindows: number;
+    events: unknown[];
+  };
+}
+
+describe("live vs retired window shim ability parity", () => {
   it("matches Aftershock ability events exactly (no LOS, no combat noise)", () => {
     // Defender behind the wall — no auto-fire draws; ability geometry still resolves.
     const scenario = parityBreachScenario(11);
@@ -305,9 +313,9 @@ describe("live vs window shim ability parity", () => {
       target: { xMm: 7000, yMm: 6000 },
       aimYawDeg: 0,
     };
-    const windowEvents = runWindowCast(scenario, cast, 3);
-    const liveEvents = runLiveCast(scenario, cast, STANDARD_RULESET.windowMs * 3);
-    expect(abilityParityEvents(liveEvents)).toEqual(abilityParityEvents(windowEvents));
+    const recorded = windowParity("aftershock");
+    const liveEvents = runLiveCast(scenario, cast, WINDOW_MS * recorded.holdWindows);
+    expect(abilityParityEvents(liveEvents)).toEqual(recorded.events);
   });
 
   it("matches Orbital Strike ability events exactly (target empty, defender out of range/LOS)", () => {
@@ -320,9 +328,9 @@ describe("live vs window shim ability parity", () => {
       target: { xMm: 4500, yMm: 2000 },
       mapTarget: { xMm: 4500, yMm: 2000 },
     };
-    const windowEvents = runWindowCast(scenario, cast, 4);
-    const liveEvents = runLiveCast(scenario, cast, STANDARD_RULESET.windowMs * 4);
-    expect(abilityParityEvents(liveEvents)).toEqual(abilityParityEvents(windowEvents));
+    const recorded = windowParity("orbital");
+    const liveEvents = runLiveCast(scenario, cast, WINDOW_MS * recorded.holdWindows);
+    expect(abilityParityEvents(liveEvents)).toEqual(recorded.events);
   });
 
   it("matches Incendiary ability events exactly (defender out of LOS and out of molly)", () => {
@@ -334,9 +342,9 @@ describe("live vs window shim ability parity", () => {
       target: { xMm: 4500, yMm: 2000 },
       aimYawDeg: 0,
     };
-    const windowEvents = runWindowCast(scenario, cast, 5);
-    const liveEvents = runLiveCast(scenario, cast, STANDARD_RULESET.windowMs * 5);
-    expect(abilityParityEvents(liveEvents)).toEqual(abilityParityEvents(windowEvents));
+    const recorded = windowParity("incendiary");
+    const liveEvents = runLiveCast(scenario, cast, WINDOW_MS * recorded.holdWindows);
+    expect(abilityParityEvents(liveEvents)).toEqual(recorded.events);
   });
 });
 
@@ -531,37 +539,6 @@ function parityBrimScenario(seed: number, ultPoints: number): Scenario {
   };
 }
 
-function runWindowCast(
-  scenario: Scenario,
-  cast: Extract<WindowOrder, { kind: "cast" }>,
-  holdWindows: number,
-): SimEvent[] {
-  let round = mustOpenWindow(scenario);
-  round = mustSubmitWindow(round, "attack", [cast]);
-  round = mustSubmitWindow(round, "defense", defenseHoldPlan(round));
-  const first = resolveWindow(round);
-  expect(first.ok).toBe(true);
-  if (!first.ok) throw new Error(first.message);
-  const events = [...first.events];
-  round = first.round;
-  for (let i = 0; i < holdWindows; i += 1) {
-    round = mustSubmitWindow(
-      round,
-      "attack",
-      round.state.agents
-        .filter((agent) => agent.side === "attack" && agent.alive)
-        .map((agent) => ({ kind: "hold" as const, instanceId: agent.instanceId })),
-    );
-    round = mustSubmitWindow(round, "defense", defenseHoldPlan(round));
-    const step = resolveWindow(round);
-    expect(step.ok).toBe(true);
-    if (!step.ok) throw new Error(step.message);
-    events.push(...step.events);
-    round = step.round;
-  }
-  return events;
-}
-
 function runLiveCast(
   scenario: Scenario,
   cast: Extract<AgentCommand, { kind: "cast" }>,
@@ -579,20 +556,6 @@ function mustOpenLive(scenario: Scenario): LiveRound {
   expect(isLiveRound(opened)).toBe(true);
   if (!isLiveRound(opened)) throw new Error(opened.message);
   return opened;
-}
-
-function mustOpenWindow(scenario: Scenario): Round {
-  const opened = openRound(scenario);
-  expect(isRound(opened)).toBe(true);
-  if (!isRound(opened)) throw new Error(opened.message);
-  return opened;
-}
-
-function mustSubmitWindow(round: Round, side: "attack" | "defense", orders: WindowOrder[]): Round {
-  const result = submitPlan(round, side, orders);
-  expect(result.ok).toBe(true);
-  if (!result.ok) throw new Error(result.message);
-  return result.round;
 }
 
 function mustReplay(scenario: Scenario, log: OrderLogEntry[], untilMs: number): LiveRound {

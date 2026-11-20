@@ -416,7 +416,7 @@ const mapping = {
   patch: ref.patch,
   core: CORE,
   coreNote:
-    "Charge pools, signature recharge rules, and ult points are engine-wide state, not per-ability primitives. They still appear in RoundState for every agent.",
+    "Charge pools, signature recharge rules, and ult points are engine-wide state, not per-ability primitives. They live on each agent in the live round world.",
   primitives: PRIMITIVE_DEFS,
   abilities,
   auditFixes,

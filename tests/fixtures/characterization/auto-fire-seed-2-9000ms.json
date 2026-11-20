@@ -1,5 +1,5 @@
 {
-  "id": "auto-fire-seed-2-windows-3",
+  "id": "auto-fire-seed-2-9000ms",
   "events": [
     {
       "type": "shot",
@@ -106,66 +106,17 @@
       "targetHpAfter": 0
     },
     {
-      "type": "shot-withheld",
-      "timeMs": 4000,
+      "type": "round-ended",
+      "timeMs": 3000,
       "sequence": 9,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "shooter-down"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 4000,
-      "sequence": 10,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 5000,
-      "sequence": 11,
-      "agentId": "brimstone-attack",
-      "targetInstanceId": "brimstone-attack",
-      "reason": "shooter-down"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 5000,
-      "sequence": 12,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 6000,
-      "sequence": 13,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 7000,
-      "sequence": 14,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
-    },
-    {
-      "type": "shot-withheld",
-      "timeMs": 8000,
-      "sequence": 15,
-      "agentId": "jett-defense",
-      "targetInstanceId": "jett-defense",
-      "reason": "no-line-of-sight"
+      "agentId": "",
+      "result": {
+        "kind": "attack-eliminated"
+      }
     }
   ],
-  "finalState": {
-    "seed": 2,
-    "windowIndex": 3,
-    "timeMs": 9000,
+  "finalWorld": {
+    "timeMs": 3000,
     "agents": [
       {
         "instanceId": "brimstone-attack",
@@ -204,9 +155,9 @@
     ],
     "smokes": [],
     "devices": [],
-    "zones": [],
-    "mapId": "drill-hall",
-    "rulesetId": "standard-competitive",
-    "catalogVersion": "m2-stage1-brimstone-2026-11-17"
+    "zones": []
+  },
+  "result": {
+    "kind": "attack-eliminated"
   }
 }

@@ -13,19 +13,18 @@ import { createInstance } from "../../src/sim/agents/state.ts";
 import { buyCharge } from "../../src/sim/economy/buy.ts";
 import { STATUS_BLIND, STATUS_CONCUSS, hasStatus } from "../../src/sim/effects/status.ts";
 import { DRILL_HALL, DRILL_HALL_DOORWAY } from "../../src/sim/map/drill-hall.ts";
-import {
-  isRound,
-  openRound,
-  resolveWindow,
-  submitPlan,
-  view,
-  type Round,
-  type WindowOrder,
-} from "../../src/sim/round.ts";
+import { truthLiveWorld, viewLive } from "../../src/sim/live-round.ts";
 import { createDefaultDrill } from "../../src/sim/scenario/default-drill.ts";
 import type { Scenario } from "../../src/sim/scenario/types.ts";
 import { STANDARD_RULESET } from "../../src/rules/ruleset.ts";
-import { defenseHoldPlan } from "../../src/tactics/defense-stub.ts";
+import {
+  advance,
+  agentIn,
+  issueRejected,
+  mustIssue,
+  mustOpenLive,
+  playAttack,
+} from "./support/live-harness.ts";
 
 type RefAbility = {
   name: string;
@@ -69,8 +68,8 @@ describe("Breach stage-1 kit", () => {
   });
 
   it("rejects casts of Breach abilities by other agents (ownership)", () => {
-    const round = mustOpen(breachScenario(1));
-    const failed = submitPlan(round, "defense", [
+    const round = mustOpenLive(breachScenario(1));
+    const code = issueRejected(round, "defense", [
       {
         kind: "cast",
         instanceId: "jett-defense",
@@ -79,13 +78,11 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    expect(failed.ok).toBe(false);
-    if (failed.ok) return;
-    expect(failed.code).toBe("ability-not-owned");
+    expect(code).toBe("ability-not-owned");
   });
 
   it("spends Flashpoint charges 2 → 1 → 0 and rejects the third", () => {
-    let round = mustOpen(
+    const round = mustOpenLive(
       breachScenario(2, {
         flashCharges: 2,
         breachAt: { xMm: 3000, yMm: 2000 },
@@ -94,7 +91,7 @@ describe("Breach stage-1 kit", () => {
     );
     const casts = [2, 1, 0] as const;
     for (let i = 0; i < 2; i += 1) {
-      round = mustSubmit(round, "attack", [
+      const resolved = playAttack(round, [
         {
           kind: "cast",
           instanceId: "breach-attack",
@@ -103,18 +100,13 @@ describe("Breach stage-1 kit", () => {
           aimYawDeg: 0,
         },
       ]);
-      round = mustSubmit(round, "defense", holdDefense(round));
-      const resolved = resolveWindow(round);
-      expect(resolved.ok).toBe(true);
-      if (!resolved.ok) return;
-      const accepted = resolved.events.find((event) => event.type === "cast-accepted");
+      const accepted = resolved.find((event) => event.type === "cast-accepted");
       expect(accepted?.type).toBe("cast-accepted");
       if (accepted?.type === "cast-accepted") {
         expect(accepted.chargesRemaining).toBe(casts[i]! - 1);
       }
-      round = resolved.round;
     }
-    const third = submitPlan(round, "attack", [
+    const third = issueRejected(round, "attack", [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -123,9 +115,7 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    expect(third.ok).toBe(false);
-    if (third.ok) return;
-    expect(third.code).toBe("insufficient-charges");
+    expect(third).toBe("insufficient-charges");
   });
 
   it("rejects Fault Line inside 50 s and accepts after the cooldown", () => {
@@ -133,8 +123,8 @@ describe("Breach stage-1 kit", () => {
       breachAt: { xMm: 3000, yMm: 2000 },
       enemyAt: { xMm: 11000, yMm: 2000 },
     };
-    let round = mustOpen(breachScenario(3, hidden));
-    round = mustSubmit(round, "attack", [
+    const round = mustOpenLive(breachScenario(3, hidden));
+    const first = playAttack(round, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -144,16 +134,11 @@ describe("Breach stage-1 kit", () => {
         chargeValue: 20,
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const first = resolveWindow(round);
-    expect(first.ok).toBe(true);
-    if (!first.ok) return;
-    expect(first.events.some((event) => event.type === "cast-accepted" && event.abilityId === FAULT_LINE_ID)).toBe(
+    expect(first.some((event) => event.type === "cast-accepted" && event.abilityId === FAULT_LINE_ID)).toBe(
       true,
     );
-    round = first.round;
 
-    round = mustSubmit(round, "attack", [
+    const early = playAttack(round, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -163,24 +148,19 @@ describe("Breach stage-1 kit", () => {
         chargeValue: 20,
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const early = resolveWindow(round);
-    expect(early.ok).toBe(true);
-    if (!early.ok) return;
     expect(
-      early.events.some(
+      early.some(
         (event) =>
           event.type === "cast-rejected" &&
           event.abilityId === FAULT_LINE_ID &&
           event.code === "signature-on-cooldown",
       ),
     ).toBe(true);
-    round = early.round;
 
-    while (round.state.timeMs < 50000) {
-      round = advanceHoldWindow(round);
+    while (round.world.timeMs < 50000) {
+      advance(round);
     }
-    round = mustSubmit(round, "attack", [
+    const later = playAttack(round, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -190,17 +170,13 @@ describe("Breach stage-1 kit", () => {
         chargeValue: 20,
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const later = resolveWindow(round);
-    expect(later.ok).toBe(true);
-    if (!later.ok) return;
-    expect(later.events.some((event) => event.type === "cast-accepted" && event.abilityId === FAULT_LINE_ID)).toBe(
+    expect(later.some((event) => event.type === "cast-accepted" && event.abilityId === FAULT_LINE_ID)).toBe(
       true,
     );
   });
 
   it("gates Rolling Thunder on 8 ult points and spends them; kills grant +1 killer and +1 victim", () => {
-    let round = mustOpen(
+    let round = mustOpenLive(
       breachScenario(4, {
         ultPoints: 0,
         enemyHp: 40,
@@ -208,7 +184,7 @@ describe("Breach stage-1 kit", () => {
         enemyAt: { xMm: 11000, yMm: 2000 },
       }),
     );
-    round = mustSubmit(round, "attack", [
+    const rejected = playAttack(round, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -217,12 +193,8 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const rejected = resolveWindow(round);
-    expect(rejected.ok).toBe(true);
-    if (!rejected.ok) return;
     expect(
-      rejected.events.some(
+      rejected.some(
         (event) =>
           event.type === "cast-rejected" &&
           event.abilityId === ROLLING_THUNDER_ID &&
@@ -231,20 +203,16 @@ describe("Breach stage-1 kit", () => {
     ).toBe(true);
 
     // Sightline duel for the kill ledger (doorway y=6000).
-    round = mustOpen(breachScenario(4, { ultPoints: 0, enemyHp: 40 }));
+    round = mustOpenLive(breachScenario(4, { ultPoints: 0, enemyHp: 40 }));
     let killed = false;
+    mustIssue(round, "attack", [
+      { kind: "shoot", instanceId: "breach-attack", targetInstanceId: "jett-defense" },
+    ]);
     for (let i = 0; i < 20; i += 1) {
-      round = mustSubmit(round, "attack", [
-        { kind: "shoot", instanceId: "breach-attack", targetInstanceId: "jett-defense" },
-      ]);
-      round = mustSubmit(round, "defense", holdDefense(round));
-      const killWindow = resolveWindow(round);
-      expect(killWindow.ok).toBe(true);
-      if (!killWindow.ok) return;
-      round = killWindow.round;
-      const victim = round.state.agents.find((agent) => agent.instanceId === "jett-defense");
+      advance(round);
+      const victim = round.world.agents.find((agent) => agent.instanceId === "jett-defense");
       if (victim && !victim.alive) {
-        const killer = round.state.agents.find((agent) => agent.instanceId === "breach-attack");
+        const killer = round.world.agents.find((agent) => agent.instanceId === "breach-attack");
         expect(killer?.ultimatePoints).toBe(1);
         expect(victim.ultimatePoints).toBe(1);
         killed = true;
@@ -253,8 +221,8 @@ describe("Breach stage-1 kit", () => {
     }
     expect(killed).toBe(true);
 
-    const withUlt = mustOpen(breachScenario(5, { ultPoints: 8 }));
-    let armed = mustSubmit(withUlt, "attack", [
+    const withUlt = mustOpenLive(breachScenario(5, { ultPoints: 8 }));
+    const ultCast = playAttack(withUlt, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -263,14 +231,10 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    armed = mustSubmit(armed, "defense", holdDefense(armed));
-    const ultCast = resolveWindow(armed);
-    expect(ultCast.ok).toBe(true);
-    if (!ultCast.ok) return;
-    expect(ultCast.events.some((event) => event.type === "cast-accepted" && event.abilityId === ROLLING_THUNDER_ID)).toBe(
+    expect(ultCast.some((event) => event.type === "cast-accepted" && event.abilityId === ROLLING_THUNDER_ID)).toBe(
       true,
     );
-    expect(ultCast.state.agents.find((agent) => agent.instanceId === "breach-attack")?.ultimatePoints).toBe(0);
+    expect(agentIn(withUlt, "breach-attack").ultimatePoints).toBe(0);
   });
 
   it("spaces Aftershock bursts 0.6 s apart and Rolling Thunder blasts 0.255 s apart", () => {
@@ -278,8 +242,8 @@ describe("Breach stage-1 kit", () => {
       breachAt: { xMm: 3000, yMm: 2000 },
       enemyAt: { xMm: 11000, yMm: 2000 },
     };
-    let round = mustOpen(breachScenario(6, hidden));
-    round = mustSubmit(round, "attack", [
+    const round = mustOpenLive(breachScenario(6, hidden));
+    const aftershock = playAttack(round, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -288,16 +252,12 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const aftershock = resolveWindow(round);
-    expect(aftershock.ok).toBe(true);
-    if (!aftershock.ok) return;
-    const bursts = aftershock.events.filter((event) => event.type === "ability-damage");
+    const bursts = aftershock.filter((event) => event.type === "ability-damage");
     expect(bursts).toHaveLength(2);
     expect(bursts[1]!.timeMs - bursts[0]!.timeMs).toBe(600);
 
-    let ultRound = mustOpen(breachScenario(7, { ...hidden, ultPoints: 8 }));
-    ultRound = mustSubmit(ultRound, "attack", [
+    const ultRound = mustOpenLive(breachScenario(7, { ...hidden, ultPoints: 8 }));
+    const thunder = playAttack(ultRound, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -306,11 +266,7 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    ultRound = mustSubmit(ultRound, "defense", holdDefense(ultRound));
-    const thunder = resolveWindow(ultRound);
-    expect(thunder.ok).toBe(true);
-    if (!thunder.ok) return;
-    const blasts = thunder.events.filter(
+    const blasts = thunder.filter(
       (event) => event.type === "status-wave" && event.abilityId === ROLLING_THUNDER_ID,
     );
     expect(blasts).toHaveLength(8);
@@ -320,14 +276,14 @@ describe("Breach stage-1 kit", () => {
   });
 
   it("applies Aftershock and Fault Line through the Drill Hall divider", () => {
-    let round = mustOpen(
+    const round = mustOpenLive(
       breachScenario(8, {
         breachAt: { xMm: 5000, yMm: 2000 },
         enemyAt: { xMm: 9500, yMm: 2000 },
         enemyHp: 200,
       }),
     );
-    round = mustSubmit(round, "attack", [
+    const shock = playAttack(round, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -336,22 +292,18 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const shock = resolveWindow(round);
-    expect(shock.ok).toBe(true);
-    if (!shock.ok) return;
-    const hits = shock.events
+    const hits = shock
       .filter((event) => event.type === "ability-damage")
       .flatMap((event) => (event.type === "ability-damage" ? event.hits : []));
     expect(hits.some((hit) => hit.targetInstanceId === "jett-defense" && hit.damage === 80)).toBe(true);
 
-    let fault = mustOpen(
+    const fault = mustOpenLive(
       breachScenario(9, {
         breachAt: { xMm: 5000, yMm: 2000 },
         enemyAt: { xMm: 14000, yMm: 2000 },
       }),
     );
-    fault = mustSubmit(fault, "attack", [
+    playAttack(fault, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -361,22 +313,18 @@ describe("Breach stage-1 kit", () => {
         chargeValue: 24,
       },
     ]);
-    fault = mustSubmit(fault, "defense", holdDefense(fault));
-    const wave = resolveWindow(fault);
-    expect(wave.ok).toBe(true);
-    if (!wave.ok) return;
-    const concussed = wave.state.agents.find((agent) => agent.instanceId === "jett-defense");
-    expect(concussed && hasStatus(concussed, STATUS_CONCUSS, wave.state.timeMs)).toBe(true);
+    const concussed = fault.world.agents.find((agent) => agent.instanceId === "jett-defense");
+    expect(concussed && hasStatus(concussed, STATUS_CONCUSS, fault.world.timeMs)).toBe(true);
   });
 
   it("applies concuss durations and assumed walk/hit effects", () => {
-    let round = mustOpen(
+    const round = mustOpenLive(
       breachScenario(10, {
         breachAt: { xMm: 5000, yMm: 2000 },
         enemyAt: { xMm: 14000, yMm: 2000 },
       }),
     );
-    round = mustSubmit(round, "attack", [
+    const wave = playAttack(round, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -386,11 +334,7 @@ describe("Breach stage-1 kit", () => {
         chargeValue: 24,
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const wave = resolveWindow(round);
-    expect(wave.ok).toBe(true);
-    if (!wave.ok) return;
-    const statusEvent = wave.events.find(
+    const statusEvent = wave.find(
       (event) => event.type === "status-wave" && event.abilityId === FAULT_LINE_ID,
     );
     expect(statusEvent?.type).toBe("status-wave");
@@ -402,14 +346,14 @@ describe("Breach stage-1 kit", () => {
     expect(STANDARD_RULESET.concussWalkSpeedMultiplierProvenance.kind).toBe("assumed");
     expect(STANDARD_RULESET.concussHitChancePenaltyProvenance.kind).toBe("assumed");
 
-    let thunder = mustOpen(
+    const thunder = mustOpenLive(
       breachScenario(11, {
         ultPoints: 8,
         breachAt: { xMm: 5000, yMm: 2000 },
         enemyAt: { xMm: 14000, yMm: 2000 },
       }),
     );
-    thunder = mustSubmit(thunder, "attack", [
+    const blasts = playAttack(thunder, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -418,11 +362,7 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    thunder = mustSubmit(thunder, "defense", holdDefense(thunder));
-    const blasts = resolveWindow(thunder);
-    expect(blasts.ok).toBe(true);
-    if (!blasts.ok) return;
-    const firstBlast = blasts.events.find(
+    const firstBlast = blasts.find(
       (event) => event.type === "status-wave" && event.abilityId === ROLLING_THUNDER_ID,
     );
     expect(firstBlast?.type).toBe("status-wave");
@@ -436,14 +376,14 @@ describe("Breach stage-1 kit", () => {
     const { wallDepthMmAlongRay } = await import("../../src/sim/map/geometry.ts");
     const { createWorld } = await import("../../src/sim/run.ts");
 
-    let round = mustOpen(
+    const round = mustOpenLive(
       breachScenario(30, {
         breachAt: { xMm: 6000, yMm: 2000 },
         enemyAt: { xMm: 9500, yMm: 2000 },
         enemyFacingDeg: 0,
       }),
     );
-    round = mustSubmit(round, "attack", [
+    const thinFlash = playAttack(round, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -452,11 +392,7 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const thinFlash = resolveWindow(round);
-    expect(thinFlash.ok).toBe(true);
-    if (!thinFlash.ok) return;
-    const thinEvent = thinFlash.events.find((event) => event.type === "flash-resolved");
+    const thinEvent = thinFlash.find((event) => event.type === "flash-resolved");
     expect(thinEvent?.type).toBe("flash-resolved");
     if (thinEvent?.type === "flash-resolved") {
       expect(thinEvent.blindedInstanceIds).toEqual(["jett-defense"]);
@@ -500,14 +436,14 @@ describe("Breach stage-1 kit", () => {
   });
 
   it("blinds only enemies looking toward the flash and lets smoke block Flashpoint", () => {
-    let looking = mustOpen(
+    const looking = mustOpenLive(
       breachScenario(12, {
         breachAt: { xMm: 6000, yMm: 6000 },
         enemyAt: { xMm: 9500, yMm: 6000 },
         enemyFacingDeg: 180,
       }),
     );
-    looking = mustSubmit(looking, "attack", [
+    const away = playAttack(looking, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -516,17 +452,13 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    looking = mustSubmit(looking, "defense", holdDefense(looking));
-    const away = resolveWindow(looking);
-    expect(away.ok).toBe(true);
-    if (!away.ok) return;
-    const flashAway = away.events.find((event) => event.type === "flash-resolved");
+    const flashAway = away.find((event) => event.type === "flash-resolved");
     expect(flashAway?.type).toBe("flash-resolved");
     if (flashAway?.type === "flash-resolved") {
       expect(flashAway.blindedInstanceIds).toEqual([]);
     }
 
-    let toward = mustOpen(
+    const toward = mustOpenLive(
       breachScenario(13, {
         breachAt: { xMm: 6000, yMm: 6000 },
         enemyAt: { xMm: 9500, yMm: 6000 },
@@ -534,8 +466,8 @@ describe("Breach stage-1 kit", () => {
       }),
     );
     // Face the flash impact (west → east look = 0).
-    toward.state.agents.find((agent) => agent.instanceId === "jett-defense")!.facingDeg = 0;
-    toward = mustSubmit(toward, "attack", [
+    toward.world.agents.find((agent) => agent.instanceId === "jett-defense")!.facingDeg = 0;
+    const hit = playAttack(toward, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -544,16 +476,12 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    toward = mustSubmit(toward, "defense", holdDefense(toward));
-    const hit = resolveWindow(toward);
-    expect(hit.ok).toBe(true);
-    if (!hit.ok) return;
-    const flashHit = hit.events.find((event) => event.type === "flash-resolved");
+    const flashHit = hit.find((event) => event.type === "flash-resolved");
     expect(flashHit?.type).toBe("flash-resolved");
     if (flashHit?.type === "flash-resolved") {
       expect(flashHit.blindedInstanceIds).toEqual(["jett-defense"]);
     }
-    expect(hit.state.agents.find((agent) => agent.instanceId === "jett-defense")?.statuses[0]?.id).toBe(
+    expect(toward.world.agents.find((agent) => agent.instanceId === "jett-defense")?.statuses[0]?.id).toBe(
       STATUS_BLIND,
     );
 
@@ -561,7 +489,7 @@ describe("Breach stage-1 kit", () => {
     const breach = getAgent(SHIPPED_CATALOG, "breach");
     const jett = getAgent(SHIPPED_CATALOG, "jett");
     if (!brimstone || !breach || !jett) throw new Error("missing agents");
-    let smoked = mustOpen({
+    const smoked = mustOpenLive({
       ...createDefaultDrill(14),
       attack: {
         side: "attack",
@@ -582,7 +510,8 @@ describe("Breach stage-1 kit", () => {
       },
       orders: [],
     });
-    smoked = mustSubmit(smoked, "attack", [
+    // Advance until smoke is active, then flash in a later window once smoke is up.
+    playAttack(smoked, [
       {
         kind: "cast",
         instanceId: "brimstone-attack",
@@ -597,15 +526,9 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    smoked = mustSubmit(smoked, "defense", holdDefense(smoked));
-    // Advance until smoke is active, then flash in a later window once smoke is up.
-    const smokeWindow = resolveWindow(smoked);
-    expect(smokeWindow.ok).toBe(true);
-    if (!smokeWindow.ok) return;
     // Flash may resolve in the same window after flight; smoke deploy is 1s, flash impact at 0.9s.
     // Cast flash next window when smoke is already active.
-    let next = smokeWindow.round;
-    next = mustSubmit(next, "attack", [
+    const blocked = playAttack(smoked, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -614,11 +537,7 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    next = mustSubmit(next, "defense", holdDefense(next));
-    const blocked = resolveWindow(next);
-    expect(blocked.ok).toBe(true);
-    if (!blocked.ok) return;
-    const flashBlocked = blocked.events.find((event) => event.type === "flash-resolved");
+    const flashBlocked = blocked.find((event) => event.type === "flash-resolved");
     expect(flashBlocked?.type).toBe("flash-resolved");
     if (flashBlocked?.type === "flash-resolved") {
       expect(flashBlocked.blindedInstanceIds).toEqual([]);
@@ -627,25 +546,25 @@ describe("Breach stage-1 kit", () => {
   });
 
   it("deep-equals for the same seed and Breach plans", () => {
-    const first = playBreachWindows(20);
-    const second = playBreachWindows(20);
-    expect(first.state).toEqual(second.state);
+    const first = playBreach(20);
+    const second = playBreach(20);
+    expect(first.world).toEqual(second.world);
     expect(first.events).toEqual(second.events);
   });
 
-  it("leaves view(side) unchanged except flashed agents see nothing", () => {
-    let round = mustOpen(
+  it("leaves viewLive(side) unchanged except flashed agents see nothing", () => {
+    const round = mustOpenLive(
       breachScenario(21, {
         breachAt: { xMm: 3000, yMm: 6000 },
         enemyAt: { xMm: 11000, yMm: 6000 },
         enemyFacingDeg: 180,
       }),
     );
-    const before = view(round, "defense").agents.map((agent) => agent.instanceId).sort();
+    const before = viewLive(round, "defense").agents.map((agent) => agent.instanceId).sort();
     expect(before).toEqual(["breach-attack", "jett-defense"]);
 
-    round.state.agents.find((agent) => agent.instanceId === "jett-defense")!.facingDeg = 0;
-    round = mustSubmit(round, "attack", [
+    round.world.agents.find((agent) => agent.instanceId === "jett-defense")!.facingDeg = 0;
+    playAttack(round, [
       {
         kind: "cast",
         instanceId: "breach-attack",
@@ -654,11 +573,7 @@ describe("Breach stage-1 kit", () => {
         aimYawDeg: 0,
       },
     ]);
-    round = mustSubmit(round, "defense", holdDefense(round));
-    const flashed = resolveWindow(round);
-    expect(flashed.ok).toBe(true);
-    if (!flashed.ok) return;
-    const defenseView = view(flashed.round, "defense").agents.map((agent) => agent.instanceId);
+    const defenseView = viewLive(round, "defense").agents.map((agent) => agent.instanceId);
     expect(defenseView).toEqual(["jett-defense"]);
   });
 
@@ -725,42 +640,9 @@ function breachScenario(
   };
 }
 
-function mustOpen(scenario: Scenario): Round {
-  const opened = openRound(scenario);
-  expect(isRound(opened)).toBe(true);
-  if (!isRound(opened)) throw new Error(opened.message);
-  return opened;
-}
-
-function mustSubmit(round: Round, side: "attack" | "defense", orders: WindowOrder[]): Round {
-  const result = submitPlan(round, side, orders);
-  expect(result.ok).toBe(true);
-  if (!result.ok) throw new Error(`${result.code}: ${result.message}`);
-  return result.round;
-}
-
-function holdDefense(round: Round): WindowOrder[] {
-  return defenseHoldPlan(round);
-}
-
-function advanceHoldWindow(round: Round): Round {
-  let next = mustSubmit(
-    round,
-    "attack",
-    round.state.agents
-      .filter((agent) => agent.side === "attack" && agent.alive)
-      .map((agent) => ({ kind: "hold" as const, instanceId: agent.instanceId })),
-  );
-  next = mustSubmit(next, "defense", holdDefense(next));
-  const resolved = resolveWindow(next);
-  expect(resolved.ok).toBe(true);
-  if (!resolved.ok) throw new Error(resolved.message);
-  return resolved.round;
-}
-
-function playBreachWindows(seed: number) {
-  let round = mustOpen(breachScenario(seed, { ultPoints: 8 }));
-  round = mustSubmit(round, "attack", [
+function playBreach(seed: number) {
+  const round = mustOpenLive(breachScenario(seed, { ultPoints: 8 }));
+  const events = playAttack(round, [
     {
       kind: "cast",
       instanceId: "breach-attack",
@@ -769,9 +651,5 @@ function playBreachWindows(seed: number) {
       aimYawDeg: 0,
     },
   ]);
-  round = mustSubmit(round, "defense", holdDefense(round));
-  const resolved = resolveWindow(round);
-  expect(resolved.ok).toBe(true);
-  if (!resolved.ok) throw new Error(resolved.message);
-  return { state: resolved.state, events: resolved.events };
+  return { world: truthLiveWorld(round), events };
 }

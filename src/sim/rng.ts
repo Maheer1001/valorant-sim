@@ -2,7 +2,7 @@ export type Rng = {
   nextUint32(): number;
   /** Uniform integer in [0, bound). */
   nextInt(bound: number): number;
-  /** Current mulberry32 state for persisting named streams across windows. */
+  /** Current mulberry32 state for persisting named streams across steps and saves. */
   getState(): number;
 };
 
