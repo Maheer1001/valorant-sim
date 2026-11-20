@@ -6,6 +6,8 @@ This is the single list of every planned stage: what it delivers, how we intend 
 
 Status today is in [`PROJECT_STATUS.md`](../PROJECT_STATUS.md).
 
+Detailed plans written so far (wave 1 of planning, 20 November 2026): [G1](stage-g1-plan.md), [G2](stage-g2-plan.md), [G3](stage-g3-plan.md), [G4](stage-g4-plan.md), [G5](stage-g5-plan.md), [G6](stage-g6-plan.md), [O1](stage-o1-plan.md), [O2](stage-o2-plan.md), [X1](stage-x1-plan.md), [D1](stage-d1-plan.md), [K3](stage-3-plan.md), [K4](stage-k4-plan.md), [K5](stage-k5-plan.md). How to build them in parallel without conflicts: [`parallel-build-plan.md`](parallel-build-plan.md).
+
 ## Ground rules (apply to every stage)
 
 - **Engine stays pure.** `src/sim`, `src/tactics`, `src/learning`, `src/persistence` and `src/rules` never import React. The architecture test enforces this.
@@ -23,7 +25,7 @@ Status today is in [`PROJECT_STATUS.md`](../PROJECT_STATUS.md).
 | Kit stage 1 | Breach fully executable ([plan](stage-1-plan.md)). |
 | Kit stage 2 | Brimstone fully executable. |
 | Cast UI | Aim / map-target / charge casts, overlays, agent panel, event log. |
-| Live (a)–(e) | Pauseable live engine, smooth motion, immediate orders, round timer, replay, fast controls and previews, pre-round buy/plan, window layer retired ([plan](live-round-plan.md), [migration](live-round-migration.md)). |
+| Live (a)-(e) | Pauseable live engine, smooth motion, immediate orders, round timer, replay, fast controls and previews, pre-round buy/plan, window layer retired ([plan](live-round-plan.md), [migration](live-round-migration.md)). |
 
 ## Dependency graph
 
@@ -73,6 +75,7 @@ flowchart TD
   X4 --> K6_24
 
   LIVE --> G1 --> G2 --> G4
+  X1 --> G2
   LIVE --> G3 --> G5
   G4 --> G5
   LIVE --> G6
@@ -98,11 +101,11 @@ A solid arrow means "must be done first". A dotted arrow means "the later part o
 ## Recommended order
 
 1. **K3 Raze.** Fully designed already, and it builds the first homing projectile on the live engine.
-2. **G1 Map sites.** Small, and it unblocks the spike.
+2. **X1 Channels and G1 Map sites.** Both unblock the spike.
 3. **G2 Spike plant / defuse.** Gives rounds a real objective, so attack and defense play differently.
 4. **O1 Beliefs, then O2 Rule-based opponent.** Replaces the hold stub, so the game is playable against something.
 5. **G6 Defense pre-round, G4 Multi-round match, G3 Weapons + armor, G5 Economy.** Turns single rounds into a match.
-6. **K4 onwards, D1, O3–O6** in dependency order, with kit stages slotted between system stages.
+6. **K4 onwards, D1, O3-O6** in dependency order, with kit stages slotted between system stages.
 
 The owner can reorder anything that the graph allows.
 
@@ -155,11 +158,11 @@ Agents are completed in the order of `data/primitive-stages.json`. Each stage ad
 
 ## X: Engine systems for later kits
 
-These came from the turn-layer notes in `effect-primitives.md` §5 and are now planned against the live runner. Build each one just before the first kit stage that needs it.
+These came from the turn-layer notes in `effect-primitives.md` section 5 and are now planned against the live runner. Build each one just before the first kit stage that needs it.
 
 | Stage | Delivers | Approach and steps | Depends on | Needed by |
 | --- | --- | --- | --- | --- |
-| X1 Channels, interrupts, recall | Windups and channels that can be cancelled; a player `recall` command for reclaimable devices. | Add `channel-start` / `channel-complete` jobs; cancel them on caster death, suppress or detain, with a typed cancel event; add a `recall` `AgentCommand` validated like `cast`; use refund rules only where the source states them. | live engine | K5, K7, K12, K17 |
+| X1 Channels, interrupts, recall | Windups and channels that can be cancelled; a player `recall` command for reclaimable devices. | Add `channel-start` / `channel-complete` jobs; cancel them on caster death, suppress or detain, with a typed cancel event; add a `recall` `AgentCommand` validated like `cast`; use refund rules only where the source states them. | live engine | G2, K5, K7, K12, K17 |
 | X2 Steering samples | Crosshair-steered abilities without continuous mouse input. | Cast carries up to 4 aim samples at fixed offsets (owner decision 1); samples go in the order log so replays match. | live engine | K23, K24 |
 | X3 Audio cues | Sounds without breaking fog. | `viewLive` returns optional `audioCues[]` for the viewing side only (owner decision 3); deafen hides them. | live engine | K12, K13 |
 | X4 Height stub | Vertical movement on a 2D map. | Timing-only stubs for updraft, glide and levitate; no height layer (owner decision 2). | live engine | K20, K24 |
@@ -176,9 +179,9 @@ These came from the turn-layer notes in `effect-primitives.md` §5 and are now p
 ### G2 Spike plant and defuse
 
 - **Delivers:** a spike carrier, plant and defuse actions, post-plant timer, new round results.
-- **Approach:** plant and defuse are channelled actions (they can use X1 when it exists, or a simple timed job first). Timers come from a primary source if one exists, otherwise they are tagged ASSUMED.
+- **Approach:** plant and defuse are X1 channels (`{ kind: "plant" }` and `{ kind: "defuse" }` in X1's `ChannelWhat`), so death and movement cancel them. Timers come from a primary source if one exists, otherwise they are tagged ASSUMED.
 - **Steps:** (1) add spike state (carrier, dropped position, planted site, timer) to the world; (2) add `plant` / `defuse` commands and validation (on site, alive, not moving); (3) add `spike-detonated` and `spike-defused` to `RoundResult`, and switch the round timer to the spike timer on plant; (4) add plant/defuse ult points to the ledger (TODO today); (5) add the UI: carrier marker, plant button, timer; (6) tests for each result path and determinism.
-- **Depends on:** G1. **Unblocks:** G4, O2.
+- **Depends on:** G1, X1. **Unblocks:** G4, O2.
 
 ### G3 Weapons and armor
 
