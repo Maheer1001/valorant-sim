@@ -322,6 +322,8 @@ Manual checklist: [`docs/playtest.md`](docs/playtest.md).
 
 ## Roadmap
 
+Full stage list with approach, steps and dependencies: [`docs/roadmap.md`](docs/roadmap.md). Summary:
+
 1. **Done.** Drill, catalog, live smoke, both-team draft, coverage, JSON scenario.
 2. **Done.** Interactive planning windows, fog-of-war view, defense hold stub, auto-engage, hp/death.
 3. **Done.** Stage 1 per [`docs/stage-1-plan.md`](docs/stage-1-plan.md): Breach + Brimstone fully executable. Primitives docs: [`docs/effect-primitives.md`](docs/effect-primitives.md).

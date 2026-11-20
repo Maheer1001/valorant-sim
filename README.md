@@ -1,17 +1,21 @@
 # Valorant Tactical Simulation
 
-A deterministic, seeded tactical simulator for 5v5 Valorant-style rounds. Draft two teams, run a scripted scenario, and step through it event by event on an SVG map. Line of sight, smokes, ability charges and shots are all resolved by an engine with no UI code in it.
+A deterministic, seeded tactical simulator for 5v5 Valorant-style rounds. Draft two teams, buy and plan in a pre-round phase, then play the round live on an SVG map: pause, change speed, give orders and watch abilities resolve. Line of sight, smokes, ability charges and shots are all resolved by an engine with no UI code in it.
 
 > Fan project. Not affiliated with or endorsed by Riot Games. The map ("Drill Hall") and the weapon ("Rifle A") are original stand-ins, not game assets.
 
-## What works (Milestone 1)
+## What works
 
 - **Draft:** pick agents for attack and defence, up to five per team, one copy of each agent per team. Inspect kits and see which abilities are implemented and which are placeholders.
 - **Composition coverage:** each team gets a report of what its abilities cover (smokes, entry, flank watch) and where the gaps are.
-- **Simulation:** an event queue ordered by `(timeMs, sequence, agentId)`, with integer milliseconds and millimetres. Walls block movement and sight. An active Sky Smoke blocks sight until the moment it expires.
+- **Two full agent kits:** Breach and Brimstone are fully playable (flash, concussions, smokes, molly, stim beacon, orbital strike, ult points and charges).
+- **Pre-round:** a buy timer, ability purchases, routes per attacker, and casts queued at a time or at a waypoint. Press Go to start the round.
+- **Live round:** pause and resume, speed control, a 1:40 round timer, multi-select, hotkeys, right-click moves, ability and path previews, a kill feed, and fog of war with a truth toggle.
+- **Simulation:** fixed 50 ms steps over an event queue ordered by `(timeMs, sequence, agentId)`, with integer milliseconds and millimetres. Walls block movement and sight; smokes block sight until they expire.
 - **Seeded randomness:** named RNG streams forked from the scenario seed. Each shot stores its hit chance and its draw separately, so the same seed always gives the same run.
-- **Timeline:** play, pause and step through the engine log.
-- **Scenarios:** export and import scenarios as versioned JSON.
+- **Replays and scenarios:** download and reload a round's order log as a replay, and export and import scenarios as versioned JSON.
+
+The defense is still a hold-position stub, and there is no spike yet. Both are on the roadmap.
 
 Every rule and ability number is tagged with its source (patch notes, wiki, or assumed). The full list is in [`PROJECT_STATUS.md`](PROJECT_STATUS.md).
 
@@ -63,10 +67,10 @@ src/
   learning/     learning-record contracts
   persistence/  scenario JSON (de)serialisation
   rules/        rulesets and source provenance
-  ui/           React: board, draft panel, timeline
+  ui/           React: board, draft, pre-round, live HUD and orders
 tests/          unit tests + an architecture test that keeps sim/ free of React imports
 ```
 
 ## Roadmap
 
-Planned evaluators include map suitability, synergy, counter-composition and supported plans. See `PROJECT_STATUS.md` for what's done, what's assumed and what's next.
+Every planned stage (the remaining agent kits, spike, weapons, economy, multi-round matches, an opponent, a planner and learning records), with how each will be built and what it depends on, is in [`docs/roadmap.md`](docs/roadmap.md). [`PROJECT_STATUS.md`](PROJECT_STATUS.md) has what's done and what's assumed.
