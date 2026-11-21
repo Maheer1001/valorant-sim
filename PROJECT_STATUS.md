@@ -407,6 +407,28 @@ Browser check (headless Edge at 1366x768 through the DevTools protocol, dev serv
 | test | Pass. Vitest 5.0.5, 26 files, 165 tests. |
 | build | Pass. Vite 8.3.4 produced `dist/`. |
 
+
+### Stage H0 session 1: H0.0 to H0.2 (21 November 2026)
+
+Behaviour-neutral refactor per [`docs/stage-h0-plan.md`](docs/stage-h0-plan.md). Base commit for every diff check: `29c727b` (code identical to `b87229e`; the commits between are docs only). H0.3 to H0.6 are not started.
+
+| Sub-stage | Commit | What | `npm run check` |
+| --- | --- | --- | --- |
+| H0.0 golden capture | `2f33bc2` | `tests/sim/h0-golden.test.ts`, `tests/ui/h0-dom.test.tsx`, `tests/support/golden.ts`, `tests/fixtures/h0-golden/` recorded from the unmodified base: five scripted live rounds (per-second truth, both fogged views, plan steps; events with sequence numbers, order log, RNG state, event text), a no-combat ability tour to the 100 s timeout, rejection probes plus all 20 rejection messages, replay and chunk-size equality, exact DOM at five UI states. 21 of 22 event types are covered (`order-rejected` only comes from the scripted runner, covered by the characterization fixtures). | Pass: 28 files, 176 tests |
+| H0.0b | `30825a9` | One more golden scenario, also recorded from the unmodified base, added because of the sensitivity check below. Existing golden files byte-identical. | Pass: 28 files, 177 tests |
+| H0.1 live-round split | `1111039` | `src/sim/live-round.ts` (968 lines) split into `src/sim/live/` behind a barrel that keeps all 25 old exports. Commands dispatch through `COMMAND_SPECS`, a step is the ordered `STEP_PHASES` list, round results come from ordered `RESULT_RULES`. | Pass: 28 files, 177 tests |
+| H0.2 unions and handler table | `af4163c` | `world.ts`, `rejections.ts`, `jobs/` (composed `Job` / `SimEvent` unions, `JOB_HANDLERS` with one handler per job type, ordered `CAST_RESOLVERS`), `combat/fire-interval.ts`, `live/command-types.ts`; `run.ts` keeps all 15 old exports. New `tests/sim/registry.test.ts` and `tests/architecture-registry.test.ts`. | Pass: 30 files, 188 tests |
+
+Gates after every sub-stage (all run): `git diff --exit-code 29c727b -- tests/fixtures/characterization tests/fixtures/window-parity` clean; `git diff 29c727b -- tests/` lists only added files (no existing test modified or deleted); golden fixtures unchanged since `30825a9` and never regenerated after; no file in `src/sim/live/` over 250 lines.
+
+Sensitivity check (after H0.0, each change reverted): one event description string changed -> 6 golden tests fail; one SVG attribute in `MapView` changed -> the DOM golden fails; standing-route and fire-scheduling phases swapped in a step -> **not detected** at first, because no recorded route arrival shared a step with scheduled fires. Fixed before any refactor by H0.0b (3500 mm legs at 3500 mm/s arrive on the whole-second fire steps); the swap then fails the new test.
+
+Import graph: at the base the runtime graph had one cycle (`breach-resolve.ts`, `brimstone-resolve.ts`, `run.ts`). After H0.2 there are no cycles, runtime or type-only (checked by a script, by `tests/architecture-registry.test.ts`, and by graphify: "Import Cycles: None detected"; `applyJob()` went from 35 edges to 5). `src/sim/agents/**` imports none of `run.ts`, `live-round.ts`, `src/sim/live/**` (was 2 files).
+
+Largest files now: `src/sim/live/commands.ts` 216, `live/step.ts` 177, `live/types.ts` 133; `src/sim/jobs/core.ts` 331, `jobs/core-types.ts` 104; `run.ts` 135 (was 733); `live-round.ts` 37 (was 968).
+
+Browser smoke (`node tools/smoke-browser.mjs`, new, headless Edge at 1366x768, run after H0.2): no document scroll (768 = 768, 1366 = 1366); no console errors or exceptions (the browser's automatic `/favicon.ico` 404 is the only entry and is listed as ignored; the app ships no favicon); Site A right-click waypoint 0.16 px from the cursor at (16747, 5997) mm; drag-box selects only Brimstone; play run: Go, Space, 5 s, timer 1:40 -> 1:35, event log non-empty. With the pre-d4 click formula swapped in on purpose, the tool reports the Site A waypoint 111.6 px off and fails, so it catches the d4 regression. Screenshots for session 2 comparison saved locally in `.smoke/baseline-h0.2/` (git-ignored).
+
 ### Checks (Live Stage e — `npm run check`, 20 November 2026)
 
 | Step | Result |
