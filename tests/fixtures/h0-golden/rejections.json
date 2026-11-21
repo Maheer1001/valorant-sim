@@ -1,0 +1,407 @@
+{
+ "probes": {
+  "results": [
+   {
+    "label": "unknown agent",
+    "ok": false,
+    "code": "unknown-agent",
+    "message": "Unknown agent nobody.",
+    "orderIndex": 0
+   },
+   {
+    "label": "wrong side",
+    "ok": false,
+    "code": "wrong-side",
+    "message": "Agent jett-defense is not on attack.",
+    "orderIndex": 0
+   },
+   {
+    "label": "empty route",
+    "ok": false,
+    "code": "invalid-order",
+    "message": "Move route needs at least one waypoint.",
+    "orderIndex": 0
+   },
+   {
+    "label": "non-integer waypoint",
+    "ok": false,
+    "code": "invalid-order",
+    "message": "Route waypoints must be integer millimeters.",
+    "orderIndex": 0
+   },
+   {
+    "label": "not owned",
+    "ok": false,
+    "code": "ability-not-owned",
+    "message": "Cast rejected: ability-not-owned.",
+    "orderIndex": 0
+   },
+   {
+    "label": "placeholder ability",
+    "ok": false,
+    "code": "ability-not-executable",
+    "message": "Cast rejected: ability-not-executable.",
+    "orderIndex": 0
+   },
+   {
+    "label": "bad yaw",
+    "ok": false,
+    "code": "invalid-order",
+    "message": "aimYawDeg must be an integer in 0..359.",
+    "orderIndex": 0
+   },
+   {
+    "label": "bad charge value",
+    "ok": false,
+    "code": "invalid-order",
+    "message": "chargeValue must be an integer.",
+    "orderIndex": 0
+   },
+   {
+    "label": "shoot ally",
+    "ok": false,
+    "code": "target-not-enemy",
+    "message": "Shoot target must be an enemy.",
+    "orderIndex": 0
+   },
+   {
+    "label": "shoot unseen",
+    "ok": false,
+    "code": "target-not-visible",
+    "message": "Shoot target is not in line of sight.",
+    "orderIndex": 0
+   },
+   {
+    "label": "shoot unknown",
+    "ok": false,
+    "code": "unknown-agent",
+    "message": "Unknown target nobody.",
+    "orderIndex": 0
+   },
+   {
+    "label": "second batch member fails",
+    "ok": false,
+    "code": "wrong-side",
+    "message": "Agent kayo-defense is not on attack.",
+    "orderIndex": 1
+   }
+  ],
+  "orderLog": [
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "move-route",
+      "instanceId": "breach-attack",
+      "waypoints": [
+       {
+        "xMm": 6000,
+        "yMm": 5200
+       },
+       {
+        "xMm": 9000,
+        "yMm": 6000
+       },
+       {
+        "xMm": 14000,
+        "yMm": 3000
+       }
+      ]
+     },
+     {
+      "kind": "move-route",
+      "instanceId": "brimstone-attack",
+      "waypoints": [
+       {
+        "xMm": 6000,
+        "yMm": 6800
+       },
+       {
+        "xMm": 9500,
+        "yMm": 7000
+       }
+      ]
+     }
+    ],
+    "result": "accepted",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "hold",
+      "instanceId": "nobody"
+     }
+    ],
+    "result": "unknown-agent",
+    "message": "Unknown agent nobody.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "hold",
+      "instanceId": "jett-defense"
+     }
+    ],
+    "result": "wrong-side",
+    "message": "Agent jett-defense is not on attack.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "move-route",
+      "instanceId": "breach-attack",
+      "waypoints": []
+     }
+    ],
+    "result": "invalid-order",
+    "message": "Move route needs at least one waypoint.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "move-route",
+      "instanceId": "breach-attack",
+      "waypoints": [
+       {
+        "xMm": 1.5,
+        "yMm": 2
+       }
+      ]
+     }
+    ],
+    "result": "invalid-order",
+    "message": "Route waypoints must be integer millimeters.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "cast",
+      "instanceId": "breach-attack",
+      "abilityId": "incendiary",
+      "target": {
+       "xMm": 5000,
+       "yMm": 5000
+      }
+     }
+    ],
+    "result": "ability-not-owned",
+    "message": "Cast rejected: ability-not-owned.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "defense",
+    "commands": [
+     {
+      "kind": "cast",
+      "instanceId": "jett-defense",
+      "abilityId": "cloudburst",
+      "target": {
+       "xMm": 15000,
+       "yMm": 2000
+      }
+     }
+    ],
+    "result": "ability-not-executable",
+    "message": "Cast rejected: ability-not-executable.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "cast",
+      "instanceId": "breach-attack",
+      "abilityId": "flashpoint",
+      "target": {
+       "xMm": 5000,
+       "yMm": 5000
+      },
+      "aimYawDeg": 400
+     }
+    ],
+    "result": "invalid-order",
+    "message": "aimYawDeg must be an integer in 0..359.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "cast",
+      "instanceId": "breach-attack",
+      "abilityId": "fault-line",
+      "target": {
+       "xMm": 5000,
+       "yMm": 5000
+      },
+      "chargeValue": 1.5
+     }
+    ],
+    "result": "invalid-order",
+    "message": "chargeValue must be an integer.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "shoot",
+      "instanceId": "breach-attack",
+      "targetInstanceId": "brimstone-attack"
+     }
+    ],
+    "result": "target-not-enemy",
+    "message": "Shoot target must be an enemy.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "shoot",
+      "instanceId": "breach-attack",
+      "targetInstanceId": "jett-defense"
+     }
+    ],
+    "result": "target-not-visible",
+    "message": "Shoot target is not in line of sight.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "shoot",
+      "instanceId": "breach-attack",
+      "targetInstanceId": "nobody"
+     }
+    ],
+    "result": "unknown-agent",
+    "message": "Unknown target nobody.",
+    "origin": "live"
+   },
+   {
+    "simTimeMs": 0,
+    "side": "attack",
+    "commands": [
+     {
+      "kind": "hold",
+      "instanceId": "breach-attack"
+     },
+     {
+      "kind": "hold",
+      "instanceId": "kayo-defense"
+     }
+    ],
+    "result": "wrong-side",
+    "message": "Agent kayo-defense is not on attack.",
+    "origin": "live"
+   }
+  ],
+  "pendingBatch": []
+ },
+ "messages": [
+  {
+   "code": "ability-not-owned",
+   "message": "That agent does not own this ability."
+  },
+  {
+   "code": "ability-not-executable",
+   "message": "This ability is not playable yet (placeholder)."
+  },
+  {
+   "code": "insufficient-charges",
+   "message": "No charges left for this ability."
+  },
+  {
+   "code": "out-of-range",
+   "message": "That point is outside the ability's cast range."
+  },
+  {
+   "code": "unknown-agent",
+   "message": "That agent is not in the round."
+  },
+  {
+   "code": "team-full",
+   "message": "The team already has five agents."
+  },
+  {
+   "code": "duplicate-agent",
+   "message": "That agent is already on this team."
+  },
+  {
+   "code": "unknown-definition",
+   "message": "Unknown agent in the catalog."
+  },
+  {
+   "code": "unknown-map",
+   "message": "The map is not loaded."
+  },
+  {
+   "code": "ruleset-mismatch",
+   "message": "Scenario ruleset does not match the active ruleset."
+  },
+  {
+   "code": "catalog-mismatch",
+   "message": "Scenario catalog version does not match the loaded catalog."
+  },
+  {
+   "code": "invalid-order",
+   "message": "That order is not valid (check numbers and fields)."
+  },
+  {
+   "code": "wrong-side",
+   "message": "That agent is not on your side."
+  },
+  {
+   "code": "agent-down",
+   "message": "That agent is down."
+  },
+  {
+   "code": "target-not-enemy",
+   "message": "Shoot targets must be enemies."
+  },
+  {
+   "code": "target-not-visible",
+   "message": "That target is not visible."
+  },
+  {
+   "code": "signature-on-cooldown",
+   "message": "Signature is still on cooldown."
+  },
+  {
+   "code": "insufficient-ult-points",
+   "message": "Not enough ultimate points (need 8)."
+  },
+  {
+   "code": "insufficient-credits",
+   "message": "Not enough credits to buy that charge."
+  },
+  {
+   "code": "charges-full",
+   "message": "That ability is already at max charges."
+  }
+ ]
+}

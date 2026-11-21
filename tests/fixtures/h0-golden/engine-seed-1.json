@@ -1,0 +1,4222 @@
+{
+ "seed": 1,
+ "phase": "ended",
+ "result": {
+  "kind": "defense-eliminated"
+ },
+ "endTimeMs": 7650,
+ "combatState": 2115027331,
+ "nextSequence": 158,
+ "issues": [
+  {
+   "atMs": 3000,
+   "ok": false,
+   "code": "agent-down"
+  },
+  {
+   "atMs": 4000,
+   "ok": true
+  },
+  {
+   "atMs": 6000,
+   "ok": true
+  },
+  {
+   "atMs": 7000,
+   "ok": true
+  }
+ ],
+ "finalTruth": {
+  "timeMs": 7650,
+  "agents": [
+   {
+    "instanceId": "breach-attack",
+    "definitionId": "breach",
+    "side": "attack",
+    "xMm": 14000,
+    "yMm": 3000,
+    "hp": 60,
+    "alive": true,
+    "facingDeg": 0,
+    "credits": 550,
+    "charges": {
+     "aftershock": 1,
+     "flashpoint": 0,
+     "fault-line": 0
+    },
+    "cooldownReadyAtMs": {
+     "fault-line": 54000
+    },
+    "ultimatePoints": 10,
+    "statuses": [
+     {
+      "id": "combat-stim",
+      "sourceAbilityId": "stim-beacon",
+      "untilMs": 5500,
+      "modifiers": {
+       "fireRate": 1.1,
+       "reloadTime": 0.9,
+       "drawTime": 0.9,
+       "spreadRecovery": 1.1
+      }
+     },
+     {
+      "id": "haste",
+      "sourceAbilityId": "stim-beacon",
+      "untilMs": 5500,
+      "modifiers": {
+       "movementSpeed": 1.1
+      }
+     }
+    ]
+   },
+   {
+    "instanceId": "brimstone-attack",
+    "definitionId": "brimstone",
+    "side": "attack",
+    "xMm": 11825,
+    "yMm": 7930,
+    "hp": 100,
+    "alive": true,
+    "facingDeg": 22,
+    "credits": 600,
+    "charges": {
+     "stim-beacon": 0,
+     "incendiary": 0,
+     "sky-smoke": 2
+    },
+    "cooldownReadyAtMs": {},
+    "ultimatePoints": 8,
+    "statuses": [
+     {
+      "id": "combat-stim",
+      "sourceAbilityId": "stim-beacon",
+      "untilMs": 11000,
+      "modifiers": {
+       "fireRate": 1.1,
+       "reloadTime": 0.9,
+       "drawTime": 0.9,
+       "spreadRecovery": 1.1
+      }
+     },
+     {
+      "id": "haste",
+      "sourceAbilityId": "stim-beacon",
+      "untilMs": 11000,
+      "modifiers": {
+       "movementSpeed": 1.1
+      }
+     }
+    ]
+   },
+   {
+    "instanceId": "jett-defense",
+    "definitionId": "jett",
+    "side": "defense",
+    "xMm": 16000,
+    "yMm": 1000,
+    "hp": 0,
+    "alive": false,
+    "facingDeg": 180,
+    "credits": 800,
+    "charges": {},
+    "cooldownReadyAtMs": {},
+    "ultimatePoints": 1,
+    "statuses": []
+   },
+   {
+    "instanceId": "kayo-defense",
+    "definitionId": "kayo",
+    "side": "defense",
+    "xMm": 16000,
+    "yMm": 11000,
+    "hp": 0,
+    "alive": false,
+    "facingDeg": 180,
+    "credits": 800,
+    "charges": {},
+    "cooldownReadyAtMs": {},
+    "ultimatePoints": 1,
+    "statuses": []
+   }
+  ],
+  "smokes": [
+   {
+    "id": "smoke-15",
+    "ownerInstanceId": "brimstone-attack",
+    "abilityId": "sky-smoke",
+    "xMm": 8000,
+    "yMm": 6000,
+    "radiusMm": 4150,
+    "activeFromMs": 2000,
+    "expiresAtMs": 21250
+   }
+  ],
+  "devices": [
+   {
+    "id": "stim-18",
+    "kind": "stim-beacon",
+    "ownerInstanceId": "brimstone-attack",
+    "abilityId": "stim-beacon",
+    "side": "attack",
+    "xMm": 3500,
+    "yMm": 7000,
+    "radiusMm": 6000,
+    "activeFromMs": 1500,
+    "expiresAtMs": 13500,
+    "enemiesSeeRadius": false,
+    "indestructible": true
+   }
+  ],
+  "zones": [
+   {
+    "id": "incendiary-69",
+    "abilityId": "incendiary",
+    "ownerInstanceId": "brimstone-attack",
+    "side": "attack",
+    "xMm": 19999,
+    "yMm": 10821,
+    "fullRadiusMm": 4500,
+    "activeFromMs": 7100,
+    "expiresAtMs": 15100,
+    "burstEndMs": 7350,
+    "spreadEndMs": 8100,
+    "fullEndMs": 15100,
+    "shrinkEndMs": null,
+    "damagesAllies": false,
+    "blocksVision": false,
+    "tickDamage": 6,
+    "tickIntervalMs": 100
+   }
+  ]
+ },
+ "finalPlanSteps": [
+  {
+   "id": "g-flash",
+   "instanceId": "breach-attack",
+   "abilityId": "flashpoint",
+   "trigger": {
+    "kind": "at-waypoint",
+    "waypointIndex": 1
+   },
+   "target": {
+    "xMm": 12000,
+    "yMm": 4800
+   },
+   "aimYawDeg": 329,
+   "status": "fired",
+   "due": false,
+   "fireReason": "arrived"
+  },
+  {
+   "id": "g-smoke",
+   "instanceId": "brimstone-attack",
+   "abilityId": "sky-smoke",
+   "trigger": {
+    "kind": "at-time",
+    "timeMs": 1000
+   },
+   "target": {
+    "xMm": 8000,
+    "yMm": 6000
+   },
+   "mapTarget": {
+    "xMm": 8000,
+    "yMm": 6000
+   },
+   "status": "fired",
+   "due": false
+  },
+  {
+   "id": "g-stim",
+   "instanceId": "brimstone-attack",
+   "abilityId": "stim-beacon",
+   "trigger": {
+    "kind": "at-time",
+    "timeMs": 1500
+   },
+   "target": {
+    "xMm": 3500,
+    "yMm": 7000
+   },
+   "mapTarget": {
+    "xMm": 3500,
+    "yMm": 7000
+   },
+   "status": "fired",
+   "due": false
+  }
+ ],
+ "orderLog": [
+  {
+   "simTimeMs": 0,
+   "side": "attack",
+   "commands": [
+    {
+     "kind": "move-route",
+     "instanceId": "breach-attack",
+     "waypoints": [
+      {
+       "xMm": 6000,
+       "yMm": 5200
+      },
+      {
+       "xMm": 9000,
+       "yMm": 6000
+      },
+      {
+       "xMm": 14000,
+       "yMm": 3000
+      }
+     ]
+    },
+    {
+     "kind": "move-route",
+     "instanceId": "brimstone-attack",
+     "waypoints": [
+      {
+       "xMm": 6000,
+       "yMm": 6800
+      },
+      {
+       "xMm": 9500,
+       "yMm": 7000
+      }
+     ]
+    }
+   ],
+   "result": "accepted",
+   "origin": "live"
+  },
+  {
+   "simTimeMs": 1000,
+   "side": "attack",
+   "commands": [
+    {
+     "kind": "cast",
+     "instanceId": "brimstone-attack",
+     "abilityId": "sky-smoke",
+     "target": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "mapTarget": {
+      "xMm": 8000,
+      "yMm": 6000
+     }
+    }
+   ],
+   "result": "accepted",
+   "origin": "plan"
+  },
+  {
+   "simTimeMs": 1500,
+   "side": "attack",
+   "commands": [
+    {
+     "kind": "cast",
+     "instanceId": "brimstone-attack",
+     "abilityId": "stim-beacon",
+     "target": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "mapTarget": {
+      "xMm": 3500,
+      "yMm": 7000
+     }
+    }
+   ],
+   "result": "accepted",
+   "origin": "plan"
+  },
+  {
+   "simTimeMs": 1750,
+   "side": "attack",
+   "commands": [
+    {
+     "kind": "cast",
+     "instanceId": "breach-attack",
+     "abilityId": "flashpoint",
+     "target": {
+      "xMm": 12000,
+      "yMm": 4800
+     },
+     "aimYawDeg": 329
+    }
+   ],
+   "result": "accepted",
+   "origin": "plan"
+  },
+  {
+   "simTimeMs": 3000,
+   "side": "attack",
+   "commands": [
+    {
+     "kind": "shoot",
+     "instanceId": "breach-attack",
+     "targetInstanceId": "jett-defense"
+    }
+   ],
+   "result": "agent-down",
+   "message": "Target jett-defense is down.",
+   "origin": "live"
+  },
+  {
+   "simTimeMs": 4000,
+   "side": "attack",
+   "commands": [
+    {
+     "kind": "cast",
+     "instanceId": "breach-attack",
+     "abilityId": "fault-line",
+     "target": {
+      "xMm": 12000,
+      "yMm": 6000
+     },
+     "aimYawDeg": 0,
+     "chargeValue": 20
+    }
+   ],
+   "result": "accepted",
+   "origin": "live"
+  },
+  {
+   "simTimeMs": 6000,
+   "side": "attack",
+   "commands": [
+    {
+     "kind": "cast",
+     "instanceId": "brimstone-attack",
+     "abilityId": "incendiary",
+     "target": {
+      "xMm": 13000,
+      "yMm": 9000
+     },
+     "aimYawDeg": 20
+    }
+   ],
+   "result": "accepted",
+   "origin": "live"
+  },
+  {
+   "simTimeMs": 7000,
+   "side": "attack",
+   "commands": [
+    {
+     "kind": "move-route",
+     "instanceId": "brimstone-attack",
+     "waypoints": [
+      {
+       "xMm": 12000,
+       "yMm": 8000
+      },
+      {
+       "xMm": 15000,
+       "yMm": 10000
+      }
+     ]
+    }
+   ],
+   "result": "accepted",
+   "origin": "live"
+  }
+ ],
+ "events": [
+  {
+   "type": "move-started",
+   "timeMs": 0,
+   "sequence": 1,
+   "agentId": "breach-attack",
+   "from": {
+    "xMm": 3000,
+    "yMm": 5000
+   },
+   "to": {
+    "xMm": 6000,
+    "yMm": 5200
+   }
+  },
+  {
+   "type": "move-started",
+   "timeMs": 0,
+   "sequence": 2,
+   "agentId": "brimstone-attack",
+   "from": {
+    "xMm": 3000,
+    "yMm": 7000
+   },
+   "to": {
+    "xMm": 6000,
+    "yMm": 6800
+   }
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 0,
+   "sequence": 3,
+   "agentId": "breach-attack",
+   "targetInstanceId": "breach-attack",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 0,
+   "sequence": 4,
+   "agentId": "brimstone-attack",
+   "targetInstanceId": "brimstone-attack",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 0,
+   "sequence": 5,
+   "agentId": "jett-defense",
+   "targetInstanceId": "jett-defense",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 0,
+   "sequence": 6,
+   "agentId": "kayo-defense",
+   "targetInstanceId": "kayo-defense",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "move-arrived",
+   "timeMs": 859,
+   "sequence": 7,
+   "agentId": "breach-attack",
+   "at": {
+    "xMm": 6000,
+    "yMm": 5200
+   }
+  },
+  {
+   "type": "move-started",
+   "timeMs": 859,
+   "sequence": 8,
+   "agentId": "breach-attack",
+   "from": {
+    "xMm": 6000,
+    "yMm": 5200
+   },
+   "to": {
+    "xMm": 9000,
+    "yMm": 6000
+   }
+  },
+  {
+   "type": "move-arrived",
+   "timeMs": 859,
+   "sequence": 9,
+   "agentId": "brimstone-attack",
+   "at": {
+    "xMm": 6000,
+    "yMm": 6800
+   }
+  },
+  {
+   "type": "move-started",
+   "timeMs": 859,
+   "sequence": 10,
+   "agentId": "brimstone-attack",
+   "from": {
+    "xMm": 6000,
+    "yMm": 6800
+   },
+   "to": {
+    "xMm": 9500,
+    "yMm": 7000
+   }
+  },
+  {
+   "type": "shot",
+   "timeMs": 1000,
+   "sequence": 11,
+   "agentId": "breach-attack",
+   "targetInstanceId": "kayo-defense",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 3805,
+   "draw": 5930,
+   "hit": false,
+   "damage": 0,
+   "targetHpAfter": 100
+  },
+  {
+   "type": "shot",
+   "timeMs": 1000,
+   "sequence": 12,
+   "agentId": "brimstone-attack",
+   "targetInstanceId": "jett-defense",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 3783,
+   "draw": 1181,
+   "hit": true,
+   "damage": 40,
+   "targetHpAfter": 60
+  },
+  {
+   "type": "shot",
+   "timeMs": 1000,
+   "sequence": 13,
+   "agentId": "jett-defense",
+   "targetInstanceId": "brimstone-attack",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 3783,
+   "draw": 7502,
+   "hit": false,
+   "damage": 0,
+   "targetHpAfter": 100
+  },
+  {
+   "type": "shot",
+   "timeMs": 1000,
+   "sequence": 14,
+   "agentId": "kayo-defense",
+   "targetInstanceId": "breach-attack",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 3805,
+   "draw": 2097,
+   "hit": true,
+   "damage": 40,
+   "targetHpAfter": 60
+  },
+  {
+   "type": "cast-accepted",
+   "timeMs": 1000,
+   "sequence": 15,
+   "agentId": "brimstone-attack",
+   "abilityId": "sky-smoke",
+   "target": {
+    "xMm": 8000,
+    "yMm": 6000
+   },
+   "chargesRemaining": 2
+  },
+  {
+   "type": "cast-accepted",
+   "timeMs": 1500,
+   "sequence": 18,
+   "agentId": "brimstone-attack",
+   "abilityId": "stim-beacon",
+   "target": {
+    "xMm": 3500,
+    "yMm": 7000
+   },
+   "chargesRemaining": 0
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 1500,
+   "sequence": 19,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "breach-attack",
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "move-arrived",
+   "timeMs": 1746,
+   "sequence": 44,
+   "agentId": "breach-attack",
+   "at": {
+    "xMm": 9000,
+    "yMm": 6000
+   }
+  },
+  {
+   "type": "move-started",
+   "timeMs": 1746,
+   "sequence": 45,
+   "agentId": "breach-attack",
+   "from": {
+    "xMm": 9000,
+    "yMm": 6000
+   },
+   "to": {
+    "xMm": 14000,
+    "yMm": 3000
+   }
+  },
+  {
+   "type": "cast-accepted",
+   "timeMs": 1750,
+   "sequence": 46,
+   "agentId": "breach-attack",
+   "abilityId": "flashpoint",
+   "target": {
+    "xMm": 12000,
+    "yMm": 4800
+   },
+   "chargesRemaining": 0
+  },
+  {
+   "type": "move-arrived",
+   "timeMs": 1861,
+   "sequence": 48,
+   "agentId": "brimstone-attack",
+   "at": {
+    "xMm": 9500,
+    "yMm": 7000
+   }
+  },
+  {
+   "type": "shot",
+   "timeMs": 1909,
+   "sequence": 49,
+   "agentId": "breach-attack",
+   "targetInstanceId": "jett-defense",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4893,
+   "draw": 422,
+   "hit": true,
+   "damage": 40,
+   "targetHpAfter": 20
+  },
+  {
+   "type": "shot",
+   "timeMs": 1909,
+   "sequence": 50,
+   "agentId": "brimstone-attack",
+   "targetInstanceId": "kayo-defense",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4956,
+   "draw": 4374,
+   "hit": true,
+   "damage": 40,
+   "targetHpAfter": 60
+  },
+  {
+   "type": "smoke-active",
+   "timeMs": 2000,
+   "sequence": 16,
+   "agentId": "brimstone-attack",
+   "smokeId": "smoke-15",
+   "xMm": 8000,
+   "yMm": 6000,
+   "radiusMm": 4150
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 2000,
+   "sequence": 20,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 2000,
+   "sequence": 51,
+   "agentId": "jett-defense",
+   "targetInstanceId": "jett-defense",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 2000,
+   "sequence": 52,
+   "agentId": "kayo-defense",
+   "targetInstanceId": "kayo-defense",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 2500,
+   "sequence": 21,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "flash-resolved",
+   "timeMs": 2650,
+   "sequence": 47,
+   "agentId": "breach-attack",
+   "abilityId": "flashpoint",
+   "blindedInstanceIds": [],
+   "blockedInstanceIds": []
+  },
+  {
+   "type": "shot",
+   "timeMs": 2818,
+   "sequence": 53,
+   "agentId": "breach-attack",
+   "targetInstanceId": "jett-defense",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 6040,
+   "draw": 2805,
+   "hit": true,
+   "damage": 40,
+   "targetHpAfter": 0
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 2818,
+   "sequence": 54,
+   "agentId": "brimstone-attack",
+   "targetInstanceId": "brimstone-attack",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 3000,
+   "sequence": 22,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "shot",
+   "timeMs": 3000,
+   "sequence": 55,
+   "agentId": "kayo-defense",
+   "targetInstanceId": "breach-attack",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4830,
+   "draw": 7561,
+   "hit": false,
+   "damage": 0,
+   "targetHpAfter": 60
+  },
+  {
+   "type": "move-arrived",
+   "timeMs": 3261,
+   "sequence": 56,
+   "agentId": "breach-attack",
+   "at": {
+    "xMm": 14000,
+    "yMm": 3000
+   }
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 3500,
+   "sequence": 23,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "shot",
+   "timeMs": 3727,
+   "sequence": 57,
+   "agentId": "breach-attack",
+   "targetInstanceId": "kayo-defense",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4751,
+   "draw": 5051,
+   "hit": false,
+   "damage": 0,
+   "targetHpAfter": 60
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 3727,
+   "sequence": 58,
+   "agentId": "brimstone-attack",
+   "targetInstanceId": "brimstone-attack",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 4000,
+   "sequence": 24,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "shot",
+   "timeMs": 4000,
+   "sequence": 59,
+   "agentId": "kayo-defense",
+   "targetInstanceId": "breach-attack",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4751,
+   "draw": 7034,
+   "hit": false,
+   "damage": 0,
+   "targetHpAfter": 60
+  },
+  {
+   "type": "cast-accepted",
+   "timeMs": 4000,
+   "sequence": 60,
+   "agentId": "breach-attack",
+   "abilityId": "fault-line",
+   "target": {
+    "xMm": 12000,
+    "yMm": 6000
+   },
+   "chargesRemaining": 0
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 4500,
+   "sequence": 25,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "shot",
+   "timeMs": 4636,
+   "sequence": 62,
+   "agentId": "breach-attack",
+   "targetInstanceId": "kayo-defense",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4751,
+   "draw": 2790,
+   "hit": true,
+   "damage": 40,
+   "targetHpAfter": 20
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 4636,
+   "sequence": 63,
+   "agentId": "brimstone-attack",
+   "targetInstanceId": "brimstone-attack",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 5000,
+   "sequence": 26,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "shot",
+   "timeMs": 5000,
+   "sequence": 64,
+   "agentId": "kayo-defense",
+   "targetInstanceId": "breach-attack",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4751,
+   "draw": 8388,
+   "hit": false,
+   "damage": 0,
+   "targetHpAfter": 60
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 5500,
+   "sequence": 27,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 5545,
+   "sequence": 65,
+   "agentId": "brimstone-attack",
+   "targetInstanceId": "brimstone-attack",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "shot",
+   "timeMs": 5636,
+   "sequence": 66,
+   "agentId": "breach-attack",
+   "targetInstanceId": "kayo-defense",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4751,
+   "draw": 7603,
+   "hit": false,
+   "damage": 0,
+   "targetHpAfter": 20
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 6000,
+   "sequence": 28,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "shot",
+   "timeMs": 6000,
+   "sequence": 67,
+   "agentId": "kayo-defense",
+   "targetInstanceId": "breach-attack",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4751,
+   "draw": 8487,
+   "hit": false,
+   "damage": 0,
+   "targetHpAfter": 60
+  },
+  {
+   "type": "cast-accepted",
+   "timeMs": 6000,
+   "sequence": 68,
+   "agentId": "brimstone-attack",
+   "abilityId": "incendiary",
+   "target": {
+    "xMm": 13000,
+    "yMm": 9000
+   },
+   "chargesRemaining": 0
+  },
+  {
+   "type": "status-wave",
+   "timeMs": 6100,
+   "sequence": 61,
+   "agentId": "breach-attack",
+   "abilityId": "fault-line",
+   "statusId": "concuss",
+   "affectedInstanceIds": [],
+   "durationMs": 2500
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 6454,
+   "sequence": 70,
+   "agentId": "brimstone-attack",
+   "targetInstanceId": "brimstone-attack",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 6500,
+   "sequence": 29,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "shot",
+   "timeMs": 6636,
+   "sequence": 71,
+   "agentId": "breach-attack",
+   "targetInstanceId": "kayo-defense",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4751,
+   "draw": 8761,
+   "hit": false,
+   "damage": 0,
+   "targetHpAfter": 20
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 7000,
+   "sequence": 30,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": [
+    "brimstone-attack"
+   ]
+  },
+  {
+   "type": "shot",
+   "timeMs": 7000,
+   "sequence": 72,
+   "agentId": "kayo-defense",
+   "targetInstanceId": "breach-attack",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4751,
+   "draw": 7935,
+   "hit": false,
+   "damage": 0,
+   "targetHpAfter": 60
+  },
+  {
+   "type": "move-started",
+   "timeMs": 7000,
+   "sequence": 73,
+   "agentId": "brimstone-attack",
+   "from": {
+    "xMm": 9500,
+    "yMm": 7000
+   },
+   "to": {
+    "xMm": 12000,
+    "yMm": 8000
+   }
+  },
+  {
+   "type": "incendiary-detonated",
+   "timeMs": 7100,
+   "sequence": 69,
+   "agentId": "brimstone-attack",
+   "at": {
+    "xMm": 19999,
+    "yMm": 10821
+   },
+   "bounces": 2,
+   "zoneId": "incendiary-69"
+  },
+  {
+   "type": "zone-damage",
+   "timeMs": 7100,
+   "sequence": 74,
+   "agentId": "brimstone-attack",
+   "abilityId": "incendiary",
+   "zoneId": "incendiary-69",
+   "radiusMm": 0,
+   "hits": []
+  },
+  {
+   "type": "zone-damage",
+   "timeMs": 7200,
+   "sequence": 75,
+   "agentId": "brimstone-attack",
+   "abilityId": "incendiary",
+   "zoneId": "incendiary-69",
+   "radiusMm": 0,
+   "hits": []
+  },
+  {
+   "type": "zone-damage",
+   "timeMs": 7300,
+   "sequence": 76,
+   "agentId": "brimstone-attack",
+   "abilityId": "incendiary",
+   "zoneId": "incendiary-69",
+   "radiusMm": 0,
+   "hits": []
+  },
+  {
+   "type": "shot-withheld",
+   "timeMs": 7363,
+   "sequence": 155,
+   "agentId": "brimstone-attack",
+   "targetInstanceId": "brimstone-attack",
+   "reason": "no-line-of-sight"
+  },
+  {
+   "type": "zone-damage",
+   "timeMs": 7400,
+   "sequence": 77,
+   "agentId": "brimstone-attack",
+   "abilityId": "incendiary",
+   "zoneId": "incendiary-69",
+   "radiusMm": 300,
+   "hits": []
+  },
+  {
+   "type": "stim-pulse",
+   "timeMs": 7500,
+   "sequence": 31,
+   "agentId": "brimstone-attack",
+   "deviceId": "stim-18",
+   "affectedInstanceIds": []
+  },
+  {
+   "type": "zone-damage",
+   "timeMs": 7500,
+   "sequence": 78,
+   "agentId": "brimstone-attack",
+   "abilityId": "incendiary",
+   "zoneId": "incendiary-69",
+   "radiusMm": 900,
+   "hits": []
+  },
+  {
+   "type": "zone-damage",
+   "timeMs": 7600,
+   "sequence": 79,
+   "agentId": "brimstone-attack",
+   "abilityId": "incendiary",
+   "zoneId": "incendiary-69",
+   "radiusMm": 1500,
+   "hits": []
+  },
+  {
+   "type": "shot",
+   "timeMs": 7636,
+   "sequence": 156,
+   "agentId": "breach-attack",
+   "targetInstanceId": "kayo-defense",
+   "weaponId": "rifle_a",
+   "hitProbabilityBp": 4751,
+   "draw": 2153,
+   "hit": true,
+   "damage": 40,
+   "targetHpAfter": 0
+  },
+  {
+   "type": "round-ended",
+   "timeMs": 7650,
+   "sequence": 157,
+   "agentId": "",
+   "result": {
+    "kind": "defense-eliminated"
+   }
+  }
+ ],
+ "eventText": [
+  "0 ms · Move started toward 6000, 5200",
+  "0 ms · Move started toward 6000, 6800",
+  "0 ms · Shot withheld (no-line-of-sight)",
+  "0 ms · Shot withheld (no-line-of-sight)",
+  "0 ms · Shot withheld (no-line-of-sight)",
+  "0 ms · Shot withheld (no-line-of-sight)",
+  "859 ms · Arrived at 6000, 5200",
+  "859 ms · Move started toward 9000, 6000",
+  "859 ms · Arrived at 6000, 6800",
+  "859 ms · Move started toward 9500, 7000",
+  "1000 ms · Shot hit chance 3805/10000, draw 5930, miss",
+  "1000 ms · Shot hit chance 3783/10000, draw 1181, hit",
+  "1000 ms · Shot hit chance 3783/10000, draw 7502, miss",
+  "1000 ms · Shot hit chance 3805/10000, draw 2097, hit",
+  "1000 ms · sky-smoke accepted, 2 charges left",
+  "1500 ms · stim-beacon accepted, 0 charges left",
+  "1500 ms · Stim Beacon pulsed (2 allies)",
+  "1746 ms · Arrived at 9000, 6000",
+  "1746 ms · Move started toward 14000, 3000",
+  "1750 ms · flashpoint accepted, 0 charges left",
+  "1861 ms · Arrived at 9500, 7000",
+  "1909 ms · Shot hit chance 4893/10000, draw 422, hit",
+  "1909 ms · Shot hit chance 4956/10000, draw 4374, hit",
+  "2000 ms · Vision volume is blocking sight",
+  "2000 ms · Stim Beacon pulsed (1 allies)",
+  "2000 ms · Shot withheld (no-line-of-sight)",
+  "2000 ms · Shot withheld (no-line-of-sight)",
+  "2500 ms · Stim Beacon pulsed (1 allies)",
+  "2650 ms · Flash blinded 0, blocked 0",
+  "2818 ms · Shot hit chance 6040/10000, draw 2805, hit · kill (+1 ult killer, +1 ult victim)",
+  "2818 ms · Shot withheld (no-line-of-sight)",
+  "3000 ms · Stim Beacon pulsed (1 allies)",
+  "3000 ms · Shot hit chance 4830/10000, draw 7561, miss",
+  "3261 ms · Arrived at 14000, 3000",
+  "3500 ms · Stim Beacon pulsed (1 allies)",
+  "3727 ms · Shot hit chance 4751/10000, draw 5051, miss",
+  "3727 ms · Shot withheld (no-line-of-sight)",
+  "4000 ms · Stim Beacon pulsed (1 allies)",
+  "4000 ms · Shot hit chance 4751/10000, draw 7034, miss",
+  "4000 ms · fault-line accepted, 0 charges left",
+  "4500 ms · Stim Beacon pulsed (1 allies)",
+  "4636 ms · Shot hit chance 4751/10000, draw 2790, hit",
+  "4636 ms · Shot withheld (no-line-of-sight)",
+  "5000 ms · Stim Beacon pulsed (1 allies)",
+  "5000 ms · Shot hit chance 4751/10000, draw 8388, miss",
+  "5500 ms · Stim Beacon pulsed (1 allies)",
+  "5545 ms · Shot withheld (no-line-of-sight)",
+  "5636 ms · Shot hit chance 4751/10000, draw 7603, miss",
+  "6000 ms · Stim Beacon pulsed (1 allies)",
+  "6000 ms · Shot hit chance 4751/10000, draw 8487, miss",
+  "6000 ms · incendiary accepted, 0 charges left",
+  "6100 ms · fault-line applied concuss (2500 ms) to 0",
+  "6454 ms · Shot withheld (no-line-of-sight)",
+  "6500 ms · Stim Beacon pulsed (1 allies)",
+  "6636 ms · Shot hit chance 4751/10000, draw 8761, miss",
+  "7000 ms · Stim Beacon pulsed (1 allies)",
+  "7000 ms · Shot hit chance 4751/10000, draw 7935, miss",
+  "7000 ms · Move started toward 12000, 8000",
+  "7100 ms · Incendiary zone started after 2 bounces",
+  "7100 ms · incendiary damage tick (0 hits)",
+  "7200 ms · incendiary damage tick (0 hits)",
+  "7300 ms · incendiary damage tick (0 hits)",
+  "7363 ms · Shot withheld (no-line-of-sight)",
+  "7400 ms · incendiary damage tick (0 hits)",
+  "7500 ms · Stim Beacon pulsed (0 allies)",
+  "7500 ms · incendiary damage tick (0 hits)",
+  "7600 ms · incendiary damage tick (0 hits)",
+  "7636 ms · Shot hit chance 4751/10000, draw 2153, hit · kill (+1 ult killer, +1 ult victim)",
+  "7650 ms · Round ended (defense-eliminated)"
+ ],
+ "samples": [
+  {
+   "timeMs": 0,
+   "truth": {
+    "timeMs": 0,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 3000,
+      "yMm": 5000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 4,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 1,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": []
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 3000,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 356,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 1,
+       "incendiary": 1,
+       "sky-smoke": 3
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": []
+     },
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [],
+    "devices": [],
+    "zones": []
+   },
+   "attackView": {
+    "timeMs": 0,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 3000,
+      "yMm": 5000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 4,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 1,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": []
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 3000,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 356,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 1,
+       "incendiary": 1,
+       "sky-smoke": 3
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": []
+     }
+    ],
+    "smokes": [],
+    "devices": [],
+    "zones": []
+   },
+   "defenseView": {
+    "timeMs": 0,
+    "agents": [
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [],
+    "devices": [],
+    "zones": []
+   },
+   "planSteps": [
+    {
+     "id": "g-flash",
+     "instanceId": "breach-attack",
+     "abilityId": "flashpoint",
+     "trigger": {
+      "kind": "at-waypoint",
+      "waypointIndex": 1
+     },
+     "target": {
+      "xMm": 12000,
+      "yMm": 4800
+     },
+     "aimYawDeg": 329,
+     "status": "armed",
+     "due": false
+    },
+    {
+     "id": "g-smoke",
+     "instanceId": "brimstone-attack",
+     "abilityId": "sky-smoke",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1000
+     },
+     "target": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "mapTarget": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "status": "armed",
+     "due": false
+    },
+    {
+     "id": "g-stim",
+     "instanceId": "brimstone-attack",
+     "abilityId": "stim-beacon",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1500
+     },
+     "target": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "mapTarget": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "status": "armed",
+     "due": false
+    }
+   ]
+  },
+  {
+   "timeMs": 1000,
+   "truth": {
+    "timeMs": 1000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 6477,
+      "yMm": 5327,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 15,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 1,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": []
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 6493,
+      "yMm": 6828,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 1,
+       "incendiary": 1,
+       "sky-smoke": 3
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": []
+     },
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [],
+    "devices": [],
+    "zones": []
+   },
+   "attackView": {
+    "timeMs": 1000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 6477,
+      "yMm": 5327,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 15,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 1,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": []
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 6493,
+      "yMm": 6828,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 1,
+       "incendiary": 1,
+       "sky-smoke": 3
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": []
+     },
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [],
+    "devices": [],
+    "zones": []
+   },
+   "defenseView": {
+    "timeMs": 1000,
+    "agents": [
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 6477,
+      "yMm": 5327,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 15,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 1,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": []
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 6493,
+      "yMm": 6828,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 1,
+       "incendiary": 1,
+       "sky-smoke": 3
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": []
+     }
+    ],
+    "smokes": [],
+    "devices": [],
+    "zones": []
+   },
+   "planSteps": [
+    {
+     "id": "g-flash",
+     "instanceId": "breach-attack",
+     "abilityId": "flashpoint",
+     "trigger": {
+      "kind": "at-waypoint",
+      "waypointIndex": 1
+     },
+     "target": {
+      "xMm": 12000,
+      "yMm": 4800
+     },
+     "aimYawDeg": 329,
+     "status": "armed",
+     "due": false
+    },
+    {
+     "id": "g-smoke",
+     "instanceId": "brimstone-attack",
+     "abilityId": "sky-smoke",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1000
+     },
+     "target": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "mapTarget": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "status": "armed",
+     "due": false
+    },
+    {
+     "id": "g-stim",
+     "instanceId": "brimstone-attack",
+     "abilityId": "stim-beacon",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1500
+     },
+     "target": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "mapTarget": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "status": "armed",
+     "due": false
+    }
+   ]
+  },
+  {
+   "timeMs": 2000,
+   "truth": {
+    "timeMs": 2000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 9838,
+      "yMm": 5497,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 329,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 1,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 6000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 6000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "attackView": {
+    "timeMs": 2000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 9838,
+      "yMm": 5497,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 329,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 1,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 6000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 6000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "defenseView": {
+    "timeMs": 2000,
+    "agents": [
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [],
+    "zones": []
+   },
+   "planSteps": [
+    {
+     "id": "g-flash",
+     "instanceId": "breach-attack",
+     "abilityId": "flashpoint",
+     "trigger": {
+      "kind": "at-waypoint",
+      "waypointIndex": 1
+     },
+     "target": {
+      "xMm": 12000,
+      "yMm": 4800
+     },
+     "aimYawDeg": 329,
+     "status": "fired",
+     "due": false,
+     "fireReason": "arrived"
+    },
+    {
+     "id": "g-smoke",
+     "instanceId": "brimstone-attack",
+     "abilityId": "sky-smoke",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1000
+     },
+     "target": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "mapTarget": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "status": "fired",
+     "due": false
+    },
+    {
+     "id": "g-stim",
+     "instanceId": "brimstone-attack",
+     "abilityId": "stim-beacon",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1500
+     },
+     "target": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "mapTarget": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "status": "fired",
+     "due": false
+    }
+   ]
+  },
+  {
+   "timeMs": 3000,
+   "truth": {
+    "timeMs": 3000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 13139,
+      "yMm": 3517,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 329,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 1,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 7000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 7000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 0,
+      "alive": false,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 1,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "attackView": {
+    "timeMs": 3000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 13139,
+      "yMm": 3517,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 329,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 1,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 7000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 7000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "defenseView": {
+    "timeMs": 3000,
+    "agents": [
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 0,
+      "alive": false,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 1,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 13139,
+      "yMm": 3517,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 329,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [],
+    "zones": []
+   },
+   "planSteps": [
+    {
+     "id": "g-flash",
+     "instanceId": "breach-attack",
+     "abilityId": "flashpoint",
+     "trigger": {
+      "kind": "at-waypoint",
+      "waypointIndex": 1
+     },
+     "target": {
+      "xMm": 12000,
+      "yMm": 4800
+     },
+     "aimYawDeg": 329,
+     "status": "fired",
+     "due": false,
+     "fireReason": "arrived"
+    },
+    {
+     "id": "g-smoke",
+     "instanceId": "brimstone-attack",
+     "abilityId": "sky-smoke",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1000
+     },
+     "target": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "mapTarget": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "status": "fired",
+     "due": false
+    },
+    {
+     "id": "g-stim",
+     "instanceId": "brimstone-attack",
+     "abilityId": "stim-beacon",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1500
+     },
+     "target": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "mapTarget": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "status": "fired",
+     "due": false
+    }
+   ]
+  },
+  {
+   "timeMs": 4000,
+   "truth": {
+    "timeMs": 4000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 329,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 1,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 8000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 8000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 0,
+      "alive": false,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 1,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "attackView": {
+    "timeMs": 4000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 329,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 1,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 8000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 8000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "defenseView": {
+    "timeMs": 4000,
+    "agents": [
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 0,
+      "alive": false,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 1,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 329,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 1
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [],
+    "zones": []
+   },
+   "planSteps": [
+    {
+     "id": "g-flash",
+     "instanceId": "breach-attack",
+     "abilityId": "flashpoint",
+     "trigger": {
+      "kind": "at-waypoint",
+      "waypointIndex": 1
+     },
+     "target": {
+      "xMm": 12000,
+      "yMm": 4800
+     },
+     "aimYawDeg": 329,
+     "status": "fired",
+     "due": false,
+     "fireReason": "arrived"
+    },
+    {
+     "id": "g-smoke",
+     "instanceId": "brimstone-attack",
+     "abilityId": "sky-smoke",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1000
+     },
+     "target": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "mapTarget": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "status": "fired",
+     "due": false
+    },
+    {
+     "id": "g-stim",
+     "instanceId": "brimstone-attack",
+     "abilityId": "stim-beacon",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1500
+     },
+     "target": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "mapTarget": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "status": "fired",
+     "due": false
+    }
+   ]
+  },
+  {
+   "timeMs": 5000,
+   "truth": {
+    "timeMs": 5000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 0,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 0
+      },
+      "cooldownReadyAtMs": {
+       "fault-line": 54000
+      },
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 1,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 9000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 9000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 0,
+      "alive": false,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 1,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "attackView": {
+    "timeMs": 5000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 0,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 0
+      },
+      "cooldownReadyAtMs": {
+       "fault-line": 54000
+      },
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 1,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 9000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 9000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "defenseView": {
+    "timeMs": 5000,
+    "agents": [
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 0,
+      "alive": false,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 1,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 0,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 0
+      },
+      "cooldownReadyAtMs": {
+       "fault-line": 54000
+      },
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [],
+    "zones": []
+   },
+   "planSteps": [
+    {
+     "id": "g-flash",
+     "instanceId": "breach-attack",
+     "abilityId": "flashpoint",
+     "trigger": {
+      "kind": "at-waypoint",
+      "waypointIndex": 1
+     },
+     "target": {
+      "xMm": 12000,
+      "yMm": 4800
+     },
+     "aimYawDeg": 329,
+     "status": "fired",
+     "due": false,
+     "fireReason": "arrived"
+    },
+    {
+     "id": "g-smoke",
+     "instanceId": "brimstone-attack",
+     "abilityId": "sky-smoke",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1000
+     },
+     "target": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "mapTarget": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "status": "fired",
+     "due": false
+    },
+    {
+     "id": "g-stim",
+     "instanceId": "brimstone-attack",
+     "abilityId": "stim-beacon",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1500
+     },
+     "target": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "mapTarget": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "status": "fired",
+     "due": false
+    }
+   ]
+  },
+  {
+   "timeMs": 6000,
+   "truth": {
+    "timeMs": 6000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 0,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 0
+      },
+      "cooldownReadyAtMs": {
+       "fault-line": 54000
+      },
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 1,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 10000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 10000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 0,
+      "alive": false,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 1,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "attackView": {
+    "timeMs": 6000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 0,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 0
+      },
+      "cooldownReadyAtMs": {
+       "fault-line": 54000
+      },
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 3,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 1,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 10000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 10000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "defenseView": {
+    "timeMs": 6000,
+    "agents": [
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 0,
+      "alive": false,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 1,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 0,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 0
+      },
+      "cooldownReadyAtMs": {
+       "fault-line": 54000
+      },
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [],
+    "zones": []
+   },
+   "planSteps": [
+    {
+     "id": "g-flash",
+     "instanceId": "breach-attack",
+     "abilityId": "flashpoint",
+     "trigger": {
+      "kind": "at-waypoint",
+      "waypointIndex": 1
+     },
+     "target": {
+      "xMm": 12000,
+      "yMm": 4800
+     },
+     "aimYawDeg": 329,
+     "status": "fired",
+     "due": false,
+     "fireReason": "arrived"
+    },
+    {
+     "id": "g-smoke",
+     "instanceId": "brimstone-attack",
+     "abilityId": "sky-smoke",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1000
+     },
+     "target": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "mapTarget": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "status": "fired",
+     "due": false
+    },
+    {
+     "id": "g-stim",
+     "instanceId": "brimstone-attack",
+     "abilityId": "stim-beacon",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1500
+     },
+     "target": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "mapTarget": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "status": "fired",
+     "due": false
+    }
+   ]
+  },
+  {
+   "timeMs": 7000,
+   "truth": {
+    "timeMs": 7000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 0,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 0
+      },
+      "cooldownReadyAtMs": {
+       "fault-line": 54000
+      },
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 20,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 0,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 11000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 11000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 0,
+      "alive": false,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 1,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "attackView": {
+    "timeMs": 7000,
+    "agents": [
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 0,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 0
+      },
+      "cooldownReadyAtMs": {
+       "fault-line": 54000
+      },
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "brimstone-attack",
+      "definitionId": "brimstone",
+      "side": "attack",
+      "xMm": 9500,
+      "yMm": 7000,
+      "hp": 100,
+      "alive": true,
+      "facingDeg": 20,
+      "credits": 600,
+      "charges": {
+       "stim-beacon": 0,
+       "incendiary": 0,
+       "sky-smoke": 2
+      },
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 8,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 11000,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 11000,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [
+     {
+      "id": "stim-18",
+      "kind": "stim-beacon",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "stim-beacon",
+      "side": "attack",
+      "xMm": 3500,
+      "yMm": 7000,
+      "radiusMm": 6000,
+      "activeFromMs": 1500,
+      "expiresAtMs": 13500,
+      "enemiesSeeRadius": false,
+      "indestructible": true
+     }
+    ],
+    "zones": []
+   },
+   "defenseView": {
+    "timeMs": 7000,
+    "agents": [
+     {
+      "instanceId": "jett-defense",
+      "definitionId": "jett",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 1000,
+      "hp": 0,
+      "alive": false,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 1,
+      "statuses": []
+     },
+     {
+      "instanceId": "kayo-defense",
+      "definitionId": "kayo",
+      "side": "defense",
+      "xMm": 16000,
+      "yMm": 11000,
+      "hp": 20,
+      "alive": true,
+      "facingDeg": 180,
+      "credits": 800,
+      "charges": {},
+      "cooldownReadyAtMs": {},
+      "ultimatePoints": 0,
+      "statuses": []
+     },
+     {
+      "instanceId": "breach-attack",
+      "definitionId": "breach",
+      "side": "attack",
+      "xMm": 14000,
+      "yMm": 3000,
+      "hp": 60,
+      "alive": true,
+      "facingDeg": 0,
+      "credits": 550,
+      "charges": {
+       "aftershock": 1,
+       "flashpoint": 0,
+       "fault-line": 0
+      },
+      "cooldownReadyAtMs": {
+       "fault-line": 54000
+      },
+      "ultimatePoints": 9,
+      "statuses": [
+       {
+        "id": "combat-stim",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "fireRate": 1.1,
+         "reloadTime": 0.9,
+         "drawTime": 0.9,
+         "spreadRecovery": 1.1
+        }
+       },
+       {
+        "id": "haste",
+        "sourceAbilityId": "stim-beacon",
+        "untilMs": 5500,
+        "modifiers": {
+         "movementSpeed": 1.1
+        }
+       }
+      ]
+     }
+    ],
+    "smokes": [
+     {
+      "id": "smoke-15",
+      "ownerInstanceId": "brimstone-attack",
+      "abilityId": "sky-smoke",
+      "xMm": 8000,
+      "yMm": 6000,
+      "radiusMm": 4150,
+      "activeFromMs": 2000,
+      "expiresAtMs": 21250
+     }
+    ],
+    "devices": [],
+    "zones": []
+   },
+   "planSteps": [
+    {
+     "id": "g-flash",
+     "instanceId": "breach-attack",
+     "abilityId": "flashpoint",
+     "trigger": {
+      "kind": "at-waypoint",
+      "waypointIndex": 1
+     },
+     "target": {
+      "xMm": 12000,
+      "yMm": 4800
+     },
+     "aimYawDeg": 329,
+     "status": "fired",
+     "due": false,
+     "fireReason": "arrived"
+    },
+    {
+     "id": "g-smoke",
+     "instanceId": "brimstone-attack",
+     "abilityId": "sky-smoke",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1000
+     },
+     "target": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "mapTarget": {
+      "xMm": 8000,
+      "yMm": 6000
+     },
+     "status": "fired",
+     "due": false
+    },
+    {
+     "id": "g-stim",
+     "instanceId": "brimstone-attack",
+     "abilityId": "stim-beacon",
+     "trigger": {
+      "kind": "at-time",
+      "timeMs": 1500
+     },
+     "target": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "mapTarget": {
+      "xMm": 3500,
+      "yMm": 7000
+     },
+     "status": "fired",
+     "due": false
+    }
+   ]
+  }
+ ]
+}
