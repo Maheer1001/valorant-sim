@@ -483,7 +483,13 @@ export function App() {
           }),
         );
         draft.route.forEach((point, index) => {
-          primitives.push({ kind: "circle", center: point, radiusMm: 280, fill: true });
+          primitives.push({
+            kind: "circle",
+            center: point,
+            radiusMm: 280,
+            fill: true,
+            testId: `route-waypoint-${member.instanceId}-${index}`,
+          });
           primitives.push({ kind: "label", at: point, text: String(index) });
         });
       }

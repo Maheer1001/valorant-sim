@@ -37,7 +37,7 @@ import { yawDegFromPoints } from "./coords.ts";
 export type PreviewPrimitive =
   | { kind: "polyline"; points: Point[]; faint?: boolean; stroke?: string }
   | { kind: "polygon"; points: Point[]; fill?: string; testId?: string }
-  | { kind: "circle"; center: Point; radiusMm: number; dashed?: boolean; fill?: boolean }
+  | { kind: "circle"; center: Point; radiusMm: number; dashed?: boolean; fill?: boolean; testId?: string }
   | { kind: "line"; from: Point; to: Point }
   | { kind: "dots"; points: Point[] }
   | { kind: "label"; at: Point; text: string };

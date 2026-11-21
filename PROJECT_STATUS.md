@@ -1,6 +1,6 @@
 # Project status
 
-Updated: 20 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Live round Stages (a)–(e)** are in: pauseable host loop, smooth motion, immediate orders, round timer, replay, board-first layout, multi-select, hotkeys, ability/path previews, and pre-round buy/plan UI. The old windowed API is gone (Stage e). Spike and a real opponent are not done.
+Updated: 21 November 2026. Milestone 2 remains in place. **Stage 1 is complete** for Breach + Brimstone kits. **Live round Stages (a)-(e)** are in: pauseable host loop, smooth motion, immediate orders, round timer, replay, board-first layout, multi-select, hotkeys, ability/path previews, and pre-round buy/plan UI. The old windowed API is gone (Stage e). Board clicks map correctly on a letterboxed board (Stage d4). Spike and a real opponent are not done.
 
 Agent records for patch 13.10 are in `agent-reference.json`. That file is a reference, not the sim catalog. Breach and Brimstone catalog numbers are guarded against drift by `tests/sim/breach.test.ts` and `tests/sim/brimstone.test.ts`.
 
@@ -382,6 +382,30 @@ App boots into pre-round (attackers at spawn only). Host buy timer with Hold tog
 Deleted `src/sim/round.ts` (`openRound`, `submitPlan`, `resolveWindow`, `view`, `snapshotRound`, `stepRound`, `WindowOrder`, `RoundState`). Removed `windowMs` / `WINDOW_MS_PROVENANCE` from the ruleset, the `missing-plan` and `plan-already-submitted` rejection codes, `defenseHoldPlan`, and the shim-only `onEvent` hook on `drainJobsUntil`. `PlanFailure` now lives in `live-round.ts`.
 
 Tests: Breach, Brimstone and round suites run on the live engine through `tests/sim/support/live-harness.ts` (`mustOpenLive`, `mustIssue`, `issueRejected`, `advance`, `playAttack`). No case was dropped. Live/window ability parity now compares against ability events recorded from the shim just before deletion (`tests/fixtures/window-parity/`). Characterization fixtures were re-recorded from the live engine (same orders, same total sim time) and gain a `result` field; regenerate with `VALSIM_UPDATE_FIXTURES=1`. One invariant changed meaning: same-instant batches now apply in issue order, not sorted by agent id (see [`docs/live-round-migration.md`](docs/live-round-migration.md)).
+
+### Board click mapping fix - Stage (d4) (21 November 2026)
+
+Bug: `clientToMm` in `src/ui/board/coords.ts` scaled client coordinates by the SVG's client rect, but the board SVG uses `preserveAspectRatio="xMidYMid meet"`. When the board is wider or taller than the 5:3 map, the map is drawn letterboxed and every click landed in the wrong place. At 1366x768 the board is 1340 x 448 px (aspect 2.99), and a right-click on the drawn centre of Site A put the waypoint about 112 px to the left (x about 13763 mm instead of 16750 mm).
+
+Fix (UI only, no engine change):
+
+- `svgClientToMm` (new, `coords.ts`) converts with the SVG's real transform, `getScreenCTM().inverse()`, and falls back to letterbox math on the bounding rect when no screen matrix is available (jsdom) or it is singular.
+- `clientToMm` itself now applies the meet transform (`scale = min(w / mapW, h / mapH)` plus centring offsets). Clicks in the letterbox bars map outside the map instead of onto its edge.
+- `MapView.pointFromClient` is the single conversion point for every board input: left-click (moves, aim and map-target casts, pre-round planning), right-click moves, hover previews, drag-box ends and the Fault Line wheel. Drag-box selection compares agents against two converted mm points, so it shares the same space.
+- Circle preview primitives take an optional `testId`; pre-round waypoint discs are `route-waypoint-<instanceId>-<index>`.
+
+Tests: `tests/ui/coords.test.ts` adds exact-fit, wide and tall cases (map corners, map centre and the drawn Site A centre (16750, 6000)), the inverse-matrix path, and fallbacks for a missing, null or singular screen matrix. `tests/ui/board-letterbox.test.tsx` (new) renders the app on a 3:1 board and asserts that a right-click on the drawn Site A centre puts the waypoint disc within 1 mm of the site centre, and that a tight drag-box around Brimstone's drawn position selects only Brimstone. With the old mapping swapped back in, both UI tests fail. No existing assertion changed: the other UI tests mock a 200 x 120 board, which is exactly 5:3, and the old `clientToMm` test clicks the centre, which maps the same either way.
+
+Browser check (headless Edge at 1366x768 through the DevTools protocol, dev server): board 1340 x 448 px, `getScreenCTM` path used, right-click at the drawn Site A centre gave a waypoint at (16747, 5997) mm whose disc centre was 0.16 px from the cursor (one px is about 27 mm on this board). No document scroll (`scrollHeight` = `clientHeight` = 768).
+
+### Checks (Stage d4 - `npm run check`, 21 November 2026)
+
+| Step | Result |
+| --- | --- |
+| lint | Pass. ESLint completed with no findings. |
+| typecheck | Pass. `tsc --noEmit` completed with no errors. |
+| test | Pass. Vitest 5.0.5, 26 files, 165 tests. |
+| build | Pass. Vite 8.3.4 produced `dist/`. |
 
 ### Checks (Live Stage e — `npm run check`, 20 November 2026)
 

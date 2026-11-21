@@ -12,7 +12,7 @@ import { activeSmokes } from "../../sim/map/line-of-sight.ts";
 import type { MapDefinition } from "../../sim/map/drill-hall.ts";
 import type { Point } from "../../sim/types.ts";
 import type { World } from "../../sim/run.ts";
-import { clientToMm, pointFromYawPreview } from "./coords.ts";
+import { pointFromYawPreview, svgClientToMm } from "./coords.ts";
 import type { PreviewPrimitive } from "./previews.ts";
 
 export type AgentDisplay = {
@@ -82,6 +82,7 @@ function renderPrimitive(primitive: PreviewPrimitive, key: string) {
     return (
       <circle
         key={key}
+        data-testid={primitive.testId}
         cx={primitive.center.xMm}
         cy={primitive.center.yMm}
         r={primitive.radiusMm}
@@ -175,14 +176,12 @@ export function MapView({
   } | null>(null);
   const [box, setBox] = useState<{ a: Point; b: Point } | null>(null);
 
+  /**
+   * Single conversion point for every board input (click, right-click, hover
+   * previews, drag-box ends, wheel), so all of them agree with what is drawn.
+   */
   function pointFromClient(clientX: number, clientY: number): Point {
-    const rect = svgRef.current?.getBoundingClientRect() ?? {
-      left: 0,
-      top: 0,
-      width: 1,
-      height: 1,
-    };
-    return clientToMm(clientX, clientY, rect, map.widthMm, map.heightMm);
+    return svgClientToMm(svgRef.current, clientX, clientY, map.widthMm, map.heightMm);
   }
 
   function pointFromEvent(event: MouseEvent<SVGSVGElement> | PointerEvent<SVGSVGElement> | WheelEvent<SVGSVGElement>): Point {

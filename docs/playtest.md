@@ -29,6 +29,7 @@ Top bar: **Pre-round**, buy timer **m:ss** labeled **(assumed)**, **Hold timer**
 5. **Edit / delete / shorten** — Click the step, set time 12.5 s, Save. Delete with **x**. Re-queue on a 2-point route; replace route with one point; notice names the dropped step.
 6. **Go fail** — Queue a cast with 0 charges; Go; stay in pre-round; plain-language charges message.
 7. **Go ok** — Buy Flashpoint, queue at-time 0, Go; live clock **1:40**, Paused. Space; cast fires.
+8. **Click mapping (stage d4)** - At 1366x768 the board is letterboxed (dark bars left and right of the map). Right-click the drawn centre of Site A: the waypoint disc sits under the cursor, not about 112 px to the left. Resize the window so the bars move to the top and bottom and repeat; the disc still sits under the cursor.
 
 ---
 
@@ -68,6 +69,7 @@ Ability slots on the HUD: **C** and **Q** = basics in catalog order, **E** = sig
 10. **Fog / replay** — Top bar fog toggle (both defenders hidden until truth). Download / Load replay. After a pre-round Go, download includes version 2, post-buy scenario, and `preRoundPlan`. Load goes straight to live (log only).
 11. **Setup drawer** — Draft, coverage, starting ult, live Buy panel, full event log, scenario import/export.
 12. **Round end** — Timeout or wipe -> banner + **New round** -> back to pre-round.
+13. **Click mapping (stage d4)** - With the board letterboxed: right-click move, hover previews (aim line, radii), left-click aim and map-target casts, the Fault Line wheel preview, and the drag-box all line up with what is drawn under the cursor. A drag-box drawn tightly around one agent selects only that agent.
 
 **Reporting a bug:** attach Replay JSON (scenario + seed + orderLog + simTimeMs + optional preRoundPlan), catalog / ruleset versions, and what you clicked.
 
