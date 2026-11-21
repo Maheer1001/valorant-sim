@@ -1,6 +1,6 @@
 import { getMap } from "../map/drill-hall.ts";
 import type { Segment, Side } from "../types.ts";
-import { findAgent } from "../run.ts";
+import { findAgent } from "../world.ts";
 import { cloneCommand, COMMAND_SPECS, type AgentCommand, type CommandSpec } from "./commands.ts";
 import type { IssueOrdersOptions, IssueResult, LiveRound, OrderLogEntry, OrderOrigin } from "./types.ts";
 import { validateCommand } from "./validate.ts";

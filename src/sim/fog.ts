@@ -2,7 +2,7 @@ import { hasStatus, STATUS_BLIND } from "./effects/status.ts";
 import { getMap } from "./map/drill-hall.ts";
 import { hasLineOfSight } from "./map/line-of-sight.ts";
 import type { Side } from "./types.ts";
-import type { World } from "./run.ts";
+import type { World } from "./world.ts";
 
 /** Fog-of-war filter over an arbitrary world snapshot. */
 export function viewWorld(mapId: string, world: World, side: Side): World {

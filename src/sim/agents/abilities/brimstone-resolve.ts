@@ -1,7 +1,8 @@
 import type { Catalog } from "../catalog.ts";
 import { getAgent } from "../catalog.ts";
-import type { ApplyResult, Job, World } from "../../run.ts";
-import { findAgent } from "../../run.ts";
+import type { ApplyResult, CastResolver, Job, JobHandler, JobOf } from "../../jobs/types.ts";
+import { findAgent, type World } from "../../world.ts";
+import type { BrimstoneJob } from "./brimstone-jobs.ts";
 import { spendUltPoints } from "../../combat/ult-points.ts";
 import {
   applyStatus,
@@ -649,3 +650,22 @@ function reject(
     },
   };
 }
+
+/** Brimstone job handlers (same calls as the former applyJob branches). */
+export const BRIMSTONE_JOB_HANDLERS: { [K in BrimstoneJob["type"]]: JobHandler<JobOf<K>> } = {
+  "stim-beacon-pulse": (job, ctx) => applyStimBeaconPulse(job, ctx.timeMs, ctx.sequence, ctx.world),
+  "device-expire": (job, ctx) => applyDeviceExpire(job, ctx.timeMs, ctx.sequence, ctx.world),
+  "incendiary-detonate": (job, ctx) => applyIncendiaryDetonate(job, ctx.timeMs, ctx.sequence, ctx.world, ctx.ruleset),
+  "orbital-activate": (job, ctx) => applyOrbitalActivate(job, ctx.timeMs, ctx.sequence, ctx.world),
+  "orbital-shrink": (job, ctx) => applyOrbitalShrink(job, ctx.timeMs, ctx.sequence, ctx.world),
+  "zone-tick": (job, ctx) => applyZoneTick(job, ctx.timeMs, ctx.sequence, ctx.world),
+  "zone-expire": (job, ctx) => applyZoneExpire(job, ctx.timeMs, ctx.sequence, ctx.world),
+};
+
+/** Brimstone casts, including Sky Smoke (same call as the former second branch of the cast job). */
+export const BRIMSTONE_CAST_RESOLVER: CastResolver = {
+  agentId: "brimstone",
+  abilityIds: [STIM_BEACON_ID, INCENDIARY_ID, SKY_SMOKE_ID, ORBITAL_STRIKE_ID],
+  resolve: (job, ctx) =>
+    tryResolveBrimstoneCast(job, ctx.timeMs, ctx.sequence, ctx.world, ctx.catalog, ctx.walls, ctx.ruleset),
+};

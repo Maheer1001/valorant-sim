@@ -3,7 +3,9 @@ import type { EventQueue } from "../clock.ts";
 import type { Rng } from "../rng.ts";
 import type { Segment } from "../types.ts";
 import type { Ruleset } from "../../rules/ruleset.ts";
-import { applyJob, type Job, type SimEvent, type World } from "../run.ts";
+import { applyJob } from "../jobs/apply.ts";
+import type { Job, SimEvent } from "../jobs/types.ts";
+import type { World } from "../world.ts";
 import type { LiveRound } from "./types.ts";
 
 export function enqueue(round: LiveRound, timeMs: number, agentId: string, payload: Job): void {

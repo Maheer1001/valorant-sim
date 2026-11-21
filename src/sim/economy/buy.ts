@@ -1,6 +1,6 @@
 import type { Catalog } from "../agents/catalog.ts";
 import { getAgent } from "../agents/catalog.ts";
-import type { AgentBody } from "../run.ts";
+import type { AgentBody } from "../world.ts";
 import type { RejectionCode } from "../types.ts";
 
 export type BuyResult =

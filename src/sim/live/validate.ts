@@ -1,5 +1,5 @@
 import type { Side } from "../types.ts";
-import { findAgent } from "../run.ts";
+import { findAgent } from "../world.ts";
 import { COMMAND_SPECS, type AgentCommand, type CommandSpec, type CommandValidation } from "./commands.ts";
 import type { LiveRound } from "./types.ts";
 

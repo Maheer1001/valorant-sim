@@ -1,4 +1,4 @@
-import type { SimEvent } from "./run.ts";
+import type { SimEvent } from "./jobs/types.ts";
 
 export function describeEvent(event: SimEvent): string {
   const prefix = `${event.timeMs} ms`;

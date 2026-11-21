@@ -2,7 +2,7 @@ import { hasStatus, STATUS_CONCUSS, STATUS_HASTE, statusModifier, yawToward } fr
 import { clipSegment, distanceMm } from "../map/geometry.ts";
 import type { Point, Segment } from "../types.ts";
 import type { Ruleset } from "../../rules/ruleset.ts";
-import { lerpPoint, type AgentBody } from "../run.ts";
+import { lerpPoint, type AgentBody } from "../world.ts";
 import { markWaypointReached } from "./plan-steps.ts";
 import type { LiveRound, StandingOrder } from "./types.ts";
 

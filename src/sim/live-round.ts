@@ -27,7 +27,7 @@ export type {
   RoundResult,
   StandingOrder,
 } from "./live/types.ts";
-export type { AgentCommand } from "./live/commands.ts";
+export type { AgentCommand } from "./live/command-types.ts";
 export { isLiveRound, openLiveRound } from "./live/open.ts";
 export { flushPendingBatches, issueOrders } from "./live/orders.ts";
 export { stepLive } from "./live/step.ts";

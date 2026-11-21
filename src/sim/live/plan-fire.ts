@@ -1,4 +1,4 @@
-import type { AgentCommand } from "./commands.ts";
+import type { AgentCommand } from "./command-types.ts";
 import { issueOrders } from "./orders.ts";
 import type { LiveRound } from "./types.ts";
 

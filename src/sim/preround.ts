@@ -7,7 +7,7 @@ import type { PlanFailure } from "./live-round.ts";
 import type { Scenario } from "./scenario/types.ts";
 import type { Point, RejectionCode, Side } from "./types.ts";
 import { STANDARD_RULESET, type Ruleset } from "../rules/ruleset.ts";
-import type { AgentBody } from "./run.ts";
+import type { AgentBody } from "./world.ts";
 import {
   flushPendingBatches,
   isLiveRound,

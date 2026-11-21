@@ -4,28 +4,15 @@ import { RIFLE_A } from "../combat/assumed-rifle.ts";
 import { hasStatus, STATUS_BLIND } from "../effects/status.ts";
 import { getMap } from "../map/drill-hall.ts";
 import { hasLineOfSight } from "../map/line-of-sight.ts";
-import type { Point, RejectionCode, Segment, Side } from "../types.ts";
-import { findAgent, type AgentBody } from "../run.ts";
+import type { Segment, Side } from "../types.ts";
+import { findAgent, type AgentBody } from "../world.ts";
 import { enqueue } from "./drain.ts";
 import { cancelAbilityPlans, cancelWaypointPlans } from "./plan-steps.ts";
 import { startSegment } from "./standing.ts";
+import type { AgentCommand, CommandValidation } from "./command-types.ts";
 import type { LiveRound, OrderOrigin } from "./types.ts";
 
-export type AgentCommand =
-  | { kind: "hold"; instanceId: string }
-  | { kind: "move-route"; instanceId: string; waypoints: Point[] }
-  | {
-      kind: "cast";
-      instanceId: string;
-      abilityId: string;
-      target: Point;
-      aimYawDeg?: number;
-      chargeValue?: number;
-      mapTarget?: Point;
-    }
-  | { kind: "shoot"; instanceId: string; targetInstanceId: string };
-
-export type CommandValidation = { ok: true } | { ok: false; code: RejectionCode; message: string };
+export type { AgentCommand, CommandValidation } from "./command-types.ts";
 
 /**
  * Per-kind behaviour of a command. `validate` runs after the common checks in

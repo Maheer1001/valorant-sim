@@ -1,4 +1,4 @@
-import type { RoundResult } from "../run.ts";
+import type { RoundResult } from "../world.ts";
 import type { LiveRound } from "./types.ts";
 
 /** A round-end rule: returns a result, or null to let the next rule decide. */

@@ -1,6 +1,6 @@
 import { viewWorld } from "../fog.ts";
 import type { Side } from "../types.ts";
-import type { World } from "../run.ts";
+import type { World } from "../world.ts";
 import type { LiveRound } from "./types.ts";
 
 /** Fog-of-war view for one side (copy; safe for hosts and bots to mutate). */

@@ -5,7 +5,8 @@ import { getMap } from "../map/drill-hall.ts";
 import { forkSeed } from "../rng.ts";
 import type { Scenario } from "../scenario/types.ts";
 import { STANDARD_RULESET, type Ruleset } from "../../rules/ruleset.ts";
-import { createWorld, type Job } from "../run.ts";
+import type { Job } from "../jobs/types.ts";
+import { createWorld } from "../world.ts";
 import type { LiveRound, OpenLiveOptions, PlanFailure, StandingOrder } from "./types.ts";
 
 export function isLiveRound(value: LiveRound | PlanFailure): value is LiveRound {

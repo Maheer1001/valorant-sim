@@ -1,7 +1,8 @@
 import type { Catalog } from "../catalog.ts";
 import { getAgent } from "../catalog.ts";
-import type { ApplyResult, Job, World } from "../../run.ts";
-import { findAgent } from "../../run.ts";
+import type { ApplyResult, CastResolver, Job, JobHandler, JobOf } from "../../jobs/types.ts";
+import { findAgent, type World } from "../../world.ts";
+import type { BreachJob } from "./breach-jobs.ts";
 import { clipSegment, wallDepthMmAlongRay } from "../../map/geometry.ts";
 import { hasLineOfSight } from "../../map/line-of-sight.ts";
 import type { Point, RejectionCode, Segment } from "../../types.ts";
@@ -467,47 +468,6 @@ export function applyRollingThunderBlast(
   };
 }
 
-export function applyStatusExpire(
-  job: Extract<Job, { type: "status-expire" }>,
-  timeMs: number,
-  sequence: number,
-  world: World,
-): ApplyResult {
-  const agent = findAgent(world, job.instanceId);
-  if (!agent) {
-    return {
-      world,
-      followups: [],
-      event: {
-        type: "order-rejected",
-        timeMs,
-        sequence,
-        agentId: job.instanceId,
-        orderType: "status-expire",
-        code: "unknown-agent",
-      },
-    };
-  }
-  // Only drop the status when its untilMs has actually elapsed (refresh-safe).
-  const before = agent.statuses.length;
-  agent.statuses = agent.statuses.filter((status) => {
-    if (status.id !== job.statusId || status.sourceAbilityId !== job.sourceAbilityId) return true;
-    return status.untilMs > timeMs;
-  });
-  return {
-    world,
-    followups: [],
-    event: {
-      type: "status-expired",
-      timeMs,
-      sequence,
-      agentId: agent.instanceId,
-      statusId: job.statusId,
-      sourceAbilityId: job.sourceAbilityId,
-      removed: agent.statuses.length < before,
-    },
-  };
-}
 
 function reject(
   world: World,
@@ -534,3 +494,23 @@ function reject(
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, Math.round(value)));
 }
+
+/* Stage H0: status-expire is generic and now lives in jobs/status-expire.ts. Re-exported for existing importers. */
+export { applyStatusExpire } from "../../jobs/status-expire.ts";
+
+/** Breach job handlers (same calls as the former applyJob branches). */
+export const BREACH_JOB_HANDLERS: { [K in BreachJob["type"]]: JobHandler<JobOf<K>> } = {
+  "aftershock-burst": (job, ctx) => applyAftershockBurst(job, ctx.timeMs, ctx.sequence, ctx.world),
+  "flashpoint-impact": (job, ctx) => applyFlashpointImpact(job, ctx.timeMs, ctx.sequence, ctx.world, ctx.walls, ctx.ruleset),
+  "fault-line-wave": (job, ctx) => applyFaultLineWave(job, ctx.timeMs, ctx.sequence, ctx.world),
+  "rolling-thunder-blast": (job, ctx) =>
+    applyRollingThunderBlast(job, ctx.timeMs, ctx.sequence, ctx.world, ctx.walls, ctx.ruleset),
+};
+
+/** Breach casts (same call as the former first branch of the cast job). */
+export const BREACH_CAST_RESOLVER: CastResolver = {
+  agentId: "breach",
+  abilityIds: [AFTERSHOCK_ID, FLASHPOINT_ID, FAULT_LINE_ID, ROLLING_THUNDER_ID],
+  resolve: (job, ctx) =>
+    tryResolveBreachCast(job, ctx.timeMs, ctx.sequence, ctx.world, ctx.catalog, ctx.walls, ctx.ruleset),
+};

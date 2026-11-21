@@ -1,4 +1,4 @@
-import type { AgentBody } from "../run.ts";
+import type { AgentBody } from "../world.ts";
 
 /**
  * Ult point ledger for kills.

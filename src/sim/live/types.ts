@@ -3,10 +3,11 @@ import type { EventQueue } from "../clock.ts";
 import type { Scenario } from "../scenario/types.ts";
 import type { Point, RejectionCode, Side } from "../types.ts";
 import type { Ruleset } from "../../rules/ruleset.ts";
-import type { Job, RoundResult, SimEvent, World } from "../run.ts";
-import type { AgentCommand } from "./commands.ts";
+import type { Job, SimEvent } from "../jobs/types.ts";
+import type { RoundResult, World } from "../world.ts";
+import type { AgentCommand } from "./command-types.ts";
 
-export type { RoundResult } from "../run.ts";
+export type { RoundResult } from "../world.ts";
 
 /** Typed rejection for opening a round or starting one from a pre-round plan. */
 export type PlanFailure = {

@@ -1,5 +1,7 @@
 import { RIFLE_A } from "../combat/assumed-rifle.ts";
-import { autoFireIntervalFor, findAgent, type Job } from "../run.ts";
+import { autoFireIntervalFor } from "../combat/fire-interval.ts";
+import type { Job } from "../jobs/types.ts";
+import { findAgent } from "../world.ts";
 import { enqueue } from "./drain.ts";
 import type { LiveRound } from "./types.ts";
 

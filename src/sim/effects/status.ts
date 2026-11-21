@@ -1,4 +1,4 @@
-import type { AgentBody } from "../run.ts";
+import type { AgentBody } from "../world.ts";
 import type { StatusEffect } from "../types.ts";
 
 export const STATUS_CONCUSS = "concuss";
