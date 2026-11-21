@@ -298,6 +298,32 @@ function runTour() {
   return runScripted(9, startTour(), TOUR_SCRIPT, 2000);
 }
 
+/**
+ * Arrival / fire coincidence (added after the H0.0 sensitivity check): walk speed is
+ * 3500 mm/s and fires are on whole seconds, so 3500 mm legs make route arrivals and
+ * segment starts land in the same 50 ms step as scheduled fires. This pins the order
+ * of the standing-route and fire-scheduling phases inside a step (sequence numbers).
+ */
+const ARRIVAL_SCRIPT: readonly ScriptEntry[] = [
+  {
+    atMs: 0,
+    side: "attack",
+    commands: [
+      { kind: "move-route", instanceId: "breach-attack", waypoints: [{ xMm: 6500, yMm: 5000 }, { xMm: 6500, yMm: 1500 }, { xMm: 3000, yMm: 1500 }] },
+      { kind: "move-route", instanceId: "brimstone-attack", waypoints: [{ xMm: 3000, yMm: 10500 }, { xMm: 6500, yMm: 10500 }] },
+    ],
+  },
+];
+
+function runArrival() {
+  const scenario = createPlayableDrill(11, { startingUltPoints: 0 });
+  const opened = startLiveFromPreRound(scenario, { version: 1, side: "attack", buys: [], agents: [] }, SHIPPED_CATALOG, STANDARD_RULESET, {
+    decide: defenseHoldDecide,
+  });
+  if (!isLiveRound(opened)) throw new Error(`arrival plan rejected: ${opened.code} ${opened.message}`);
+  return runScripted(11, opened, ARRIVAL_SCRIPT, 1000);
+}
+
 /** Probe batches issued at t=0 on a fresh golden round; every result is recorded. */
 function runRejectionProbes() {
   const probes: { label: string; side: Side; commands: AgentCommand[] }[] = [
@@ -364,6 +390,7 @@ describe("H0 golden engine fingerprint", () => {
     it("records golden fixtures (VALSIM_UPDATE_FIXTURES=1)", () => {
       for (const seed of SEEDS) writeGoldenJson(`engine-seed-${seed}.json`, runGolden(seed));
       writeGoldenJson("engine-ability-tour.json", runTour());
+      writeGoldenJson("engine-arrival-fire.json", runArrival());
       writeGoldenJson("rejections.json", { probes: runRejectionProbes(), messages: allRejectionMessages() });
     });
     return;
@@ -390,6 +417,13 @@ describe("H0 golden engine fingerprint", () => {
     for (let i = 0; i < golden.samples.length; i += 1) {
       expect(run.samples[i], `tour sample at ${golden.samples[i]!.timeMs} ms`).toEqual(golden.samples[i]);
     }
+    expect(run.events).toEqual(golden.events);
+    expect(run).toEqual(golden);
+  });
+
+  it("route arrivals in fire steps keep their sequence numbers", () => {
+    const golden = readGoldenJson<GoldenRun>("engine-arrival-fire.json");
+    const run = runArrival();
     expect(run.events).toEqual(golden.events);
     expect(run).toEqual(golden);
   });
