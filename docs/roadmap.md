@@ -7,6 +7,7 @@ This is the single list of every planned stage: what it delivers, how we intend 
 Status today is in [`PROJECT_STATUS.md`](../PROJECT_STATUS.md).
 
 Detailed plans written so far (wave 1 of planning, 20 November 2026): [G1](stage-g1-plan.md), [G2](stage-g2-plan.md), [G3](stage-g3-plan.md), [G4](stage-g4-plan.md), [G5](stage-g5-plan.md), [G6](stage-g6-plan.md), [O1](stage-o1-plan.md), [O2](stage-o2-plan.md), [X1](stage-x1-plan.md), [D1](stage-d1-plan.md), [K3](stage-3-plan.md), [K4](stage-k4-plan.md), [K5](stage-k5-plan.md). How to build them in parallel without conflicts: [`parallel-build-plan.md`](parallel-build-plan.md).
+H0, the behaviour-neutral refactor that runs alone before wave 1: [`stage-h0-plan.md`](stage-h0-plan.md).
 
 ## Ground rules (apply to every stage)
 
